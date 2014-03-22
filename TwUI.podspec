@@ -19,4 +19,6 @@ Pod::Spec.new do |s|
   s.exclude_files = '**/*{TUIAccessibilityElement}*'
   s.prefix_header_file = "lib/UIKit/TUIKit.h"
 
+  s.resources = 'Resources'
+
 end

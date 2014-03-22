@@ -33,6 +33,10 @@ static inline CGRect TUIEdgeInsetsInsetRect(CGRect rect, TUIEdgeInsets insets) {
 	return rect;
 }
 
+static inline TUIEdgeInsets TUIEdgeInsetsInvert(TUIEdgeInsets insets) {
+    return (TUIEdgeInsets){-insets.top, -insets.left, -insets.bottom, -insets.right};
+}
+
 static inline BOOL TUIEdgeInsetsEqualToEdgeInsets(TUIEdgeInsets insets1, TUIEdgeInsets insets2) {
     return insets1.left == insets2.left && insets1.top == insets2.top && insets1.right == insets2.right && insets1.bottom == insets2.bottom;
 }

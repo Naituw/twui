@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>1A765DE8-1974-4CA9-812D-C47CFD72BD28</string>
+	<key>IDESourceControlProjectName</key>
+	<string>TwUI</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>C863FC59-A0B3-49EF-BF1E-F09E63930CB0</key>
+		<string>https://github.com/Naituw/twui.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>TwUI.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>C863FC59-A0B3-49EF-BF1E-F09E63930CB0</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/Naituw/twui.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>C863FC59-A0B3-49EF-BF1E-F09E63930CB0</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>C863FC59-A0B3-49EF-BF1E-F09E63930CB0</string>
+			<key>IDESourceControlWCCName</key>
+			<string>twui</string>
+		</dict>
+	</array>
+</dict>
+</plist>

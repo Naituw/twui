@@ -88,7 +88,7 @@
 #pragma mark NSAccessibility
 
 - (id)accessibilityHitTest:(NSPoint)point
-{	
+{
 	if((self.userInteractionEnabled == NO) || (self.hidden == YES) || (self.alpha <= 0.0f))
 		return nil;
 	

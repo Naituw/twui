@@ -53,11 +53,11 @@
 
 - (TUIControlState)state
 {
-  // start with the normal state, then OR in implicit state that is based on other properties
-  TUIControlState actual = TUIControlStateNormal;
-  
-  if(_controlFlags.disabled)        actual |= TUIControlStateDisabled;
-  if(_controlFlags.selected)        actual |= TUIControlStateSelected;
+    // start with the normal state, then OR in implicit state that is based on other properties
+    TUIControlState actual = TUIControlStateNormal;
+    
+    if(_controlFlags.disabled)        actual |= TUIControlStateDisabled;
+    if(_controlFlags.selected)        actual |= TUIControlStateSelected;
 	if(_controlFlags.tracking)        actual |= TUIControlStateHighlighted;
 	if(_controlFlags.highlighted) actual |= TUIControlStateHighlighted;
 	if(![self.nsView isWindowKey])  actual |= TUIControlStateNotKey;
@@ -67,27 +67,27 @@
 
 /**
  * @brief Determine if this control is in a selected state
- * 
+ *
  * Not all controls have a selected state and the meaning of "selected" is left
  * to individual control implementations to define.
- * 
+ *
  * @return selected or not
- * 
+ *
  * @note This is a convenience interface to the #state property.
  * @see #state
  */
 -(BOOL)selected {
-  return _controlFlags.selected;
+    return _controlFlags.selected;
 }
 
 /**
  * @brief Specify whether this control is in a selected state
- * 
+ *
  * Not all controls have a selected state and the meaning of "selected" is left
  * to individual control implementations to define.
- * 
+ *
  * @param selected selected or not
- * 
+ *
  * @see #state
  */
 -(void)setSelected:(BOOL)selected {
@@ -138,7 +138,7 @@
 	} else {
 		[self sendActionsForControlEvents:TUIControlEventTouchDownRepeat];
 	}
-  
+    
 	// needs display
 	[self setNeedsDisplay];
 }

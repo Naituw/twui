@@ -20,9 +20,9 @@
 @interface TUIResponder : NSResponder
 
 /* Use from NSResponder
-- (NSResponder *)nextResponder;
-- (BOOL)becomeFirstResponder;
-- (BOOL)resignFirstResponder;
+ - (NSResponder *)nextResponder;
+ - (BOOL)becomeFirstResponder;
+ - (BOOL)resignFirstResponder;
  */
 
 @property (strong, nonatomic, readonly) TUIResponder *initialFirstResponder;

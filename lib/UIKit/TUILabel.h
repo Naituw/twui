@@ -46,4 +46,6 @@
 @property(nonatomic,assign) TUITextAlignment alignment;
 @property(nonatomic, assign) TUILineBreakMode lineBreakMode; 
 
+@property(nonatomic,assign) BOOL verticalCenter;
+
 @end

@@ -15,6 +15,7 @@
  */
 
 #import <Foundation/Foundation.h>
+#import "TUIGeometry.h"
 
 @interface TUIImage : NSObject
 
@@ -23,11 +24,13 @@
 
 + (TUIImage *)imageWithData:(NSData *)data;
 + (TUIImage *)imageWithCGImage:(CGImageRef)imageRef;
++ (TUIImage *)imageWithCGImage:(CGImageRef)imageRef scale:(CGFloat)scale;
 + (TUIImage *)imageWithNSImage:(NSImage *)image;
 
 + (TUIImage *)_imageWithABImage:(id)abimage __attribute__((deprecated)); // don't use this
 
 - (id)initWithCGImage:(CGImageRef)imageRef;
+- (id)initWithCGImage:(CGImageRef)imageRef scale:(CGFloat)scale;
 
 @property (nonatomic, readonly) CGSize size;
 @property (nonatomic, readonly) CGFloat scale;
@@ -39,6 +42,7 @@
 - (void)drawInRect:(CGRect)rect blendMode:(CGBlendMode)blendMode alpha:(CGFloat)alpha;
 
 - (TUIImage *)stretchableImageWithLeftCapWidth:(NSInteger)leftCapWidth topCapHeight:(NSInteger)topCapHeight;
+- (TUIImage *)stretchableImageWithEdgeInsets:(TUIEdgeInsets)insets;
 
 @property (nonatomic, readonly) NSInteger leftCapWidth;   // default is 0. if non-zero, horiz. stretchable. right cap is calculated as width - leftCapWidth - 1
 @property (nonatomic, readonly) NSInteger topCapHeight;   // default is 0. if non-zero, vert. stretchable. bottom cap is calculated as height - topCapWidth - 1
@@ -51,5 +55,7 @@
 
 extern NSData *TUIImagePNGRepresentation(TUIImage *image);
 extern NSData *TUIImageJPEGRepresentation(TUIImage *image, CGFloat compressionQuality);
+
+extern CGImageRef TUICreateImageRefForNameAndScaleFactor(NSString *name, CGFloat scaleFactor, BOOL shouldCache, CGFloat *imageScaleFactor);
 
 #import "TUIImage+Drawing.h"

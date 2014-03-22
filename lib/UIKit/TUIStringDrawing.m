@@ -101,8 +101,8 @@
 - (CGSize)ab_drawInRect:(CGRect)rect withFont:(TUIFont *)font lineBreakMode:(TUILineBreakMode)lineBreakMode alignment:(TUITextAlignment)alignment
 {
 	TUIAttributedString *s = [TUIAttributedString stringWithString:self];
-	[s addAttribute:(NSString *)kCTForegroundColorFromContextAttributeName 
-			  value:(id)[NSNumber numberWithBool:YES] 
+	[s addAttribute:(NSString *)kCTForegroundColorFromContextAttributeName
+			  value:(id)[NSNumber numberWithBool:YES]
 			  range:NSMakeRange(0, [self length])];
 	[s setAlignment:alignment lineBreakMode:lineBreakMode];
 	s.font = font;

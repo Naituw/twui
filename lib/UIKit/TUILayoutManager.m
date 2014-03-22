@@ -74,7 +74,7 @@
 		                                           object:nil];
 		_processingChanges = NO;
 		
-		_constraints = [NSMapTable mapTableWithWeakToStrongObjects];
+		_constraints = [NSMapTable weakToStrongObjectsMapTable];
 		_viewsToProcess = [[NSMutableArray alloc] init];
 		_processedViews = [[NSMutableSet alloc] init];
 	}

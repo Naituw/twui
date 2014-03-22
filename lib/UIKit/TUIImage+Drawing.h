@@ -20,6 +20,7 @@
 
 @interface TUIImage (Drawing)
 
++ (TUIImage *)imageWithSize:(CGSize)size scale:(CGFloat)scale drawing:(void(^)(CGContextRef))draw;
 + (TUIImage *)imageWithSize:(CGSize)size drawing:(void(^)(CGContextRef))draw; // thread safe
 
 - (TUIImage *)crop:(CGRect)cropRect;
@@ -31,5 +32,7 @@
 - (TUIImage *)invertedMask;
 - (TUIImage *)embossMaskWithOffset:(CGSize)offset; // subtract reciever from itself offset by 'offset', use as a mask to draw emboss
 - (TUIImage *)innerShadowWithOffset:(CGSize)offset radius:(CGFloat)radius color:(TUIColor *)color backgroundColor:(TUIColor *)backgroundColor; // 'backgroundColor' is used as the color the shadow is drawn with, it is mostly masked out, but a halo will remain, leading to artifacts unless it is close enough to the background color
+
+- (TUIImage *)horizontalFlip;
 
 @end

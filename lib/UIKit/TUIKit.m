@@ -14,4 +14,9 @@
  limitations under the License.
  */
 
+#import "TUIKit.h"
+
 BOOL AtLeastLion = NO;
+NSInteger OSXMajorVersion = 10;
+NSInteger OSXMinorVersion = 0;
+NSInteger OSXBugfixVersion = 0;

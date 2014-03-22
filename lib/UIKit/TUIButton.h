@@ -35,7 +35,7 @@ typedef enum {
 	NSMutableDictionary		*_contentLookup;
 	TUIEdgeInsets           _titleEdgeInsets;
     TUIEdgeInsets           _imageEdgeInsets;
-
+    
 	TUIImageView           *_imageView;
 	TUILabel               *_titleView;
 	

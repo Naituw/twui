@@ -23,13 +23,17 @@
 typedef enum {
 	AB_CTLineRectAggregationTypeInline = 0,
 	AB_CTLineRectAggregationTypeBlock,
+    AB_CTLineRectAggregationTypeInlineContinuous,
 } AB_CTLineRectAggregationType;
 
 extern CGSize AB_CTLineGetSize(CTLineRef line);
 extern CGSize AB_CTFrameGetSize(CTFrameRef frame);
 extern CGFloat AB_CTFrameGetHeight(CTFrameRef frame);
 extern CFIndex AB_CTFrameGetStringIndexForPosition(CTFrameRef frame, CGPoint p);
+extern double AB_CTFrameGetTypographicBoundsForLineAtPosition(CTFrameRef frame, CGPoint p, CGFloat* ascent, CGFloat* descent, CGFloat* leading);
 
 extern void AB_CTFrameGetRectsForRange(CTFrameRef frame, CFRange range, CGRect rects[], CFIndex *rectCount);
 extern void AB_CTFrameGetRectsForRangeWithAggregationType(CTFrameRef frame, CFRange range, AB_CTLineRectAggregationType aggregationType, CGRect rects[], CFIndex *rectCount);
+void AB_CTFrameGetRectsForRangeWithNumberOfLines(CTFrameRef frame, CFRange range, NSInteger numberOfLines, AB_CTLineRectAggregationType aggregationType, CGRect rects[], CFIndex *rectCount);
+
 extern void AB_CTLinesGetRectsForRangeWithAggregationType(NSArray *lines, CGPoint *lineOrigins, CGRect bounds, CFRange range, AB_CTLineRectAggregationType aggregationType, CGRect rects[], CFIndex *rectCount);

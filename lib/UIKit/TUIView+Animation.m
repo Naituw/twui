@@ -15,14 +15,12 @@
  */
 
 #import "TUIView.h"
-#import "TUIView+Private.h"
-#import "TUICAAction.h"
 
 @interface TUIViewAnimation : NSObject <CAAction>
 {
 	void *context;
 	NSString *animationID;
-
+    
 	id __unsafe_unretained delegate;
 	SEL animationWillStartSelector;
 	SEL animationDidStopSelector;
@@ -62,14 +60,14 @@
 	if((self = [super init]))
 	{
 		basicAnimation = [CABasicAnimation animation];
-//		NSLog(@"+anims %d", ++animcount);
+        //		NSLog(@"+anims %d", ++animcount);
 	}
 	return self;
 }
 
 - (void)dealloc
 {
-//	NSLog(@"-anims %d", --animcount);
+    //	NSLog(@"-anims %d", --animcount);
 	if(animationCompletionBlock != nil) {
 		animationCompletionBlock(NO);
 		NSLog(@"Error: completion block didn't complete! %@", self);
@@ -89,7 +87,7 @@
 
 - (void)animationDidStart:(CAAnimation *)anim
 {
-//	NSLog(@"+animstart %d", ++animstart);
+    //	NSLog(@"+animstart %d", ++animstart);
 	if(delegate && animationWillStartSelector) {
 		void (*animationWillStartIMP)(id,SEL,NSString*,void*) = (void(*)(id,SEL,NSString*,void*))[(NSObject *)delegate methodForSelector:animationWillStartSelector];
 		animationWillStartIMP(delegate, animationWillStartSelector, animationID, context);
@@ -99,7 +97,7 @@
 
 - (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag
 {
-//	NSLog(@"-animstart %d", --animstart);
+    //	NSLog(@"-animstart %d", --animstart);
 	if(delegate && animationDidStopSelector) {
 		void (*animationDidStopIMP)(id,SEL,NSString*,NSNumber*,void*) = (void(*)(id,SEL,NSString*,NSNumber*,void*))[(NSObject *)delegate methodForSelector:animationDidStopSelector];
 		animationDidStopIMP(delegate, animationDidStopSelector, animationID, [NSNumber numberWithBool:flag], context);
@@ -136,8 +134,19 @@ static NSMutableArray *AnimationStack = nil;
 
 + (void)animateWithDuration:(NSTimeInterval)duration animations:(void (^)(void))animations completion:(void (^)(BOOL finished))completion
 {
-	[self beginAnimations:nil context:NULL];
+    [self animateWithDuration:duration delay:0 animations:animations completion:completion];
+}
+
++ (void)animateWithDuration:(NSTimeInterval)duration delay:(NSTimeInterval)delay animations:(void (^)(void))animations completion:(void (^)(BOOL finished))completion
+{
+    [self animateWithDuration:duration delay:0 curve:TUIViewAnimationCurveEaseInOut animations:animations completion:completion];
+}
++ (void)animateWithDuration:(NSTimeInterval)duration delay:(NSTimeInterval)delay curve:(TUIViewAnimationCurve)curve animations:(void (^)(void))animations completion:(void (^)(BOOL finished))completion
+{
+    [self beginAnimations:nil context:NULL];
 	[self setAnimationDuration:duration];
+    [self setAnimationDelay:delay];
+    [self setAnimationCurve:curve];
 	[[self _currentAnimation] setAnimationCompletionBlock:completion];
 	animations();
 	[self commitAnimations];
@@ -145,8 +154,6 @@ static NSMutableArray *AnimationStack = nil;
 
 + (void)beginAnimations:(NSString *)animationID context:(void *)context
 {
-	[NSAnimationContext beginGrouping];
-
 	TUIViewAnimation *animation = [[TUIViewAnimation alloc] init];
 	animation.context = context;
 	animation.animationID = animationID;
@@ -156,15 +163,14 @@ static NSMutableArray *AnimationStack = nil;
 	[self setAnimationDuration:0.25];
 	[self setAnimationCurve:TUIViewAnimationCurveEaseInOut];
 	
-//	NSLog(@"+++ %d", [[self _animationStack] count]);
+    //	NSLog(@"+++ %d", [[self _animationStack] count]);
 }
 
 + (void)commitAnimations
 {
 	[[self _animationStack] removeLastObject];
-	[NSAnimationContext endGrouping];
 	
-//	NSLog(@"--- %d", [[self _animationStack] count]);
+    //	NSLog(@"--- %d", [[self _animationStack] count]);
 }
 
 + (void)setAnimationDelegate:(id)delegate
@@ -191,9 +197,7 @@ static CGFloat SlomoTime()
 
 + (void)setAnimationDuration:(NSTimeInterval)duration
 {
-	duration *= SlomoTime();
-	[self _currentAnimation].basicAnimation.duration = duration;
-	[NSAnimationContext currentContext].duration = duration;
+	[self _currentAnimation].basicAnimation.duration = duration * SlomoTime();
 }
 
 + (void)setAnimationDelay:(NSTimeInterval)delay                    // default = 0.0
@@ -293,22 +297,16 @@ static BOOL animateContents = NO;
 
 - (id<CAAction>)actionForLayer:(CALayer *)layer forKey:(NSString *)event
 {
-	id defaultAction = [NSNull null];
-
-	if(disableAnimations)
-		return defaultAction;
-
-	if((animateContents == NO) && [event isEqualToString:@"contents"])
-		return defaultAction; // default - don't animate contents
-
-	id animation = [TUIView _currentAnimation];
-	if (!animation)
-		return defaultAction;
-
-	if ([TUICAAction interceptsActionForKey:event])
-		return [TUICAAction actionWithAction:animation];
-	else
-		return animation;
+	if(disableAnimations == NO) {
+		if((animateContents == NO) && [event isEqualToString:@"contents"])
+			return (id<CAAction>)[NSNull null]; // default - don't animate contents
+		
+		id<CAAction>animation = [TUIView _currentAnimation];
+		if(animation)
+			return animation;
+	}
+	
+	return (id<CAAction>)[NSNull null];
 }
 
 @end

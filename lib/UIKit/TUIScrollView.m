@@ -49,7 +49,7 @@ enum {
 - (void)_updateScrollKnobs;
 - (void)_updateScrollKnobsAnimated:(BOOL)animated;
 - (void)_updateBounce;
-- (void)_startTimer:(int)scrollMode;
+- (void)_startDisplayLink:(int)scrollMode;
 
 @end
 
@@ -97,7 +97,10 @@ enum {
 
 - (void)dealloc
 {
-	[scrollTimer invalidate];
+	if (displayLink)
+    {
+        CVDisplayLinkRelease(displayLink);
+    }
 }
 
 - (id<TUIScrollViewDelegate>)delegate
@@ -115,6 +118,7 @@ enum {
 	_scrollViewFlags.delegateScrollViewDidShowScrollIndicator = [_delegate respondsToSelector:@selector(scrollView:didShowScrollIndicator:)];
 	_scrollViewFlags.delegateScrollViewWillHideScrollIndicator = [_delegate respondsToSelector:@selector(scrollView:willHideScrollIndicator:)];
 	_scrollViewFlags.delegateScrollViewDidHideScrollIndicator = [_delegate respondsToSelector:@selector(scrollView:didHideScrollIndicator:)];
+    _scrollViewFlags.delegateScrollViewDidEndScroll = [_delegate respondsToSelector:@selector(scrollViewDidEndScroll:)];
 }
 
 - (TUIScrollViewIndicatorStyle)scrollIndicatorStyle
@@ -247,27 +251,39 @@ enum {
   return TUIEdgeInsetsMake(0, 0, (_scrollViewFlags.horizontalScrollIndicatorShowing) ? _horizontalScrollKnob.frame.size.height : 0, (_scrollViewFlags.verticalScrollIndicatorShowing) ? _verticalScrollKnob.frame.size.width : 0);
 }
 
-- (void)_startTimer:(int)scrollMode
+static CVReturn scrollCallback(CVDisplayLinkRef displayLink, const CVTimeStamp *now, const CVTimeStamp *outputTime, CVOptionFlags flagsIn, CVOptionFlags *flagsOut, void *displayLinkContext)
+{
+	@autoreleasepool {
+		// perform drawing on the main thread
+		TUIScrollView *scrollView = (__bridge id)displayLinkContext;
+		[scrollView performSelectorOnMainThread:@selector(tick:) withObject:nil waitUntilDone:NO];
+	}
+	return kCVReturnSuccess;
+}
+
+- (void)_startDisplayLink:(int)scrollMode
 {
 	_scrollViewFlags.animationMode = scrollMode;
 	_throw.t = CFAbsoluteTimeGetCurrent();
 	_bounce.bouncing = NO;
 	
-	if(!scrollTimer) {
-		scrollTimer = [NSTimer scheduledTimerWithTimeInterval:1/60. target:self selector:@selector(tick:) userInfo:nil repeats:YES];
+	if (!displayLink) {
+		CVDisplayLinkCreateWithActiveCGDisplays(&displayLink);
+		CVDisplayLinkSetOutputCallback(displayLink, &scrollCallback, (__bridge void *)self);
+		CVDisplayLinkSetCurrentCGDisplay(displayLink, kCGDirectMainDisplay);
 	}
+	CVDisplayLinkStart(displayLink);
 }
 
-- (void)_stopTimer
+- (void)_stopDisplayLink
 {
-	if(scrollTimer) {
-		[scrollTimer invalidate];
-		scrollTimer = nil;
+	if (displayLink) {
+		CVDisplayLinkStop(displayLink);
 	}
 	_scrollViewFlags.animationMode = AnimationModeNone;
 	_bounce.bouncing = 0;
 	[self _updateBounce];
-	[self _updateScrollKnobsAnimated:TRUE];
+	[self _updateScrollKnobsAnimated:NO];
 }
 
 - (void)willMoveToWindow:(TUINSWindow *)newWindow
@@ -275,7 +291,7 @@ enum {
 	[super willMoveToWindow:newWindow];
 	if(!newWindow) {
 		x = YES;
-		[self _stopTimer];
+		[self _stopDisplayLink];
 	}
 }
 
@@ -402,15 +418,15 @@ enum {
 	
 	_verticalScrollKnob.frame = CGRectMake(
     round(-offset.x + bounds.size.width - knobSize - pullX), // x
-    round(-offset.y + (hVisible ? knobSize : 0) + resizeKnobSize.height + bounceY), // y
+    round(-offset.y + (hVisible ? knobSize : 0) + resizeKnobSize.height + bounceY + _scrollIndicatorSlotInsets.bottom), // y
     knobSize, // width
-    bounds.size.height - (hVisible ? knobSize : 0) - resizeKnobSize.height // height
+    bounds.size.height - (hVisible ? knobSize : 0) - resizeKnobSize.height - _scrollIndicatorSlotInsets.bottom // height
   );
   
 	_horizontalScrollKnob.frame = CGRectMake(
     round(-offset.x - bounceX), // x
     round(-offset.y + pullY), // y
-    bounds.size.width - (vVisible ? knobSize : 0) - resizeKnobSize.width, // width
+    bounds.size.width - (vVisible ? knobSize : 0) - resizeKnobSize.width - _scrollIndicatorSlotInsets.right, // width
     knobSize // height
   );
   
@@ -638,7 +654,7 @@ static CGPoint PointLerp(CGPoint a, CGPoint b, CGFloat t)
 
 - (BOOL)isScrollingToTop
 {
-	if(scrollTimer) {
+	if(displayLink) {
 		if(_scrollViewFlags.animationMode == AnimationModeScrollTo) {
 			if(roundf(destinationOffset.y) == roundf([self topDestinationOffset]))
 				return YES;
@@ -651,10 +667,13 @@ static CGPoint PointLerp(CGPoint a, CGPoint b, CGFloat t)
 {
 	if(animated) {
 		destinationOffset = contentOffset;
-		[self _startTimer:AnimationModeScrollTo];
+		[self _startDisplayLink:AnimationModeScrollTo];
 	} else {
 		destinationOffset = contentOffset;
 		[self setContentOffset:contentOffset];
+        if (_scrollViewFlags.delegateScrollViewDidEndScroll) {
+            [_delegate scrollViewDidEndScroll:self];
+        }
 	}
 }
 
@@ -673,7 +692,7 @@ static CGPoint PointLerp(CGPoint a, CGPoint b, CGFloat t)
     // note the drag offset
     _dragScrollLocation = dragLocation;
     // begin a continuous scroll
-    [self _startTimer:AnimationModeScrollContinuous];
+    [self _startDisplayLink:AnimationModeScrollContinuous];
   }else{
     [self endContinuousScrollAnimated:animated];
   }
@@ -688,7 +707,7 @@ static CGPoint PointLerp(CGPoint a, CGPoint b, CGFloat t)
  */
 - (void)endContinuousScrollAnimated:(BOOL)animated {
   if(_scrollViewFlags.animationMode == AnimationModeScrollContinuous){
-    [self _stopTimer];
+    [self _stopDisplayLink];
   }
 }
 
@@ -743,7 +762,7 @@ static float clampBounce(float x) {
 		_bounce.t = t;
 		
 		if(fabsf(_bounce.vy) < 1.0 && fabsf(_bounce.y) < 1.0 && fabsf(_bounce.vx) < 1.0 && fabsf(_bounce.x) < 1.0) {
-			[self _stopTimer];
+			[self _stopDisplayLink];
 		}
 		
 		[self _updateScrollKnobs];
@@ -756,7 +775,7 @@ static float clampBounce(float x) {
 	
 	if(self.nsWindow == nil) {
 		NSLog(@"Warning: no window %d (should be 1)", x);
-		[self _stopTimer];
+		[self _stopDisplayLink];
 		return;
 	}
 	
@@ -784,7 +803,7 @@ static float clampBounce(float x) {
 				// may happen in the case where our we scrolled, then stopped, then lifted finger (didn't do a system-started throw, but timer started anyway to do something else)
 				// todo - handle this before it happens, but keep this sanity check
 				if(MAX(fabsf(_throw.vx), fabsf(_throw.vy)) < 0.1) {
-					[self _stopTimer];
+					[self _stopDisplayLink];
 				}
 			}
 			
@@ -800,7 +819,7 @@ static float clampBounce(float x) {
 			[self _setContentOffset:o];
 			
 			if((fabsf(o.x - lastOffset.x) < 0.1) && (fabsf(o.y - lastOffset.y) < 0.1)) {
-				[self _stopTimer];
+				[self _stopDisplayLink];
 				[self setContentOffset:destinationOffset];
 			}
 			
@@ -926,6 +945,9 @@ static float clampBounce(float x) {
   
   if(!self._pulling){
     if(fabsf(_lastScroll.dy) < 2.0 && fabsf(_lastScroll.dx) < 2.0){
+        if (_scrollViewFlags.delegateScrollViewDidEndScroll) {
+            [_delegate scrollViewDidEndScroll:self];
+        }
       return; // don't bother throwing
     }
   }
@@ -941,7 +963,7 @@ static float clampBounce(float x) {
 		_throw.vy = _lastScroll.dy / dt;
 		_throw.t = t;
 		
-		[self _startTimer:AnimationModeThrow];
+		[self _startDisplayLink:AnimationModeThrow];
 		
 		if(_pull.xPulling) {
 			_pull.xPulling = NO;
@@ -984,6 +1006,7 @@ static float clampBounce(float x) {
 		}
 	}
 	
+    [self.superview endGestureWithEvent:event];
 }
 
 - (void)scrollWheel:(NSEvent *)event
@@ -1033,7 +1056,7 @@ static float clampBounce(float x) {
 				_throw.throwing = 0;
 				_scrollViewFlags.didChangeContentInset = 0;
 				
-				[self _stopTimer];
+				[self _stopDisplayLink];
 				CGEventRef cgEvent = [event CGEvent];
 				const int64_t isContinuous = CGEventGetIntegerValueField(cgEvent, kCGScrollWheelEventIsContinuous);
 
@@ -1129,7 +1152,7 @@ static float clampBounce(float x) {
 					if(_bounce.bouncing) {
 						// ignore - let the bounce finish (_updateBounce will kill the timer when it's ready)
 					} else {
-						[self _stopTimer];
+						[self _stopDisplayLink];
 					}
 				}
 				break;
@@ -1151,6 +1174,9 @@ static float clampBounce(float x) {
   if(subview == _verticalScrollKnob || subview == _horizontalScrollKnob){
     _scrollViewFlags.mouseDownInScrollKnob = FALSE;
     [self _updateScrollKnobsAnimated:TRUE];
+      if (_scrollViewFlags.delegateScrollViewDidEndScroll) {
+          [_delegate scrollViewDidEndScroll:self];
+      }
   }
 	
 	[super mouseUp:event fromSubview:subview];

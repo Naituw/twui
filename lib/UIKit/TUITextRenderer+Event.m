@@ -15,7 +15,6 @@
  */
 
 #import "TUITextRenderer+Event.h"
-#import "ABActiveRange.h"
 #import "CoreText+Additions.h"
 #import "TUICGAdditions.h"
 #import "TUIImage.h"
@@ -52,6 +51,8 @@
 {
 	delegate = d;
 	
+    _flags.delegateTextRendererActiveRangeAtIndex = [delegate respondsToSelector:@selector(textRenderer:activeRangeAtIndex:)];
+    _flags.delegateTextRendererDidClickActiveRange = [delegate respondsToSelector:@selector(textRenderer:didClickActiveRange:)];
 	_flags.delegateActiveRangesForTextRenderer = [delegate respondsToSelector:@selector(activeRangesForTextRenderer:)];
 	_flags.delegateWillBecomeFirstResponder = [delegate respondsToSelector:@selector(textRendererWillBecomeFirstResponder:)];
 	_flags.delegateDidBecomeFirstResponder = [delegate respondsToSelector:@selector(textRendererDidBecomeFirstResponder:)];
@@ -154,15 +155,17 @@
 			_selectionAffinity = TUITextSelectionAffinityCharacter;
 			break;
 	}
-	
+    
 	CFIndex eventIndex = [self stringIndexForEvent:event];
-	NSArray *ranges = nil;
-	if(_flags.delegateActiveRangesForTextRenderer) {
-		ranges = [delegate activeRangesForTextRenderer:self];
-	}
-	
-	id<ABActiveTextRange> hitActiveRange = [self rangeInRanges:ranges forStringIndex:eventIndex];
-	
+    id<ABActiveTextRange> hitActiveRange = nil;
+    
+    if (_flags.delegateTextRendererActiveRangeAtIndex) {
+        hitActiveRange = [delegate textRenderer:self activeRangeAtIndex:eventIndex];
+    } else if (_flags.delegateActiveRangesForTextRenderer) {
+        NSArray * ranges = [delegate activeRangesForTextRenderer:self];
+        hitActiveRange = [self rangeInRanges:ranges forStringIndex:eventIndex];
+    }
+
 	if([event clickCount] > 1)
 		goto normal; // we want double-click-drag-select-by-word, not drag selected text
 	
@@ -236,6 +239,12 @@ normal:
 	
 	CGRect totalRect = CGRectUnion(previousSelectionRect, [self rectForCurrentSelection]);
 	[view setNeedsDisplayInRect:totalRect];
+    
+    if (self.hitRange && _flags.delegateTextRendererDidClickActiveRange)
+    {
+        [self.delegate textRenderer:self didClickActiveRange:self.hitRange];
+    }
+    self.hitRange = nil;
 }
 
 - (void)mouseDragged:(NSEvent *)event
@@ -247,6 +256,8 @@ normal:
 	
 	CGRect totalRect = CGRectUnion(previousSelectionRect, [self rectForCurrentSelection]);
 	[view setNeedsDisplayInRect:totalRect];
+    
+    self.hitRange = nil;
 }
 
 - (CGRect)rectForCurrentSelection {
@@ -345,6 +356,32 @@ normal:
 	
 	[pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
     return [pboard setString:[self selectedString] forType:NSStringPboardType];
+}
+
+- (void)quickLookWithEvent:(NSEvent *)event
+{
+    NSInteger idx = [self stringIndexForEvent:event];
+    NSAttributedString * string = [self attributedString];
+    
+    NSRange range = [string doubleClickAtIndex:idx];
+    
+    NSAttributedString * target = [string attributedSubstringFromRange:range];
+    
+    if (!target.length) return;
+    
+    NSRect rect = [self firstRectForCharacterRange:ABCFRangeFromNSRange(range)];
+    NSPoint point = rect.origin;
+    
+    CGFloat descent, leading;
+    
+    AB_CTFrameGetTypographicBoundsForLineAtPosition(self.ctFrame, [self localPointForEvent:event], NULL, &descent, &leading);
+    
+    point.y += descent;
+    //point.y += leading;
+    
+    point = [self.view convertPoint:point toView:self.view.nsView.rootView];
+    
+    [self.view.nsView showDefinitionForAttributedString:target atPoint:point];
 }
 
 @end

@@ -20,21 +20,33 @@
 
 @implementation TUIImage (Drawing)
 
-+ (TUIImage *)imageWithSize:(CGSize)size drawing:(void(^)(CGContextRef))draw
++ (TUIImage *)imageWithSize:(CGSize)size scale:(CGFloat)scale drawing:(void(^)(CGContextRef))draw
 {
-	if(size.width < 1 || size.height < 1)
+    if(size.width < 1 || size.height < 1)
 		return nil;
-
+	
+	size = CGSizeMake(size.width * scale, size.height * scale);
+    
 	CGContextRef ctx = TUICreateGraphicsContextWithOptions(size, NO);
+    CGContextScaleCTM(ctx, scale, scale);
+    
 	draw(ctx);
 	TUIImage *i = TUIGraphicsContextGetImage(ctx);
+        
 	CGContextRelease(ctx);
 	return i;
 }
 
++ (TUIImage *)imageWithSize:(CGSize)size drawing:(void(^)(CGContextRef))draw
+{
+	CGFloat scale = [[NSScreen mainScreen] respondsToSelector:@selector(backingScaleFactor)] ? [[NSScreen mainScreen] backingScaleFactor] : 1.0f;
+    
+    return [self imageWithSize:size scale:scale drawing:draw];
+}
+
 - (TUIImage *)scale:(CGSize)size
 {
-	return [TUIImage imageWithSize:size drawing:^(CGContextRef ctx) {
+	return [TUIImage imageWithSize:size scale:self.scale drawing:^(CGContextRef ctx) {
 		CGRect r;
 		r.origin = CGPointZero;
 		r.size = size;
@@ -52,17 +64,24 @@
 	CGFloat my = cropRect.origin.y + cropRect.size.height;
 	if((cropRect.origin.x >= 0.0) && (cropRect.origin.y >= 0.0) && (mx <= s.width) && (my <= s.height)) {
 		// fast crop
+        if (self.scale != 1)
+        {
+            cropRect.size.width *= self.scale;
+            cropRect.size.height *= self.scale;
+            cropRect.origin.x *= self.scale;
+            cropRect.origin.y *= self.scale;
+        }
 		CGImageRef cgimage = CGImageCreateWithImageInRect(self.CGImage, cropRect);
 		if(!cgimage) {
 			NSLog(@"CGImageCreateWithImageInRect failed %@ %@", NSStringFromRect(cropRect), NSStringFromSize(s));
 			return nil;
 		}
-		TUIImage *i = [TUIImage imageWithCGImage:cgimage];
+		TUIImage *i = [TUIImage imageWithCGImage:cgimage scale:self.scale];
 		CGImageRelease(cgimage);
 		return i;
 	} else {
 		// slow crop - probably doing pad
-		return [TUIImage imageWithSize:cropRect.size drawing:^(CGContextRef ctx) {
+		return [TUIImage imageWithSize:cropRect.size scale:self.scale drawing:^(CGContextRef ctx) {
 			CGRect imageRect;
 			imageRect.origin.x = -cropRect.origin.x;
 			imageRect.origin.y = -cropRect.origin.y;
@@ -107,7 +126,7 @@
 	CGRect r;
 	r.origin = CGPointZero;
 	r.size = self.size;
-	return [TUIImage imageWithSize:r.size drawing:^(CGContextRef ctx) {
+	return [TUIImage imageWithSize:r.size scale:self.scale drawing:^(CGContextRef ctx) {
 		CGContextClipToRoundRect(ctx, r, radius);
 		CGContextDrawImage(ctx, r, self.CGImage);
 	}];
@@ -116,7 +135,7 @@
 - (TUIImage *)invertedMask
 {
 	CGSize s = self.size;
-	return [TUIImage imageWithSize:s drawing:^(CGContextRef ctx) {
+	return [TUIImage imageWithSize:s scale:self.scale drawing:^(CGContextRef ctx) {
 		CGRect rect = CGRectMake(0, 0, s.width, s.height);
 		CGContextSetRGBFillColor(ctx, 0, 0, 0, 1);
 		CGContextFillRect(ctx, rect);
@@ -129,13 +148,17 @@
 
 - (TUIImage *)innerShadowWithOffset:(CGSize)offset radius:(CGFloat)radius color:(TUIColor *)color backgroundColor:(TUIColor *)backgroundColor
 {
+    CGFloat originalScale = self.scale;
 	CGFloat padding = ceil(radius);
 	TUIImage *paddedImage = [self pad:padding];
-	TUIImage *shadowImage = [TUIImage imageWithSize:paddedImage.size drawing:^(CGContextRef ctx) {
+    
+    CGFloat scaleMultiplier =  originalScale / paddedImage.scale;
+    
+	TUIImage *shadowImage = [TUIImage imageWithSize:paddedImage.size scale:paddedImage.scale drawing:^(CGContextRef ctx) {
 		CGContextSaveGState(ctx);
 		CGRect r = CGRectMake(0, 0, paddedImage.size.width, paddedImage.size.height);
 		CGContextClipToMask(ctx, r, paddedImage.CGImage); // clip to image
-		CGContextSetShadowWithColor(ctx, offset, radius, color.CGColor);
+		CGContextSetShadowWithColor(ctx, offset, radius * scaleMultiplier, color.CGColor);
 		CGContextBeginTransparencyLayer(ctx, NULL);
 		{
 			CGContextClipToMask(ctx, r, [[paddedImage invertedMask] CGImage]); // clip to inverted
@@ -146,7 +169,7 @@
 		CGContextRestoreGState(ctx);
 	}];
 	
-	return [shadowImage pad:-padding];
+	return [shadowImage pad:-padding * scaleMultiplier];
 }
 
 - (TUIImage *)embossMaskWithOffset:(CGSize)offset
@@ -154,7 +177,7 @@
 	CGFloat padding = MAX(offset.width, offset.height) + 1;
 	TUIImage *paddedImage = [self pad:padding];
 	CGSize s = paddedImage.size;
-	TUIImage *embossedImage = [TUIImage imageWithSize:s drawing:^(CGContextRef ctx) {
+	TUIImage *embossedImage = [TUIImage imageWithSize:s scale:self.scale drawing:^(CGContextRef ctx) {
 		CGContextSaveGState(ctx);
 		CGRect r = CGRectMake(0, 0, s.width, s.height);
 		CGContextClipToMask(ctx, r, [paddedImage CGImage]);
@@ -165,6 +188,21 @@
 	}];
 	
 	return [embossedImage pad:-padding];
+}
+
+- (TUIImage *)horizontalFlip
+{
+    CGSize s = self.size;
+    
+    return [TUIImage imageWithSize:s scale:self.scale drawing:^(CGContextRef ctx) {
+        CGContextSaveGState(ctx);
+        
+        CGContextTranslateCTM(ctx, s.width, 0);
+        CGContextScaleCTM(ctx, -1.0, 1.0);
+        
+        CGContextDrawImage(ctx, CGRectMake(0, 0, s.width, s.height), self.CGImage);
+        CGContextRestoreGState(ctx);
+    }];
 }
 
 @end

@@ -14,10 +14,8 @@
  limitations under the License.
  */
 
+#import "TUIKit.h"
 #import "TUIView+PasteboardDragging.h"
-#import "TUICGAdditions.h"
-#import "TUIImage.h"
-#import "TUINSView.h"
 
 @implementation TUIView (PasteboardDragging)
 
@@ -74,12 +72,12 @@
 		[pasteboard clearContents];
 		[pasteboard writeObjects:[NSArray arrayWithObject:pasteboardObject]];
 		
-		[self.nsView dragImage:dragNSImage 
+		[self.nsView dragImage:dragNSImage
 							at:[dragView frameInNSView].origin
-						offset:NSZeroSize 
-						 event:event 
-					pasteboard:pasteboard 
-						source:self 
+						offset:NSZeroSize
+						 event:event
+					pasteboard:pasteboard
+						source:self
 					 slideBack:YES];
 	}
 }

@@ -138,6 +138,48 @@ found:
 	return 0;
 }
 
+extern double AB_CTFrameGetTypographicBoundsForLineAtPosition(CTFrameRef frame, CGPoint p, CGFloat* ascent, CGFloat* descent, CGFloat* leading)
+{
+    //	p = (CGPoint){0, 0};
+    //	NSLog(@"checking p = %@", NSStringFromCGPoint(p));
+    //	CGRect f = [self frame];
+    //	NSLog(@"frame = %@", f);
+	NSArray *lines = (__bridge NSArray *)CTFrameGetLines(frame);
+	
+	CFIndex linesCount = [lines count];
+	CGPoint lineOrigins[linesCount];
+	CTFrameGetLineOrigins(frame, CFRangeMake(0, linesCount), lineOrigins);
+	
+	CTLineRef line = NULL;
+	CGPoint lineOrigin = CGPointZero;
+	
+	for(CFIndex i = 0; i < linesCount; ++i) {
+		line = (__bridge CTLineRef)[lines objectAtIndex:i];
+		lineOrigin = lineOrigins[i];
+        //		NSLog(@"%d origin = %@", i, NSStringFromCGPoint(lineOrigin));
+		CGFloat descent, ascent;
+		CTLineGetTypographicBounds(line, &ascent, &descent, NULL);
+		if(p.y > (floor(lineOrigin.y) - floor(descent))) { // above bottom of line
+			if(i == 0 && (p.y > (ceil(lineOrigin.y) + ceil(ascent)))) { // above top of first line
+                line = (__bridge CTLineRef)lines[0];
+			}
+            break;
+		}
+	}
+	
+    if (!line && linesCount)
+    {
+        line = (__bridge CTLineRef)lines[linesCount - 1];
+    }
+
+    if (line)
+    {
+        return CTLineGetTypographicBounds(line, ascent, descent, leading);
+    }
+    
+    return 0;
+}
+
 static inline BOOL RangeContainsIndex(CFRange range, CFIndex index)
 {
 	BOOL a = (index >= range.location);
@@ -145,23 +187,149 @@ static inline BOOL RangeContainsIndex(CFRange range, CFIndex index)
 	return (a && b);
 }
 
+
 void AB_CTFrameGetRectsForRange(CTFrameRef frame, CFRange range, CGRect rects[], CFIndex *rectCount)
 {
 	AB_CTFrameGetRectsForRangeWithAggregationType(frame, range, AB_CTLineRectAggregationTypeInline, rects, rectCount);
 }
 
+static void AB_addRectToRects(CGRect r, CGRect rects[], CFIndex index, NSInteger previousLineY, AB_CTLineRectAggregationType aggregationType)
+{
+    r = CGRectIntegral(r);
+    
+    if (aggregationType == AB_CTLineRectAggregationTypeInlineContinuous &&
+        previousLineY != NSNotFound)
+    {
+        r.size.height = previousLineY - r.origin.y;
+    }
+    rects[index] = r;
+}
+
 void AB_CTFrameGetRectsForRangeWithAggregationType(CTFrameRef frame, CFRange range, AB_CTLineRectAggregationType aggregationType, CGRect rects[], CFIndex *rectCount)
 {
-	CGRect bounds;
+    AB_CTFrameGetRectsForRangeWithNumberOfLines(frame, range, 0, aggregationType, rects, rectCount);
+}
+
+void AB_CTFrameGetRectsForRangeWithNumberOfLines(CTFrameRef frame, CFRange range, NSInteger numberOfLines, AB_CTLineRectAggregationType aggregationType, CGRect rects[], CFIndex *rectCount)
+{
+    if (!frame)
+    {
+        return;
+    }
+    
+    CGRect bounds;
 	CGPathIsRect(CTFrameGetPath(frame), &bounds);
 	
-	NSArray *lines = (__bridge NSArray *)CTFrameGetLines(frame);
-	CFIndex linesCount = [lines count];
-	CGPoint *lineOrigins = (CGPoint *) malloc(sizeof(CGPoint) * linesCount);
-	CTFrameGetLineOrigins(frame, CFRangeMake(0, linesCount), lineOrigins);
+	CFIndex maxRects = *rectCount;
+	CFIndex rectIndex = 0;
 	
-	AB_CTLinesGetRectsForRangeWithAggregationType(lines, lineOrigins, bounds, range, aggregationType, rects, rectCount);
-	free(lineOrigins);
+	CFIndex startIndex = range.location;
+	CFIndex endIndex = startIndex + range.length;
+	
+	NSArray *lines = (NSArray *)CTFrameGetLines(frame);
+	CFIndex linesCount = [lines count];
+	CGPoint lineOrigins[linesCount];
+	CTFrameGetLineOrigins(frame, CFRangeMake(0, linesCount), lineOrigins);
+    
+    NSInteger previousLineY = NSNotFound;
+    
+	for(CFIndex i = 0; i < linesCount; ++i)
+    {
+        if (numberOfLines && i >= numberOfLines)
+        {
+            break;
+        }
+        
+		CTLineRef line = (__bridge CTLineRef)[lines objectAtIndex:i];
+		
+		CGPoint lineOrigin = lineOrigins[i];
+		CGFloat ascent, descent, leading;
+		CGFloat lineWidth = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
+		lineWidth = lineWidth;
+		CGFloat lineHeight = ascent + descent + leading;
+		CGFloat line_y = lineOrigin.y - descent + bounds.origin.y;
+		
+		CFRange lineRange = CTLineGetStringRange(line);
+		CFIndex lineStartIndex = lineRange.location;
+		CFIndex lineEndIndex = lineStartIndex + lineRange.length;
+        
+        BOOL lastLine = ((numberOfLines > 0) && (i == numberOfLines - 1)) || (i == linesCount - 1);
+        if (lastLine && endIndex > (lineRange.location + lineRange.length))
+        {
+            endIndex = lineRange.location + lineRange.length;
+        }
+        
+		BOOL containsStartIndex = RangeContainsIndex(lineRange, startIndex);
+		BOOL containsEndIndex = RangeContainsIndex(lineRange, endIndex);
+        
+		if(containsStartIndex && containsEndIndex)
+        {
+            // 一共只有一行
+            if (aggregationType == AB_CTLineRectAggregationTypeInline || startIndex != endIndex)
+            {
+                CGFloat startOffset = CTLineGetOffsetForStringIndex(line, startIndex, NULL);
+                CGFloat endOffset = CTLineGetOffsetForStringIndex(line, endIndex, NULL);
+                CGRect r = CGRectMake(bounds.origin.x + lineOrigin.x + startOffset, line_y, endOffset - startOffset, lineHeight);
+                if(aggregationType == AB_CTLineRectAggregationTypeBlock)
+                {
+                    r.size.width = bounds.size.width - startOffset;
+                }
+                
+                if(rectIndex < maxRects)
+                {
+                    AB_addRectToRects(r, rects, rectIndex++, previousLineY, aggregationType);
+                }
+            }
+			goto end;
+		}
+        else if(containsStartIndex)
+        {
+            // 多行时的第一行
+			if(startIndex != lineEndIndex)
+            {
+                CGFloat startOffset = CTLineGetOffsetForStringIndex(line, startIndex, NULL);
+                CGRect r = CGRectMake(bounds.origin.x + lineOrigin.x + startOffset, line_y, bounds.size.width - startOffset - lineOrigin.x, lineHeight);
+                if(rectIndex < maxRects)
+                {
+                    AB_addRectToRects(r, rects, rectIndex++, previousLineY, aggregationType);
+                }
+            }
+		}
+        else if(containsEndIndex)
+        {
+            // 多行时的最后一行
+			CGFloat endOffset = CTLineGetOffsetForStringIndex(line, endIndex, NULL);
+			CGRect r = CGRectMake(bounds.origin.x + lineOrigin.x, line_y, endOffset, lineHeight);
+			if(aggregationType == AB_CTLineRectAggregationTypeBlock)
+            {
+				r.size.width = bounds.size.width;
+			}
+			
+			if(rectIndex < maxRects)
+            {
+				AB_addRectToRects(r, rects, rectIndex++, previousLineY, aggregationType);
+            }
+		}
+        else if(RangeContainsIndex(range, lineRange.location))
+        {
+            // 三行以上时的中间行
+			CGRect r = CGRectMake(bounds.origin.x + lineOrigin.x, line_y, bounds.size.width, lineHeight);
+			if(rectIndex < maxRects)
+            {
+                AB_addRectToRects(r, rects, rectIndex++, previousLineY, aggregationType);
+            }
+        }
+        
+        previousLineY = line_y;
+        
+        if (lastLine)
+        {
+            break;
+        }
+	}
+    
+end:
+	*rectCount = rectIndex;
 }
 
 void AB_CTLinesGetRectsForRangeWithAggregationType(NSArray *lines, CGPoint *lineOrigins, CGRect bounds, CFRange range, AB_CTLineRectAggregationType aggregationType, CGRect rects[], CFIndex *rectCount)

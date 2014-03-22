@@ -80,6 +80,18 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 }
 
 @interface TUINSView ()
+{
+    struct {
+        unsigned int delegateMouseEntered:1;
+        unsigned int delegateMouseExited:1;
+        unsigned int delegateMouseMoved:1;
+        unsigned int delegateMenuForEvent:1;
+        unsigned int delegateRightMouseDown:1;
+        unsigned int delegateRightMouseUp:1;
+        unsigned int delegateMouseUp:1;
+        unsigned int delegateScrollWheel:1;
+    } _viewFlags;
+}
 
 /*
  * The layer-hosted view which actually holds the TwUI hierarchy.
@@ -143,7 +155,6 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 	self = [super initWithFrame:frameRect];
 	if (self == nil)
 		return nil;
-	
 	[self setUp];
 	return self;
 }
@@ -151,7 +162,6 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 - (void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-	
 	_rootView.nsView = nil;
 	[_rootView removeFromSuperview];
 	
@@ -260,6 +270,12 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidBecomeKeyNotification object:self.window];
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignKeyNotification object:self.window];
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidChangeScreenProfileNotification object:self.window];
+        
+        
+        if (OSXMinorVersion > 7 || (OSXMinorVersion == 7 && OSXBugfixVersion >= 3))
+        {
+            [[NSNotificationCenter defaultCenter] removeObserver:self name:@"NSWindowDidChangeBackingPropertiesNotification" object:self.window];
+        }
 	}
 	
 	CALayer *hostLayer = self.tuiHostView.layer;
@@ -288,6 +304,11 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 		// make sure the window will post NSWindowDidChangeScreenProfileNotification
 		[self.window setDisplaysWhenScreenProfileChanges:YES];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(screenProfileOrBackingPropertiesDidChange:) name:NSWindowDidChangeScreenProfileNotification object:self.window];
+        
+        if (OSXMinorVersion > 7 || (OSXMinorVersion == 7 && OSXBugfixVersion >= 3))
+        {
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(screenProfileOrBackingPropertiesDidChange:) name:@"NSWindowDidChangeBackingPropertiesNotification" object:self.window];
+        }
 	}
 }
 
@@ -440,6 +461,11 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 
 - (void)mouseUp:(NSEvent *)event
 {
+    if (_viewFlags.delegateMouseUp)
+    {
+        [_viewDelegate nsView:self mouseUp:event];
+    }
+    
 	TUIView *lastTrackingView = _trackingView;
 
 	_trackingView = nil;
@@ -457,14 +483,29 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 - (void)mouseMoved:(NSEvent *)event
 {
 	[self _updateHoverViewWithEvent:event];
+    
+    if (_viewFlags.delegateMouseMoved)
+    {
+        [_viewDelegate nsView:self mouseMoved:event];
+    }
 }
 
 -(void)mouseEntered:(NSEvent *)event {
   [self _updateHoverViewWithEvent:event];
+    
+    if (_viewFlags.delegateMouseEntered)
+    {
+        [_viewDelegate nsView:self mouseEntered:event];
+    }
 }
 
 -(void)mouseExited:(NSEvent *)event {
   [self _updateHoverViewWithEvent:event];
+    
+    if (_viewFlags.delegateMouseExited)
+    {
+        [_viewDelegate nsView:self mouseExited:event];
+    }
 }
 
 - (void)rightMouseDown:(NSEvent *)event
@@ -473,6 +514,11 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 	[_trackingView rightMouseDown:event];
 	[TUITooltipWindow endTooltip];
 	[super rightMouseDown:event]; // we need to send this up the responder chain so that -menuForEvent: will get called for two-finger taps
+    
+    if (_viewFlags.delegateRightMouseDown)
+    {
+        [_viewDelegate nsView:self rightMouseDown:event];
+    }
 }
 
 - (void)rightMouseUp:(NSEvent *)event
@@ -482,12 +528,22 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 	_trackingView = nil;
 	
 	[lastTrackingView rightMouseUp:event]; // after _trackingView set to nil, will call mouseUp:fromSubview:
+    
+    if (_viewFlags.delegateRightMouseUp)
+    {
+        [_viewDelegate nsView:self rightMouseUp:event];
+    }
 }
 
 - (void)scrollWheel:(NSEvent *)event
 {
 	[[self viewForEvent:event] scrollWheel:event];
 	[self _updateHoverView:nil withEvent:event]; // don't pop in while scrolling
+    
+    if (_viewFlags.delegateScrollWheel)
+    {
+        [_viewDelegate nsView:self scrollWheel:event];
+    }
 }
 
 - (void)beginGestureWithEvent:(NSEvent *)event
@@ -545,6 +601,19 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 	return [_rootView performKeyEquivalent:event];
 }
 
+- (void)setViewDelegate:(id <TUINSViewDelegate>)d
+{
+	_viewDelegate = d;
+	_viewFlags.delegateMouseEntered = [_viewDelegate respondsToSelector:@selector(nsView:mouseEntered:)];
+	_viewFlags.delegateMouseExited = [_viewDelegate respondsToSelector:@selector(nsView:mouseExited:)];
+    _viewFlags.delegateMouseMoved = [_viewDelegate respondsToSelector:@selector(nsView:mouseMoved:)];
+    _viewFlags.delegateMenuForEvent = [_viewDelegate respondsToSelector:@selector(nsView:menuForEvent:)];
+    _viewFlags.delegateRightMouseDown = [_viewDelegate respondsToSelector:@selector(nsView:rightMouseDown:)];
+    _viewFlags.delegateRightMouseUp = [_viewDelegate respondsToSelector:@selector(nsView:rightMouseUp:)];
+    _viewFlags.delegateMouseUp = [_viewDelegate respondsToSelector:@selector(nsView:mouseUp:)];
+    _viewFlags.delegateScrollWheel = [_viewDelegate respondsToSelector:@selector(nsView:scrollWheel:)];
+}
+
 - (void)setEverythingNeedsDisplay
 {
 	[_rootView setEverythingNeedsDisplay];
@@ -563,6 +632,11 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 - (BOOL)isHoveringView:(TUIView *)v
 {
 	return _hoverView == v;
+}
+
+- (TUIView *)hoverView
+{
+    return _hoverView;
 }
 
 - (BOOL)acceptsFirstMouse:(NSEvent *)event
@@ -620,6 +694,11 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 
 - (NSMenu *)menuForEvent:(NSEvent *)event
 {
+    if (_viewFlags.delegateMenuForEvent)
+    {
+        return [_viewDelegate nsView:self menuForEvent:event];
+    }
+    
 	TUIView *v = [self viewForEvent:event];
 	do {
 		NSMenu *m = [v menuForEvent:event];
@@ -628,6 +707,21 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 		v = v.superview;
 	} while(v);
 	return nil;
+}
+
+- (void)quickLookWithEvent:(NSEvent *)event
+{
+    TUIView * view = [self viewForEvent:event];
+    
+    TUITextRenderer * renderer = [view textRendererAtPoint:[view localPointForEvent:event]];
+    
+    if (renderer)
+    {
+        [renderer quickLookWithEvent:event];
+        return;
+    }
+    
+    [super quickLookWithEvent:event];
 }
 
 - (void)setUp {

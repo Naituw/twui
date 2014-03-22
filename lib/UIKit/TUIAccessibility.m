@@ -77,7 +77,7 @@ TUIAccessibilityTraits TUIAccessibilityTraitUpdatesFrequently = 1 << 10;
 
 - (void)setAccessibilityTraits:(TUIAccessibilityTraits)traits
 {
-
+    
 }
 
 - (CGRect)accessibilityFrame

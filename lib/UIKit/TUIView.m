@@ -162,6 +162,11 @@ static pthread_key_t TUICurrentContextScaleFactorTLSKey;
 		_layer.delegate = self;
 		_layer.opaque = YES;
 		_layer.needsDisplayOnBoundsChange = YES;
+        
+        if (AtLeastLion) {
+            _layer.shouldRasterize = NO;
+            _layer.contentsScale = [[NSScreen mainScreen] backingScaleFactor];
+        }
 	}
 	return _layer;
 }
@@ -363,18 +368,19 @@ static void TUISetCurrentContextScaleFactor(CGFloat s)
 	void (^drawBlock)(void) = ^{
 		CGContextRef context = [self _CGContext];
 		TUIGraphicsPushContext(context);
+        
+        CGFloat scale = [self.layer respondsToSelector:@selector(contentsScale)] ? self.layer.contentsScale : 1.0f;
+		TUISetCurrentContextScaleFactor(scale);
+		CGContextScaleCTM(context, scale, scale);
+        
 		if (_viewFlags.clearsContextBeforeDrawing) {
 			CGContextClearRect(context, rectToDraw);
 		}
-
-		CGFloat scale = [self.layer respondsToSelector:@selector(contentsScale)] ? self.layer.contentsScale : 1.0f;
-		TUISetCurrentContextScaleFactor(scale);
-		CGContextScaleCTM(context, scale, scale);
-
+        
 		CGContextSetAllowsAntialiasing(context, true);
 		CGContextSetShouldAntialias(context, true);
 		CGContextSetShouldSmoothFonts(context, !_viewFlags.disableSubpixelTextRendering);
-
+        
 		if (self.drawRect) {
 			// drawRect is implemented via a block
 			self.drawRect(self, rectToDraw);
@@ -396,7 +402,7 @@ static void TUISetCurrentContextScaleFactor(CGFloat s)
 		layer.contents = (id)image.CGImage;
 		CGContextScaleCTM(context, 1.0f / scale, 1.0f / scale);
 		TUIGraphicsPopContext();
-
+        
 		if (self.drawInBackground) [CATransaction flush];
 	};
 	
@@ -983,6 +989,12 @@ static void TUISetCurrentContextScaleFactor(CGFloat s)
 - (void)layoutIfNeeded
 {
 	[self.layer layoutIfNeeded];
+}
+
+- (void)setEverythingNeedsLayout
+{
+    [self setNeedsLayout];
+	[self.subviews makeObjectsPerformSelector:@selector(setEverythingNeedsLayout)];
 }
 
 - (void)layoutSubviews

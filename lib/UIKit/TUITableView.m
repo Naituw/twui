@@ -662,7 +662,11 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
 		if(_tableFlags.maintainContentOffsetAfterReload) {
 			previousOffset = self.contentSize.height + self.contentOffset.y;
 		} else {
-			if(_tableFlags.forceSaveScrollPosition || [self.nsView inLiveResize]) {
+            if(_keepVisibleIndexPathForReload) {
+				savedIndexPath = _keepVisibleIndexPathForReload;
+				relativeOffset = _relativeOffsetForReload;
+				_keepVisibleIndexPathForReload = nil;
+			}else if(_tableFlags.forceSaveScrollPosition || [self.nsView inLiveResize]) {
 				_tableFlags.forceSaveScrollPosition = 0;
 				NSArray *a = [INDEX_PATHS_FOR_VISIBLE_ROWS sortedArrayUsingSelector:@selector(compare:)];
 				if([a count]) {
@@ -672,11 +676,7 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
 					relativeOffset = ((v.origin.y + v.size.height) - (r.origin.y + r.size.height));
 					relativeOffset += (_lastSize.height - bounds.size.height);
 				}
-			} else if(_keepVisibleIndexPathForReload) {
-				savedIndexPath = _keepVisibleIndexPathForReload;
-				relativeOffset = _relativeOffsetForReload;
-				_keepVisibleIndexPathForReload = nil;
-			}
+			} 
 		}
 		
 		[self _updateSectionInfo]; // clean up any previous section info and recreate it
@@ -693,18 +693,28 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
 		if(_tableFlags.maintainContentOffsetAfterReload) {
 			CGFloat newOffset = previousOffset - self.contentSize.height;
 			self.contentOffset = CGPointMake(self.contentOffset.x, newOffset);
-		} else {
-			if(savedIndexPath) {
-				CGRect v = [self visibleRect];
-				CGRect r = [self rectForRowAtIndexPath:savedIndexPath];
-				r.origin.y -= (v.size.height - r.size.height);
-				r.size.height += (v.size.height - r.size.height);
-				
-				r.origin.y += relativeOffset;
-				
-				[self scrollRectToVisible:r animated:NO];
-			}
 		}
+        if(savedIndexPath) {
+            
+            if (savedIndexPath.row == 0 &&
+                savedIndexPath.section == 0 &&
+                relativeOffset == 0)
+            {
+                // Scroll To Top
+                [self scrollToTopAnimated:NO];
+            }
+            else
+            {
+                CGRect v = [self visibleRect];
+                CGRect r = [self rectForRowAtIndexPath:savedIndexPath];
+                r.origin.y -= (v.size.height - r.size.height);
+                r.size.height += (v.size.height - r.size.height);
+                
+                r.origin.y += relativeOffset;
+                
+                [self scrollRectToVisible:r animated:NO];
+            }
+        }
 		
 		return YES; // needs visible cells to be redisplayed
 	}
@@ -734,7 +744,7 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
 			if(section.headerView != nil) {
 				CGRect headerFrame = [self rectForHeaderOfSection:index];
 				
-				if(_style == TUITableViewStyleGrouped) {
+				if(_style == TUITableViewStylePinnedHeader) {
 					// check if this header needs to be pinned
 					if(CGRectGetMaxY(headerFrame) > CGRectGetMaxY(visible)) {
 						headerFrame.origin.y = CGRectGetMaxY(visible) - headerFrame.size.height;
@@ -1067,9 +1077,9 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
 - (void)selectRowAtIndexPath:(TUIFastIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(TUITableViewScrollPosition)scrollPosition
 {
 	TUIFastIndexPath *oldIndexPath = [self indexPathForSelectedRow];
-//	if([indexPath isEqual:oldIndexPath]) {
-//		// just scroll to visible
-//	} else {
+	if([indexPath isEqual:oldIndexPath]) {
+		// just scroll to visible
+	} else {
 		[self deselectRowAtIndexPath:[self indexPathForSelectedRow] animated:animated];
 		
 		TUITableViewCell *cell = [self cellForRowAtIndexPath:indexPath]; // may be nil
@@ -1082,7 +1092,7 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
 		if([self.delegate respondsToSelector:@selector(tableView:didSelectRowAtIndexPath:)]){
 			[self.delegate tableView:self didSelectRowAtIndexPath:indexPath];
 		}
-//	}
+	}
 
   NSResponder *firstResponder = [self.nsWindow firstResponder];
   if(firstResponder == self || firstResponder == [self cellForRowAtIndexPath:oldIndexPath]) {
@@ -1133,82 +1143,83 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
 	return lastIndexPath;
 }
 
+- (void)selectPreviousRow:(NSEvent *)event
+{
+    // no selection or selected cell not visible and this is not repeative key press
+	BOOL noCurrentSelection = (_selectedIndexPath == nil || ([self cellForRowAtIndexPath:_selectedIndexPath] == nil && ![event isARepeat]));;
+    
+    TUIFastIndexPath *newIndexPath;
+    if(noCurrentSelection) {
+        newIndexPath = [self indexPathForLastVisibleRow];
+    } else {
+        NSUInteger section = _selectedIndexPath.section;
+        NSUInteger row = _selectedIndexPath.row;
+        if(row > 0) {
+            row--;
+        } else {
+            while(section > 0) {
+                section--;
+                NSUInteger rowsInSection = [self numberOfRowsInSection:section];
+                if(rowsInSection > 0) {
+                    row = rowsInSection - 1;
+                    break;
+                }
+            }
+        }
+        newIndexPath = [TUIFastIndexPath indexPathForRow:row inSection:section];
+    }
+    if(![_delegate respondsToSelector:@selector(tableView:shouldSelectRowAtIndexPath:forEvent:)] || [_delegate tableView:self shouldSelectRowAtIndexPath:newIndexPath forEvent:event]){
+        [self selectRowAtIndexPath:newIndexPath animated:self.animateSelectionChanges scrollPosition:TUITableViewScrollPositionToVisible];
+    }
+}
+
+- (void)selectNextRow:(NSEvent *)event
+{
+    // no selection or selected cell not visible and this is not repeative key press
+	BOOL noCurrentSelection = (_selectedIndexPath == nil || ([self cellForRowAtIndexPath:_selectedIndexPath] == nil && ![event isARepeat]));;
+    
+    TUIFastIndexPath *newIndexPath;
+    if(noCurrentSelection) {
+        newIndexPath = [self indexPathForFirstVisibleRow];
+    } else {
+        NSUInteger section = _selectedIndexPath.section;
+        NSUInteger row = _selectedIndexPath.row;
+        NSUInteger rowsInSection = [self numberOfRowsInSection:section];
+        if(row + 1 < rowsInSection) {
+            row++;
+        } else {
+            NSUInteger sections = [self numberOfSections];
+            while(section + 1 < sections) {
+                section++;
+                NSUInteger rowsInSection = [self numberOfRowsInSection:section];
+                if(rowsInSection > 0) {
+                    row = 0;
+                    break;
+                }
+            }
+        }
+        newIndexPath = [TUIFastIndexPath indexPathForRow:row inSection:section];
+    }
+    
+    if(![_delegate respondsToSelector:@selector(tableView:shouldSelectRowAtIndexPath:forEvent:)] || [_delegate tableView:self shouldSelectRowAtIndexPath:newIndexPath forEvent:event]){
+        [self selectRowAtIndexPath:newIndexPath animated:self.animateSelectionChanges scrollPosition:TUITableViewScrollPositionToVisible];
+    }
+}
+
 - (BOOL)performKeyAction:(NSEvent *)event
 {
-	// no selection or selected cell not visible and this is not repeative key press
-	BOOL noCurrentSelection = (_selectedIndexPath == nil || ([self cellForRowAtIndexPath:_selectedIndexPath] == nil && ![event isARepeat]));;
-	
-	typedef TUIFastIndexPath * (^TUITableViewCalculateNextIndexPathBlock)(TUIFastIndexPath *lastIndexPath);
-	void (^selectValidIndexPath)(TUIFastIndexPath *startForNoSelection, TUITableViewCalculateNextIndexPathBlock calculateNextIndexPath) = ^(TUIFastIndexPath *startForNoSelection, TUITableViewCalculateNextIndexPathBlock calculateNextIndexPath) {
-		NSParameterAssert(calculateNextIndexPath != nil);
-		
-		BOOL foundValidNextRow = NO;
-		TUIFastIndexPath *lastIndexPath = _selectedIndexPath;
-		while(!foundValidNextRow) {
-			TUIFastIndexPath *newIndexPath;
-			if(noCurrentSelection && lastIndexPath == nil) {
-				newIndexPath = startForNoSelection;
-			} else {
-				newIndexPath = calculateNextIndexPath(lastIndexPath);
-			}
-			
-			if(![_delegate respondsToSelector:@selector(tableView:shouldSelectRowAtIndexPath:forEvent:)] || [_delegate tableView:self shouldSelectRowAtIndexPath:newIndexPath forEvent:event]){
-				[self selectRowAtIndexPath:newIndexPath animated:self.animateSelectionChanges scrollPosition:TUITableViewScrollPositionToVisible];
-				foundValidNextRow = YES;
-			}
-			
-			if([lastIndexPath isEqual:newIndexPath]) foundValidNextRow = YES;
-			
-			lastIndexPath = newIndexPath;
-		}
-	};
-	
 	switch([[event charactersIgnoringModifiers] characterAtIndex:0]) {
 		case NSUpArrowFunctionKey: {
-			selectValidIndexPath([self indexPathForLastVisibleRow], ^(TUIFastIndexPath *lastIndexPath) {
-				NSUInteger section = lastIndexPath.section;
-				NSUInteger row = lastIndexPath.row;
-				if(row > 0) {
-					row--;
-				} else {
-					while(section > 0) {
-						section--;
-						NSUInteger rowsInSection = [self numberOfRowsInSection:section];
-						if(rowsInSection > 0) {
-							row = rowsInSection - 1;
-							break;
-						}
-					}
-				}
-				
-				return [TUIFastIndexPath indexPathForRow:row inSection:section];
-			});
-			
+            
+            [self selectPreviousRow:event];
+            
 			return YES;
 		}
-	
+            
 		case NSDownArrowFunctionKey:  {
-			selectValidIndexPath([self indexPathForFirstVisibleRow], ^(TUIFastIndexPath *lastIndexPath) {
-				NSUInteger section = lastIndexPath.section;
-				NSUInteger row = lastIndexPath.row;
-				NSUInteger rowsInSection = [self numberOfRowsInSection:section];
-				if(row + 1 < rowsInSection) {
-					row++;
-				} else {
-					NSUInteger sections = [self numberOfSections];
-					while(section + 1 < sections) {
-						section++;
-						NSUInteger rowsInSection = [self numberOfRowsInSection:section];
-						if(rowsInSection > 0) {
-							row = 0;
-							break;
-						}
-					}
-				}
-				
-				return [TUIFastIndexPath indexPathForRow:row inSection:section];
-			});
-
+            
+            [self selectNextRow:event];
+            
 			return YES;
 		}
 	}

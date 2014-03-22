@@ -122,6 +122,21 @@
 	return _ct_frame;
 }
 
+- (CTFrameRef)newCTFrameWithAttributedString:(NSAttributedString *)string
+{
+    CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)string);
+    
+    CGMutablePathRef path = CGPathCreateMutable();
+	CGPathAddRect(path, NULL, frame);
+    
+	CTFrameRef ctFrame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, 0), path, NULL);
+    
+    CGPathRelease(path);
+    CFRelease(framesetter);
+    
+    return ctFrame;
+}
+
 - (CGPathRef)ctPath
 {
 	[self _buildFramesetter];
@@ -216,109 +231,88 @@
 
 - (void)drawInContext:(CGContextRef)context
 {
-	if(attributedString) {
-		CGContextSaveGState(context);
-		
-		CTFrameRef f = [self ctFrame];
-		
-		if(_flags.preDrawBlocksEnabled && !_flags.drawMaskDragSelection) {
-			[self.attributedString enumerateAttribute:TUIAttributedStringPreDrawBlockName inRange:NSMakeRange(0, [self.attributedString length]) options:0 usingBlock:^(id value, NSRange range, BOOL *stop) {
-				if(value == NULL) return;
-				
-				CGContextSaveGState(context);
-				
-				AB_CTLineRectAggregationType aggregationType = (AB_CTLineRectAggregationType) [[self.attributedString attribute:TUIAttributedStringBackgroundFillStyleName atIndex:range.location effectiveRange:NULL] integerValue];
-				NSArray *rectsArray = [self rectsForCharacterRange:CFRangeMake(range.location, range.length) aggregationType:aggregationType];
-				
-				CFIndex rectCount = rectsArray.count;
-				CGRect rects[rectCount];
-				for(NSUInteger i = 0; i < rectCount; i++) {
-					rects[i] = [[rectsArray objectAtIndex:i] rectValue];
-				}
-				
-				TUIAttributedStringPreDrawBlock block = value;
-				block(self.attributedString, range, rects, rectCount);
-					
-				CGContextRestoreGState(context);
-			}];
-		}
-		
-		if(_flags.backgroundDrawingEnabled && !_flags.drawMaskDragSelection) {
-			CGContextSaveGState(context);
-			
-			[self.attributedString enumerateAttribute:TUIAttributedStringBackgroundColorAttributeName inRange:NSMakeRange(0, [self.attributedString length]) options:0 usingBlock:^(id value, NSRange range, BOOL *stop) {
-				if(value == NULL) return;
-				
-				CGColorRef color = (__bridge CGColorRef) value;
-				CGContextSetFillColorWithColor(context, color);
-				
-				AB_CTLineRectAggregationType aggregationType = (AB_CTLineRectAggregationType) [[self.attributedString attribute:TUIAttributedStringBackgroundFillStyleName atIndex:range.location effectiveRange:NULL] integerValue];
-				NSArray *rectsArray = [self rectsForCharacterRange:CFRangeMake(range.location, range.length) aggregationType:aggregationType];
-				
-				CFIndex rectCount = rectsArray.count;
-				CGRect rects[rectCount];
-				for(NSUInteger i = 0; i < rectCount; i++) {
-					rects[i] = [[rectsArray objectAtIndex:i] rectValue];
-				}
-				
-				for(CFIndex i = 0; i < rectCount; ++i) {
-					CGRect r = rects[i];
-					r = CGRectInset(r, -2, -1);
-					r = CGRectIntegral(r);
-					if(r.size.width > 1)
-						CGContextFillRect(context, r);
-				}
-			}];
-			
-			CGContextRestoreGState(context);
-		}
-		
-		if(hitRange && !_flags.drawMaskDragSelection) {
-			// draw highlight
-			CGContextSaveGState(context);
-			
-			NSRange _r = [hitRange rangeValue];
-			CFRange r = {_r.location, _r.length};
-			CFIndex nRects = 10;
-			CGRect rects[nRects];
-			AB_CTFrameGetRectsForRange(f, r, rects, &nRects);
-			for(int i = 0; i < nRects; ++i) {
-				CGRect rect = rects[i];
-				rect = CGRectInset(rect, -2, -1);
-				rect.size.height -= 1;
-				rect = CGRectIntegral(rect);
-				TUIColor *color = [TUIColor colorWithWhite:1.0 alpha:1.0];
-				[color set];
-				CGContextSetShadowWithColor(context, CGSizeMake(0, 0), 8, color.CGColor);
-				CGContextFillRoundRect(context, rect, 10);
-			}
-			
-			CGContextRestoreGState(context);
-		}
-		
-		CFRange selectedRange = [self _selectedRange];
-		if(selectedRange.length > 0) {
-			[[NSColor selectedTextBackgroundColor] set];
-			// draw (or mask) selection
-			CFIndex rectCount = 100;
-			CGRect rects[rectCount];
-			AB_CTFrameGetRectsForRange(f, selectedRange, rects, &rectCount);
-			if(_flags.drawMaskDragSelection) {
-				CGContextClipToRects(context, rects, rectCount);
-			} else {
-				[self drawSelectionWithRects:rects count:rectCount];
-			}
-		}
-		
-		CGContextSetTextMatrix(context, CGAffineTransformIdentity);
-		
-		if(shadowColor)
-			CGContextSetShadowWithColor(context, shadowOffset, shadowBlur, shadowColor.CGColor);
+    [self drawInContext:context threadSafely:NO];
+}
 
-		CTFrameDraw(f, context); // draw actual text
-				
-		CGContextRestoreGState(context);
-	}
+- (void)drawInContext:(CGContextRef)context threadSafely:(BOOL)threadSafe;
+{
+    NSAttributedString * __strong _attributedString = attributedString;
+    
+    if (_attributedString)
+    {
+        CTFrameRef f = NULL;
+        
+        if (threadSafe)
+        {
+            f = [self newCTFrameWithAttributedString:_attributedString];
+        }
+        else
+        {
+            f = [self ctFrame];
+            CFRetain(f);
+        }
+        
+        if(f)
+        {
+            CGContextSaveGState(context);
+            
+            if(hitRange && !_flags.drawMaskDragSelection) {
+                // draw highlight
+                CGContextSaveGState(context);
+                
+                NSRange _r = [hitRange rangeValue];
+                CFRange r = {_r.location, _r.length};
+                CFIndex nRects = 10;
+                CGRect rects[nRects];
+                AB_CTFrameGetRectsForRange(f, r, rects, &nRects);
+                for(int i = 0; i < nRects; ++i) {
+                    CGRect rect = rects[i];
+                    rect = CGRectInset(rect, -2, -1);
+                    rect.size.height -= 1;
+                    rect = CGRectIntegral(rect);
+                    TUIColor *color = [TUIColor colorWithWhite:1.0 alpha:1.0];
+                    [color set];
+                    CGContextSetShadowWithColor(context, CGSizeMake(0, 0), 8, color.CGColor);
+                    CGContextFillRoundRect(context, rect, 10);
+                }
+                
+                CGContextRestoreGState(context);
+            }
+            
+            CFRange selectedRange = [self _selectedRange];
+            
+            if(selectedRange.length > 0) {
+                [[NSColor selectedTextBackgroundColor] set];
+                // draw (or mask) selection
+                CFIndex rectCount = 100;
+                CGRect rects[rectCount];
+                AB_CTFrameGetRectsForRangeWithAggregationType(f, selectedRange, AB_CTLineRectAggregationTypeInlineContinuous, rects, &rectCount);
+                if(_flags.drawMaskDragSelection) {
+                    CGContextClipToRects(context, rects, rectCount);
+                } else {
+                    for(CFIndex i = 0; i < rectCount; ++i) {
+                        CGRect r = rects[i];
+                        r = CGRectIntegral(r);
+                        if(r.size.width > 1)
+                            CGContextFillRect(context, r);
+                    }
+                }
+            }
+            
+            CGContextSetTextMatrix(context, CGAffineTransformIdentity);
+            
+            if(shadowColor)
+                CGContextSetShadowWithColor(context, shadowOffset, shadowBlur, shadowColor.CGColor);
+            
+            CTFrameDraw(f, context); // draw actual text
+            
+            CFRelease(f);
+            
+            CGContextRestoreGState(context);
+        }
+    }
+    
+    _attributedString = nil;
 }
 
 - (void)drawSelectionWithRects:(CGRect *)rects count:(CFIndex)count {

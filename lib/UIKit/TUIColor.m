@@ -148,10 +148,10 @@ static void patternRelease(void *info)
 
 #define CACHED_COLOR(NAME, IMPLEMENTATION) \
 + (TUIColor *)NAME { \
-	static __strong TUIColor *c = nil; \
-	if(!c) \
-		c = (IMPLEMENTATION); \
-	return c; \
+static __strong TUIColor *c = nil; \
+if(!c) \
+c = (IMPLEMENTATION); \
+return c; \
 }
 
 CACHED_COLOR(clearColor,		[self colorWithWhite:0.0	alpha:0.0])

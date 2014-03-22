@@ -48,26 +48,26 @@
 
 - (void)setRootView:(NSView *)view {
 	NSAssert1([NSThread isMainThread], @"%s should only be called from the main thread", __func__);
-
+    
 	// remove any existing guest view
 	[_rootView removeFromSuperview];
 	_rootView.hostView = nil;
-
+    
 	_rootView = view;
-
+    
 	TUINSView *nsView = self.ancestorTUINSView;
-
+    
 	// and set up our new view
 	if (_rootView) {
 		// set up layer-backing on the view
 		[_rootView setWantsLayer:YES];
 		[_rootView setNeedsDisplay:YES];
-
+        
 		[nsView.appKitHostView addSubview:_rootView];
 		_rootView.hostView = self;
-
+        
 		[nsView recalculateNSViewOrdering];
-
+        
 		_rootView.nextResponder = self;
 		[self synchronizeNSViewGeometry];
 	} else {
@@ -113,9 +113,9 @@
 	self = [super initWithFrame:frame];
 	if (!self)
 		return nil;
-
+    
 	self.layer.masksToBounds = NO;
-
+    
 	// prevents the layer from displaying until we need to render our contained
 	// view
 	self.contentMode = TUIViewContentModeScaleToFill;
@@ -124,11 +124,11 @@
 
 - (id)initWithNSView:(NSView *)view; {
 	NSAssert1([NSThread isMainThread], @"%s should only be called from the main thread", __func__);
-
+    
 	self = [self initWithFrame:view.frame];
 	if (!self)
 		return nil;
-
+    
 	self.rootView = view;
 	return self;
 }
@@ -141,17 +141,17 @@
 
 - (void)synchronizeNSViewGeometry; {
 	NSAssert1([NSThread isMainThread], @"%s should only be called from the main thread", __func__);
-
+    
 	if (!self.nsWindow) {
 		// can't do this without being in a window
 		return;
 	}
-
+    
 	NSAssert(self.ancestorTUINSView, @"%@ should be in an TUINSView if it has a window", self);
-
+    
 	CGRect frame = self.NSViewFrame;
 	self.rootView.frame = frame;
-
+    
 	[self.ancestorTUINSView recalculateNSViewClipping];
 }
 
@@ -161,7 +161,7 @@
 	if (!self.renderingContainedView) {
 		return;
 	}
-
+    
 	CGContextRef context = [NSGraphicsContext currentContext].graphicsPort;
 	[self.rootView.layer renderInContext:context];
 }
@@ -178,7 +178,7 @@
 
 - (void)stopRenderingContainedView; {
 	NSAssert(_renderingContainedViewCount > 0, @"Mismatched call to %s", __func__);
-
+    
 	if (--_renderingContainedViewCount == 0) {
 		self.layer.contents = nil;
 	}
@@ -194,7 +194,7 @@
 - (void)willMoveToTUINSView:(TUINSView *)view; {
 	[super willMoveToTUINSView:view];
 	[self.rootView willMoveToTUINSView:view];
-
+    
 	[CATransaction tui_performWithDisabledActions:^{
 		[self.rootView removeFromSuperview];
 	}];
@@ -202,27 +202,27 @@
 
 - (void)didMoveFromTUINSView:(TUINSView *)view; {
 	[super didMoveFromTUINSView:view];
-
+    
 	TUINSView *newView = self.ancestorTUINSView;
 	if (newView) {
 		[CATransaction tui_performWithDisabledActions:^{
 			[newView.appKitHostView addSubview:self.rootView];
 		}];
-
+        
 		self.rootView.nextResponder = self;
 	}
-
+    
 	[self.rootView didMoveFromTUINSView:view];
 }
 
 - (void)viewHierarchyDidChange {
 	[super viewHierarchyDidChange];
-
+    
 	// verify that TUIViewNSViewContainers are on top of other subviews
-	#if DEBUG
+#if DEBUG
 	NSArray *siblings = self.superview.subviews;
 	__block BOOL foundTUIView = NO;
-
+    
 	[siblings enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(TUIView *view, NSUInteger index, BOOL *stop){
 		if ([view isKindOfClass:[TUIViewNSViewContainer class]]) {
 			NSAssert2(!foundTUIView, @"%@ must be on top of its sibling TUIViews: %@", view, siblings);
@@ -230,8 +230,8 @@
 			foundTUIView = YES;
 		}
 	}];
-	#endif
-
+#endif
+    
 	[self.ancestorTUINSView recalculateNSViewOrdering];
 	[self synchronizeNSViewGeometry];
 	[self.rootView viewHierarchyDidChange];
@@ -240,9 +240,9 @@
 - (id<TUIBridgedView>)descendantViewAtPoint:(CGPoint)point {
 	if (![self pointInside:point])
 		return nil;
-
+    
 	CGPoint NSViewPoint = [self.rootView convertFromWindowPoint:[self convertToWindowPoint:point]];
-
+    
 	// never return 'self', since we don't want to catch clicks that didn't
 	// directly hit the NSView
 	return [self.rootView descendantViewAtPoint:NSViewPoint];
@@ -257,32 +257,32 @@
 
 - (CGSize)sizeThatFits:(CGSize)constraint {
 	NSAssert1([NSThread isMainThread], @"%s should only be called from the main thread", __func__);
-
+    
 	id view = self.rootView;
 	NSSize cellSize = NSMakeSize(10000, 10000);
-
+    
 	NSCell *cell = nil;
-
+    
 	if ([view respondsToSelector:@selector(cell)]) {
 		cell = [view cell];
 	}
-
+    
 	if ([cell respondsToSelector:@selector(cellSize)]) {
 		cellSize = [cell cellSize];
 	}
-
+    
 	// if we don't have a cell, or it didn't give us a true size
 	if (CGSizeEqualToSize(cellSize, CGSizeMake(10000, 10000))) {
 		return [super sizeThatFits:constraint];
 	}
-
+    
 	return cellSize;
 }
 
 - (void)sizeToFit {
 	if ([self.rootView respondsToSelector:@selector(sizeToFit)]) {
 		[self.rootView performSelector:@selector(sizeToFit)];
-
+        
 		self.bounds = self.rootView.bounds;
 	} else {
 		[super sizeToFit];

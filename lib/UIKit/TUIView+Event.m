@@ -15,13 +15,12 @@
  */
 
 #import "TUIView.h"
-#import "TUINSView.h"
-#import "TUINSWindow.h"
-#import "TUITextRenderer+Event.h"
-#import "TUITextRenderer.h"
 #import "TUIView+Event.h"
-#import "TUIView+PasteboardDragging.h"
+#import "TUITextRenderer.h"
+#import "TUITextRenderer+Event.h"
 #import "TUIView+Private.h"
+#import "TUIView+PasteboardDragging.h"
+#import "TUINSWindow.h"
 
 @implementation TUIView (Event)
 
@@ -50,7 +49,7 @@
 	_viewFlags.didStartResizeByDragging = 0;
 	
 	if(self.superview != nil){
-	  [self.superview mouseDown:event onSubview:self];
+        [self.superview mouseDown:event onSubview:self];
 	}
 	
 }
@@ -66,7 +65,7 @@
 	}
 	
 	if(self.superview != nil){
-	  [self.superview mouseUp:event fromSubview:self];
+        [self.superview mouseUp:event fromSubview:self];
 	}
 	
 }
@@ -74,14 +73,14 @@
 - (void)rightMouseDown:(NSEvent *)event
 {
 	if(self.superview != nil){
-	  [self.superview rightMouseDown:event onSubview:self];
+        [self.superview rightMouseDown:event onSubview:self];
 	}
 }
 
 - (void)rightMouseUp:(NSEvent *)event
 {
 	if(self.superview != nil){
-	  [self.superview rightMouseUp:event fromSubview:self];
+        [self.superview rightMouseUp:event fromSubview:self];
 	}
 }
 
@@ -107,17 +106,20 @@
 		o.x += p.x - startDrag.x;
 		o.y += p.y - startDrag.y;
 		
-		CGRect r = [window frame];
-		r.origin = o;
-		r = ABClampProposedRectToScreen(r);
-		o = r.origin;
+        //		CGRect r = [window frame];
+        //		r.origin = o;
+        //		r = ABClampProposedRectToScreen(r);
+        //		o = r.origin;
 		
-		if(!_viewFlags.didStartMovingByDragging) {
-			if([window respondsToSelector:@selector(windowWillStartLiveDrag)])
-				[window performSelector:@selector(windowWillStartLiveDrag)];
-			_viewFlags.didStartMovingByDragging = 1;
-		}
-		[window setFrameOrigin:o];
+        if (([window styleMask] & NSFullScreenWindowMask) != NSFullScreenWindowMask)
+        {
+            if(!_viewFlags.didStartMovingByDragging) {
+                if([window respondsToSelector:@selector(windowWillStartLiveDrag)])
+                    [window performSelector:@selector(windowWillStartLiveDrag)];
+                _viewFlags.didStartMovingByDragging = 1;
+            }
+            [window setFrameOrigin:o];
+        }
 	} else if(_viewFlags.resizeWindowByDragging) {
 		if(!_viewFlags.didStartResizeByDragging) {
 			_viewFlags.didStartResizeByDragging = 1;
@@ -158,7 +160,7 @@
 	}
 	
 	if(self.superview != nil){
-	  [self.superview mouseDragged:event onSubview:self];
+        [self.superview mouseDragged:event onSubview:self];
 	}
 	
 }
@@ -185,9 +187,9 @@
 
 - (void)mouseEntered:(NSEvent *)event
 {
-  if(self.superview != nil){
-    [self.superview mouseEntered:event onSubview:self];
-  }
+    if(self.superview != nil){
+        [self.superview mouseEntered:event onSubview:self];
+    }
 	if(_viewFlags.delegateMouseEntered){
 		[_viewDelegate view:self mouseEntered:event];
 	}
@@ -195,9 +197,9 @@
 
 - (void)mouseExited:(NSEvent *)event
 {
-  if(self.superview != nil){
-    [self.superview mouseExited:event fromSubview:self];
-  }
+    if(self.superview != nil){
+        [self.superview mouseExited:event fromSubview:self];
+    }
 	if(_viewFlags.delegateMouseExited){
 		[_viewDelegate view:self mouseExited:event];
 	}
@@ -215,12 +217,12 @@
 
 - (void)mouseDown:(NSEvent *)event onSubview:(TUIView *)subview
 {
-  [self.superview mouseDown:event onSubview:subview];
+    [self.superview mouseDown:event onSubview:subview];
 }
 
 - (void)mouseDragged:(NSEvent *)event onSubview:(TUIView *)subview
 {
-  [self.superview mouseDragged:event onSubview:subview];
+    [self.superview mouseDragged:event onSubview:subview];
 }
 
 - (void)mouseUp:(NSEvent *)event fromSubview:(TUIView *)subview
@@ -230,7 +232,7 @@
 
 - (void)rightMouseDown:(NSEvent *)event onSubview:(TUIView *)subview
 {
-  [self.superview rightMouseDown:event onSubview:subview];
+    [self.superview rightMouseDown:event onSubview:subview];
 }
 
 - (void)rightMouseUp:(NSEvent *)event fromSubview:(TUIView *)subview
@@ -240,12 +242,12 @@
 
 - (void)mouseEntered:(NSEvent *)event onSubview:(TUIView *)subview
 {
-  [self.superview mouseEntered:event onSubview:subview];
+    [self.superview mouseEntered:event onSubview:subview];
 }
 
 - (void)mouseExited:(NSEvent *)event fromSubview:(TUIView *)subview
 {
-  [self.superview mouseExited:event fromSubview:subview];
+    [self.superview mouseExited:event fromSubview:subview];
 }
 
 @end

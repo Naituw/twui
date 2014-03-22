@@ -330,6 +330,11 @@ extern CGRect(^TUIViewCenteredLayout)(TUIView*);
 - (void)layoutIfNeeded;
 
 /**
+ Recursive -setNeedsLayout
+ */
+- (void)setEverythingNeedsLayout;
+
+/**
  Subclasses may override to layout their subviews.  Also see the ^layout property for another mechanism for this.
  */
 - (void)layoutSubviews;
@@ -457,6 +462,8 @@ extern CGRect(^TUIViewCenteredLayout)(TUIView*);
 
 + (void)animateWithDuration:(NSTimeInterval)duration animations:(void (^)(void))animations;
 + (void)animateWithDuration:(NSTimeInterval)duration animations:(void (^)(void))animations completion:(void (^)(BOOL finished))completion;
++ (void)animateWithDuration:(NSTimeInterval)duration delay:(NSTimeInterval)delay animations:(void (^)(void))animations completion:(void (^)(BOOL finished))completion;
++ (void)animateWithDuration:(NSTimeInterval)duration delay:(NSTimeInterval)delay curve:(TUIViewAnimationCurve)curve animations:(void (^)(void))animations completion:(void (^)(BOOL finished))completion;
 
 /**
  from receiver and all subviews

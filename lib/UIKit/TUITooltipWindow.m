@@ -60,9 +60,9 @@ static NSTimer *FadeOutTimer = nil;
 	if(!w) {
 		NSRect r = NSMakeRect(0, 0, 10, TOOLTIP_HEIGHT);
 		w = [[TUITooltipWindow alloc] initWithContentRect:r
-												 styleMask:NSBorderlessWindowMask 
-												   backing:NSBackingStoreBuffered
-													 defer:NO];
+                                                styleMask:NSBorderlessWindowMask
+                                                  backing:NSBackingStoreBuffered
+                                                    defer:NO];
 		[w setLevel:NSPopUpMenuWindowLevel];
 		[w setOpaque:NO];
 		[w setBackgroundColor:[NSColor clearColor]];
@@ -127,7 +127,7 @@ static BOOL ShowingTooltip = NO;
 + (void)updateTooltip:(NSString *)s delay:(NSTimeInterval)delay
 {
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(_beginTooltip) object:nil];
-
+    
 	if(s) {
 		if(FadeOutTimer || ShowingTooltip) {
 			// quick switch

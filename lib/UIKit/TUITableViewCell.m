@@ -56,7 +56,12 @@
 
 - (TUITableView *)tableView
 {
-	return (TUITableView *)self.superview;
+    TUITableView * view = (TUITableView *)self.superview;
+	if ([view isKindOfClass:[TUITableView class]])
+    {
+        return view;
+    }
+    return nil;
 }
 
 - (TUIFastIndexPath *)indexPath
@@ -102,6 +107,8 @@
 -(void)mouseDragged:(NSEvent *)event {
   // propagate the event
   [super mouseDragged:event];
+    
+    _tableViewCellFlags.dragged = YES;
   // notify our table view of the event
   [self.tableView __mouseDraggedCell:self offset:_mouseOffset event:event];
 }
@@ -115,12 +122,14 @@
 	_tableViewCellFlags.highlighted = 0;
 	[self setNeedsDisplay];
 	
-	if([self eventInside:event]) {
+	if([self eventInside:event] && !(self.cancelClickWhenDragged && _tableViewCellFlags.dragged)) {
 		TUITableView *tableView = self.tableView;
 		if([tableView.delegate respondsToSelector:@selector(tableView:didClickRowAtIndexPath:withEvent:)]){
 			[tableView.delegate tableView:tableView didClickRowAtIndexPath:self.indexPath withEvent:event];
 		}
 	}
+    
+    _tableViewCellFlags.dragged = NO;
 }
 
 - (void)rightMouseDown:(NSEvent *)event{

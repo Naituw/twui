@@ -166,6 +166,8 @@ NSInteger makeFirstResponderCount = 0;
 		[[self contentView] addSubview:nsView];
 		
 		altUINSViews = [[NSMutableArray alloc] init];
+        
+        
 	}
 	return self;
 }

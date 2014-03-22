@@ -76,7 +76,18 @@
 	
 	[super drawRect:rect]; // draw background
 	CGRect bounds = self.bounds;
-	renderer.frame = CGRectMake(0, 0, bounds.size.width, bounds.size.height);
+    
+    CGRect textFrame = CGRectMake(0, 0, bounds.size.width, bounds.size.height);
+    
+    if (self.verticalCenter)
+    {
+        CGSize textSize = [renderer sizeConstrainedToWidth:textFrame.size.width];
+        textFrame = ABIntegralRectWithSizeCenteredInRect(textSize, textFrame);
+        textFrame.origin.x = 0;
+        textFrame.size.width = bounds.size.width;
+    }
+    
+	renderer.frame = textFrame;
 	[renderer draw];	
 }
 
@@ -164,6 +175,13 @@
 	_lineBreakMode = lineBreakMode;
 	
 	self.attributedString = nil;
+}
+
+- (void)setVerticalCenter:(BOOL)verticalCenter
+{
+    if (verticalCenter == _verticalCenter) return;
+    
+    _verticalCenter = verticalCenter;
 }
 
 @end

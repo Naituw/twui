@@ -46,26 +46,37 @@
 	CGFloat startRadius = 1.0;
 	CGFloat endRadius = MAX(self.rootView.bounds.size.width, self.rootView.bounds.size.height);
 	CGPoint center = CGPointMake(focusRect.origin.x + focusRect.size.width * 0.5, focusRect.origin.y + focusRect.size.height * 0.5);
-	
+    
+    CGFloat focusRadius = MAX(focusView.bounds.size.width, focusView.bounds.size.height) * 0.5;
+    
 	TUIView *fade = [[TUIView alloc] initWithFrame:self.rootView.bounds];
+    fade.layer.cornerRadius = self.rootView.layer.cornerRadius;
+    fade.layer.masksToBounds = YES;
 	fade.userInteractionEnabled = NO;
 	fade.autoresizingMask = TUIViewAutoresizingFlexibleSize;
 	fade.opaque = NO;
 	fade.drawRect = ^(TUIView *v, CGRect r) {
 		CGContextRef ctx = TUIGraphicsGetCurrentContext();
-		
-		CGFloat locations[] = {0.0, 0.25, 1.0};
+
+		CGFloat locations[] = {0.0, focusRadius / endRadius, 1.0};
 		CGFloat components[] = {
 			0.0, 0.0, 0.0, 0.0,
-			0.0, 0.0, 0.0, 0.15,
+			0.0, 0.0, 0.0, 0.0,
 			0.0, 0.0, 0.0, 0.55,
 		};
+        
+//		CGFloat locations[] = {0.0, 0.25, 1.0};
+//		CGFloat components[] = {
+//			0.0, 0.0, 0.0, 0.0,
+//			0.0, 0.0, 0.0, 0.15,
+//			0.0, 0.0, 0.0, 0.55,
+//		};
 		
 		CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
 		CGGradientRef gradient = CGGradientCreateWithColorComponents(space, components, locations, 3);
 		
 //		CGContextSaveGState(ctx);
-//		CGContextClipToRoundRect(ctx, self.rootView.bounds, 9);
+//		CGContextClipToRoundRect(ctx, rootView.bounds, 9);
 		CGContextDrawRadialGradient(ctx, gradient, center, startRadius, center, endRadius, kCGGradientDrawsBeforeStartLocation | kCGGradientDrawsAfterEndLocation);
 //		CGContextRestoreGState(ctx);
 		

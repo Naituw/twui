@@ -60,7 +60,7 @@ extern TUIImage *TUIGraphicsContextGetImage(CGContextRef ctx);
 extern void TUIGraphicsBeginImageContext(CGSize size);
 extern void TUIGraphicsBeginImageContextWithOptions(CGSize size, BOOL opaque, CGFloat scale);
 extern TUIImage *TUIGraphicsGetImageFromCurrentImageContext(void);
-extern void TUIGraphicsEndImageContext(void); 
+extern void TUIGraphicsEndImageContext(void);
 
 extern TUIImage *TUIGraphicsGetImageForView(TUIView *view);
 

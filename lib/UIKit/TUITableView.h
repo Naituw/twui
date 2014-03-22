@@ -20,7 +20,7 @@
 
 typedef enum {
 	TUITableViewStylePlain,              // regular table view
-	TUITableViewStyleGrouped, // grouped table view—headers stick to the top of the table view and scroll with it
+    TUITableViewStylePinnedHeader,
 } TUITableViewStyle;
 
 typedef enum {
@@ -162,6 +162,9 @@ typedef enum {
 - (void)selectRowAtIndexPath:(TUIFastIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(TUITableViewScrollPosition)scrollPosition;
 - (void)deselectRowAtIndexPath:(TUIFastIndexPath *)indexPath animated:(BOOL)animated;
 
+- (void)selectPreviousRow:(NSEvent *)event;
+- (void)selectNextRow:(NSEvent *)event;
+
 /**
  Above the top cell, only visible if you pull down (if you have scroll bouncing enabled)
  */
@@ -189,10 +192,6 @@ typedef enum {
 @optional
 
 - (TUIView *)tableView:(TUITableView *)tableView headerViewForSection:(NSInteger)section;
-
-// the following are required to support row reordering
-- (BOOL)tableView:(TUITableView *)tableView canMoveRowAtIndexPath:(TUIFastIndexPath *)indexPath;
-- (void)tableView:(TUITableView *)tableView moveRowAtIndexPath:(TUIFastIndexPath *)fromIndexPath toIndexPath:(TUIFastIndexPath *)toIndexPath;
 
 // the following are required to support row reordering
 - (BOOL)tableView:(TUITableView *)tableView canMoveRowAtIndexPath:(TUIFastIndexPath *)indexPath;

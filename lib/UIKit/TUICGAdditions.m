@@ -197,9 +197,16 @@ void TUIGraphicsPopContext(void)
 TUIImage* TUIGraphicsContextGetImage(CGContextRef ctx)
 {
 	CGImageRef CGImage = TUICreateCGImageFromBitmapContext(ctx);
-	TUIImage *image = [TUIImage imageWithCGImage:CGImage];
+    CGFloat scale = 1;
+    CGAffineTransform ctm = CGContextGetCTM(ctx);
+    if (ctm.a == ctm.d == 2)
+    {
+        scale = 2;
+    }
+    
+	TUIImage *image = [TUIImage imageWithCGImage:CGImage scale:scale];
 	CGImageRelease(CGImage);
-
+    
 	return image;
 }
 

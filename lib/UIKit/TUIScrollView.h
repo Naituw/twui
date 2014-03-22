@@ -82,7 +82,7 @@ typedef enum {
   TUIScrollKnob * _verticalScrollKnob;
   TUIScrollKnob * _horizontalScrollKnob;
 	
-	NSTimer *scrollTimer;
+	CVDisplayLinkRef displayLink;
 	CGPoint destinationOffset;
 	CGPoint unfixedContentOffset;
 	
@@ -144,6 +144,7 @@ typedef enum {
 		unsigned int delegateScrollViewDidShowScrollIndicator:1;
 		unsigned int delegateScrollViewWillHideScrollIndicator:1;
 		unsigned int delegateScrollViewDidHideScrollIndicator:1;
+        unsigned int delegateScrollViewDidEndScroll:1;
 	} _scrollViewFlags;
 }
 
@@ -161,6 +162,7 @@ typedef enum {
 @property (readonly, nonatomic) BOOL verticalScrollIndicatorShowing;
 @property (readonly, nonatomic) BOOL horizontalScrollIndicatorShowing;
 @property (nonatomic) TUIScrollViewIndicatorStyle scrollIndicatorStyle;
+@property (nonatomic) TUIEdgeInsets scrollIndicatorSlotInsets; // only bottom and right available currently
 @property (nonatomic) float decelerationRate;
 
 - (void)setContentOffset:(CGPoint)contentOffset animated:(BOOL)animated;
@@ -193,6 +195,7 @@ typedef enum {
 - (void)scrollViewDidScroll:(TUIScrollView *)scrollView;
 - (void)scrollViewWillBeginDragging:(TUIScrollView *)scrollView;
 - (void)scrollViewDidEndDragging:(TUIScrollView *)scrollView;
+- (void)scrollViewDidEndScroll:(TUIScrollView *)scrollView;
 
 - (void)scrollView:(TUIScrollView *)scrollView willShowScrollIndicator:(TUIScrollViewIndicator)indicator;
 - (void)scrollView:(TUIScrollView *)scrollView didShowScrollIndicator:(TUIScrollViewIndicator)indicator;

@@ -86,7 +86,7 @@
 		BOOL targetMatches = [target isEqual:t.target];
 		BOOL controlMatches = controlEvents == t.controlEvents; // is this the way UIKit does it? Should I just remove certain bits from t.controlEvents?
 		
-		if((action && targetMatches && actionMatches && controlMatches) || 
+		if((action && targetMatches && actionMatches && controlMatches) ||
 		   (!action && targetMatches && controlMatches))
 		{
 			[targetActionsToRemove addObject:t];

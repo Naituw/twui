@@ -44,40 +44,40 @@
 	vPoint.x -= vf.origin.x;
 	vPoint.y -= vf.origin.y;
 	TUITextRenderer *r = [v textRendererAtPoint:vPoint];
-//	NSLog(@"found v = %@", v);
-//	NSLog(@"found r = %@", r);
+    //	NSLog(@"found v = %@", v);
+    //	NSLog(@"found r = %@", r);
 	return r;
 }
 
 - (NSAttributedString *)attributedSubstringForProposedRange:(NSRange)aRange actualRange:(NSRangePointer)actualRange
 {
-//	NSLog(@"%@ %@ %@", NSStringFromSelector(_cmd), NSStringFromRange(aRange), NSStringFromRange(*actualRange));
+    //	NSLog(@"%@ %@ %@", NSStringFromSelector(_cmd), NSStringFromRange(aRange), NSStringFromRange(*actualRange));
 	
 	if(_tempTextRendererForTextInputClient) {
 		NSRange r = NSIntersectionRange(aRange, NSMakeRange(0, [_tempTextRendererForTextInputClient.attributedString length]));
 		*actualRange = r;
 		NSAttributedString *s = [_tempTextRendererForTextInputClient.attributedString attributedSubstringFromRange:r];
-//		NSLog(@"know which text renderer I'm dealing with, returning - %@", s);
+        //		NSLog(@"know which text renderer I'm dealing with, returning - %@", s);
 		return s;
 	} else {
-//		NSLog(@"ignoring");
+        //		NSLog(@"ignoring");
 		return [[NSAttributedString alloc] initWithString:@"a"]; // dummy string because we have NO clue what text renderer NSTextInputContext is asking about
 	}
 }
 
 - (NSUInteger)characterIndexForPoint:(NSPoint)screenPoint
 {
-//	NSLog(@"%@ %@", NSStringFromSelector(_cmd), NSStringFromPoint(screenPoint));
+    //	NSLog(@"%@ %@", NSStringFromSelector(_cmd), NSStringFromPoint(screenPoint));
 	_tempTextRendererForTextInputClient = [self _textRendererAtScreenPoint:screenPoint];
 	if(_tempTextRendererForTextInputClient) {
 		NSPoint locationInWindow = [[self window] convertScreenToBase:screenPoint];
 		CGPoint vp = [_tempTextRendererForTextInputClient.view localPointForLocationInWindow:locationInWindow];
-//		NSLog(@"vp = %@", NSStringFromPoint(vp));
+        //		NSLog(@"vp = %@", NSStringFromPoint(vp));
 		CGRect trFrame = _tempTextRendererForTextInputClient.frame;
 		vp.x -= trFrame.origin.x;
 		vp.y -= trFrame.origin.y;
 		CFIndex index = [_tempTextRendererForTextInputClient stringIndexForPoint:vp];
-//		NSLog(@"index = %d", index);
+        //		NSLog(@"index = %d", index);
 		return (NSUInteger)index;
 	}
 	
@@ -86,30 +86,30 @@
 
 - (NSRect)firstRectForCharacterRange:(NSRange)aRange actualRange:(NSRangePointer)actualRange
 {
-//	NSLog(@"%@ %@ %@", NSStringFromSelector(_cmd), NSStringFromRange(aRange), NSStringFromRange(*actualRange));
+    //	NSLog(@"%@ %@ %@", NSStringFromSelector(_cmd), NSStringFromRange(aRange), NSStringFromRange(*actualRange));
 	
 	NSRect ret = NSZeroRect;
 	
 	if(_tempTextRendererForTextInputClient) {
 		NSRange r = NSIntersectionRange(aRange, NSMakeRange(0, [_tempTextRendererForTextInputClient.attributedString length]));
 		*actualRange = r;
-//		NSLog(@"getting first rect for range: %@", NSStringFromRange(r));
+        //		NSLog(@"getting first rect for range: %@", NSStringFromRange(r));
 		CGRect f = [_tempTextRendererForTextInputClient firstRectForCharacterRange:CFRangeMake(r.location, r.length)];
-//		NSLog(@"f = %@", NSStringFromRect(f));
+        //		NSLog(@"f = %@", NSStringFromRect(f));
 		NSRect vf = [_tempTextRendererForTextInputClient.view convertRect:f toView:nil];
-//		NSLog(@"vf = %@", NSStringFromRect(vf));
+        //		NSLog(@"vf = %@", NSStringFromRect(vf));
 		
 		NSRect windowRelativeRect = [_tempTextRendererForTextInputClient.view.nsView convertRect:vf toView:nil];
-//		NSLog(@"windowRelativeRect = %@", NSStringFromRect(windowRelativeRect));
+        //		NSLog(@"windowRelativeRect = %@", NSStringFromRect(windowRelativeRect));
 		
 		NSRect screenRect = windowRelativeRect;
 		screenRect.origin = [_tempTextRendererForTextInputClient.view.nsWindow convertBaseToScreen:windowRelativeRect.origin];
-	
+        
 		ret = screenRect;
 	}
 	
 	_tempTextRendererForTextInputClient = nil; // reset (this is the last call in the dictionary-lookup sequence
-
+    
 	return ret;
 }
 
@@ -150,7 +150,7 @@
 
 - (void)setMarkedText:(id)aString selectedRange:(NSRange)someSelectedRange replacementRange:(NSRange)replacementRange
 {
-//	NSLog(@"OTHER ONE");
+    //	NSLog(@"OTHER ONE");
 }
 
 - (void)doCommandBySelector:(SEL)aSelector

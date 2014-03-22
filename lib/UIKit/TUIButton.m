@@ -173,7 +173,7 @@ static CGRect ButtonRectCenteredInRect(CGRect a, CGRect b)
 	}
 	
 	CGRect bounds = self.bounds;
-
+    
 	BOOL key = [self.nsView isWindowKey];
 	BOOL down = self.state == TUIControlStateHighlighted;
 	CGFloat alpha = (self.buttonType == TUIButtonTypeCustom ? 1.0 : down?0.7:1.0);
@@ -220,7 +220,7 @@ static CGRect ButtonRectCenteredInRect(CGRect a, CGRect b)
 	}
 	
 	TUIColor *shadowColor = self.currentTitleShadowColor;
-	// they may have manually set the renderer's shadow color, in which case we 
+	// they may have manually set the renderer's shadow color, in which case we
 	// don't want to reset it to nothing
 	if(shadowColor != nil) {
 		_titleView.renderer.shadowColor = shadowColor;
@@ -241,7 +241,7 @@ static CGRect ButtonRectCenteredInRect(CGRect a, CGRect b)
 - (void)mouseDown:(NSEvent *)event
 {
 	[super mouseDown:event];
-
+    
 	if(popUpMenu) { // happens even if clickCount is big
 		NSMenu *menu = popUpMenu;
 		NSPoint p = [self frameInNSView].origin;

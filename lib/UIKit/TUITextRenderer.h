@@ -69,6 +69,8 @@ typedef enum {
 		unsigned int backgroundDrawingEnabled:1;
 		unsigned int preDrawBlocksEnabled:1;
 		
+        unsigned int delegateTextRendererActiveRangeAtIndex:1;
+        unsigned int delegateTextRendererDidClickActiveRange:1;
 		unsigned int delegateActiveRangesForTextRenderer:1;
 		unsigned int delegateWillBecomeFirstResponder:1;
 		unsigned int delegateDidBecomeFirstResponder:1;
@@ -93,6 +95,7 @@ typedef enum {
 
 - (void)draw;
 - (void)drawInContext:(CGContextRef)context;
+- (void)drawInContext:(CGContextRef)context threadSafely:(BOOL)threadSafe;
 - (CGSize)size; // calculates vertical size based on frame width
 - (CGSize)sizeConstrainedToWidth:(CGFloat)width;
 - (CGSize)sizeConstrainedToWidth:(CGFloat)width numberOfLines:(NSUInteger)numberOfLines;

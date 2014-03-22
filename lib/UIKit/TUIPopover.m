@@ -487,12 +487,12 @@ CGFloat const TUIPopoverBackgroundViewArrowWidth = 35.0;
     {
 		TUIPopoverBackgroundView *strongSelf = weakSelf;
         CGContextRef context = TUIGraphicsGetCurrentContext();
-        CGPathRef outerBorder = [strongSelf newPopoverPathForEdge:self.popoverEdge inFrame:self.bounds];
-        CGContextSetStrokeColorWithColor(context, self.strokeColor.CGColor);
+        CGPathRef outerBorder = [strongSelf newPopoverPathForEdge:strongSelf.popoverEdge inFrame:strongSelf.bounds];
+        CGContextSetStrokeColorWithColor(context, strongSelf.strokeColor.CGColor);
         CGContextAddPath(context, outerBorder);
         CGContextStrokePath(context);
         
-        CGContextSetFillColorWithColor(context, self.fillColor.CGColor);
+        CGContextSetFillColorWithColor(context, strongSelf.fillColor.CGColor);
         CGContextAddPath(context, outerBorder);
         CGContextFillPath(context);
 		

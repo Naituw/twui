@@ -258,14 +258,18 @@ NSParagraphStyle *ABNSParagraphStyleForTextAlignment(TUITextAlignment alignment)
     range = NSIntersectionRange([self _stringRange], range);
     
     CTRunDelegateRef runDelegate = TUICreateEmbeddedObjectRunDelegate(attachment);
-    NSDictionary * placeholderAttributes = [NSDictionary dictionaryWithObjectsAndKeys:
-                                            (__bridge id)runDelegate, (NSString*)kCTRunDelegateAttributeName,
-                                            [TUIColor clearColor].CGColor,(NSString*)kCTForegroundColorAttributeName, attachment, TUIAttributedStringAttachmentName,
-                                            nil];
+    
+    NSMutableDictionary * attributes = [[self attributesAtIndex:range.location effectiveRange:NULL] mutableCopy];
+    
+    if (runDelegate) {
+        [attributes setObject:(__bridge id)runDelegate forKey:(NSString*)kCTRunDelegateAttributeName];
+    }
+    [attributes setObject:(__bridge id)[TUIColor clearColor].CGColor forKey:(NSString*)kCTForegroundColorAttributeName];
+    [attributes setObject:attachment forKey:TUIAttributedStringAttachmentName];
     
     CFRelease(runDelegate);
     
-    NSAttributedString * placeholderString = [[NSAttributedString alloc] initWithString:@"\uFFFC" attributes:placeholderAttributes];
+    NSAttributedString * placeholderString = [[NSAttributedString alloc] initWithString:@"\uFFFC" attributes:attributes];
     
     [self replaceCharactersInRange:range withAttributedString:placeholderString];
 }

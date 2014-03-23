@@ -17,10 +17,12 @@
 #import "TUIAttributedString.h"
 #import "TUIFont.h"
 #import "TUIColor.h"
+#import "TUITextAttachment.h"
 
 NSString * const TUIAttributedStringBackgroundColorAttributeName = @"TUIAttributedStringBackgroundColorAttributeName";
 NSString * const TUIAttributedStringBackgroundFillStyleName = @"TUIAttributedStringBackgroundFillStyleName";
 NSString * const TUIAttributedStringPreDrawBlockName = @"TUIAttributedStringPreDrawBlockName";
+NSString * const TUIAttributedStringAttachmentName = @"TUIAttributedStringAttachmentName";
 
 @implementation TUIAttributedString
 
@@ -248,6 +250,39 @@ NSParagraphStyle *ABNSParagraphStyleForTextAlignment(TUITextAlignment alignment)
 	[self beginEditing];
 	[self replaceCharactersInRange:NSMakeRange(0, [self length]) withString:[text copy]];
 	[self endEditing];
+}
+
+- (void)replaceCharactersInRange:(NSRange)range withTextAttachment:(TUITextAttachment *)attachment
+{
+    NSParameterAssert(attachment);
+    range = NSIntersectionRange([self _stringRange], range);
+    
+    CTRunDelegateRef runDelegate = TUICreateEmbeddedObjectRunDelegate(attachment);
+    NSDictionary * placeholderAttributes = [NSDictionary dictionaryWithObjectsAndKeys:
+                                            (__bridge id)runDelegate, (NSString*)kCTRunDelegateAttributeName,
+                                            [TUIColor clearColor].CGColor,(NSString*)kCTForegroundColorAttributeName, attachment, TUIAttributedStringAttachmentName,
+                                            nil];
+    
+    CFRelease(runDelegate);
+    
+    NSAttributedString * placeholderString = [[NSAttributedString alloc] initWithString:@"\uFFFC" attributes:placeholderAttributes];
+    
+    [self replaceCharactersInRange:range withAttributedString:placeholderString];
+}
+
+@end
+
+@implementation NSAttributedString (TUIAdditions)
+
+- (void)enumerateTextAttachments:(void (^)(TUITextAttachment * attachment, NSRange range, BOOL *stop))block
+{
+    if (!block) return;
+    
+    [self enumerateAttribute:TUIAttributedStringAttachmentName inRange:[self _stringRange] options:0 usingBlock:^(id value, NSRange range, BOOL *stop) {
+        if (value) {
+            block(value, range, stop);
+        }
+    }];
 }
 
 @end

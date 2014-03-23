@@ -20,6 +20,7 @@
 @class TUIColor;
 @class TUIFont;
 @class TUIView;
+@class TUITextAttachment;
 @protocol ABActiveTextRange;
 
 typedef enum {
@@ -55,6 +56,7 @@ typedef enum {
 	
 	__unsafe_unretained id<TUITextRendererDelegate> delegate;
 	id<ABActiveTextRange> hitRange;
+    TUITextAttachment * hitAttachment;
 	
 	CGSize shadowOffset;
 	CGFloat shadowBlur;
@@ -72,6 +74,8 @@ typedef enum {
         unsigned int delegateTextRendererActiveRangeAtIndex:1;
         unsigned int delegateTextRendererDidClickActiveRange:1;
 		unsigned int delegateActiveRangesForTextRenderer:1;
+        unsigned int delegateRenderTextAttachment:1;
+        unsigned int delegateDidClickTextAttachment:1;
 		unsigned int delegateWillBecomeFirstResponder:1;
 		unsigned int delegateDidBecomeFirstResponder:1;
 		unsigned int delegateWillResignFirstResponder:1;
@@ -117,6 +121,7 @@ typedef enum {
 - (void)drawSelectionWithRects:(CGRect *)rects count:(CFIndex)count;
 
 @property (nonatomic, strong) id<ABActiveTextRange> hitRange;
+@property (nonatomic, strong) TUITextAttachment * hitAttachment;
 
 @end
 

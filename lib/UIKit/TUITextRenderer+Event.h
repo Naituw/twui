@@ -16,6 +16,7 @@
 
 #import "TUITextRenderer.h"
 #import "ABActiveRange.h"
+#import "TUITextAttachment.h"
 
 @interface TUITextRenderer (Event)
 
@@ -36,6 +37,9 @@
 - (id<ABActiveTextRange>)textRenderer:(TUITextRenderer *)textRenderer activeRangeAtIndex:(NSInteger)index;
 - (NSArray *)activeRangesForTextRenderer:(TUITextRenderer *)textRenderer;
 - (void)textRenderer:(TUITextRenderer *)textRenderer didClickActiveRange:(id<ABActiveTextRange>)textRange;
+
+- (void)textRenderer:(TUITextRenderer *)textRenderer renderTextAttachment:(TUITextAttachment *)attachment highlighted:(BOOL)highlighted;
+- (void)textRenderer:(TUITextRenderer *)textRenderer didClickTextAttachment:(TUITextAttachment *)attachment;
 
 - (void)textRendererWillBecomeFirstResponder:(TUITextRenderer *)textRenderer;
 - (void)textRendererDidBecomeFirstResponder:(TUITextRenderer *)textRenderer;

@@ -34,6 +34,7 @@
 @synthesize frame;
 @synthesize view;
 @synthesize hitRange;
+@synthesize hitAttachment;
 @synthesize shadowColor;
 @synthesize shadowOffset;
 @synthesize shadowBlur;
@@ -307,6 +308,14 @@
             CTFrameDraw(f, context); // draw actual text
             
             CFRelease(f);
+            
+            [_attributedString enumerateTextAttachments:^(TUITextAttachment * value, NSRange range, BOOL *stop) {
+                CGRect placeholderRect = [[[self rectsForCharacterRange:CFRangeMake(range.location, range.length)] firstObject] CGRectValue];
+                value.derivedFrame = ABIntegralRectWithSizeCenteredInRect(value.contentSize, placeholderRect);
+                if (_flags.delegateRenderTextAttachment) {
+                    [self.delegate textRenderer:self renderTextAttachment:value highlighted:value == hitAttachment];
+                }
+            }];
             
             CGContextRestoreGState(context);
         }

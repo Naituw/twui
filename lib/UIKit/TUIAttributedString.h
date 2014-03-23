@@ -19,9 +19,11 @@
 extern NSString * const TUIAttributedStringBackgroundColorAttributeName;
 extern NSString * const TUIAttributedStringBackgroundFillStyleName;
 extern NSString * const TUIAttributedStringPreDrawBlockName;
+extern NSString * const TUIAttributedStringAttachmentName;
 
 @class TUIFont;
 @class TUIColor;
+@class TUITextAttachment;
 
 typedef void (^TUIAttributedStringPreDrawBlock)(NSAttributedString *attributedString, NSRange substringRange, CGRect rects[], CFIndex rectCount);
 
@@ -82,6 +84,14 @@ typedef enum {
 - (void)setShadow:(NSShadow *)shadow inRange:(NSRange)range;
 - (void)setKerning:(CGFloat)f inRange:(NSRange)range;
 - (void)setLineHeight:(CGFloat)f inRange:(NSRange)range;
+
+- (void)replaceCharactersInRange:(NSRange)range withTextAttachment:(TUITextAttachment *)attachment;
+
+@end
+
+@interface NSAttributedString (TUIAdditions)
+
+- (void)enumerateTextAttachments:(void (^)(TUITextAttachment * attachment, NSRange range, BOOL *stop))block;
 
 @end
 

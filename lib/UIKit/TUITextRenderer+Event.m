@@ -54,6 +54,8 @@
     _flags.delegateTextRendererActiveRangeAtIndex = [delegate respondsToSelector:@selector(textRenderer:activeRangeAtIndex:)];
     _flags.delegateTextRendererDidClickActiveRange = [delegate respondsToSelector:@selector(textRenderer:didClickActiveRange:)];
 	_flags.delegateActiveRangesForTextRenderer = [delegate respondsToSelector:@selector(activeRangesForTextRenderer:)];
+    _flags.delegateRenderTextAttachment = [delegate respondsToSelector:@selector(textRenderer:renderTextAttachment:)];
+    _flags.delegateDidClickTextAttachment = [delegate respondsToSelector:@selector(textRenderer:didClickTextAttachment:)];
 	_flags.delegateWillBecomeFirstResponder = [delegate respondsToSelector:@selector(textRendererWillBecomeFirstResponder:)];
 	_flags.delegateDidBecomeFirstResponder = [delegate respondsToSelector:@selector(textRendererDidBecomeFirstResponder:)];
 	_flags.delegateWillResignFirstResponder = [delegate respondsToSelector:@selector(textRendererWillResignFirstResponder:)];
@@ -157,7 +159,21 @@
 	}
     
 	CFIndex eventIndex = [self stringIndexForEvent:event];
+    CGPoint eventLocation = [self localPointForEvent:event];
+    TUITextAttachment * __block hitTextAttachment = nil;
     id<ABActiveTextRange> hitActiveRange = nil;
+    
+    [self.attributedString enumerateTextAttachments:^(TUITextAttachment *attachment, NSRange range, BOOL *stop) {
+        if (CGRectContainsPoint(attachment.derivedFrame, eventLocation)) {
+            hitTextAttachment = attachment;
+            *stop = YES;
+        }
+    }];
+    
+    if (hitTextAttachment)
+    {
+        goto normal;
+    }
     
     if (_flags.delegateTextRendererActiveRangeAtIndex) {
         hitActiveRange = [delegate textRenderer:self activeRangeAtIndex:eventIndex];
@@ -206,6 +222,7 @@ normal:
 		}
 		
 		self.hitRange = hitActiveRange;
+        self.hitAttachment = hitTextAttachment;
 	}
 	
 	CGRect totalRect = CGRectUnion(previousSelectionRect, [self rectForCurrentSelection]);
@@ -240,11 +257,15 @@ normal:
 	CGRect totalRect = CGRectUnion(previousSelectionRect, [self rectForCurrentSelection]);
 	[view setNeedsDisplayInRect:totalRect];
     
-    if (self.hitRange && _flags.delegateTextRendererDidClickActiveRange)
-    {
+    if (self.hitRange && _flags.delegateTextRendererDidClickActiveRange) {
         [self.delegate textRenderer:self didClickActiveRange:self.hitRange];
     }
     self.hitRange = nil;
+    
+    if (self.hitAttachment && _flags.delegateDidClickTextAttachment) {
+        [self.delegate textRenderer:self didClickTextAttachment:self.hitAttachment];
+    }
+    self.hitAttachment = nil;
 }
 
 - (void)mouseDragged:(NSEvent *)event
@@ -258,6 +279,7 @@ normal:
 	[view setNeedsDisplayInRect:totalRect];
     
     self.hitRange = nil;
+    self.hitAttachment = nil;
 }
 
 - (CGRect)rectForCurrentSelection {

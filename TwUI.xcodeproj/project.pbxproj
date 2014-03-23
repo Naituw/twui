@@ -130,6 +130,12 @@
 		88EFFB5413F417E200CF91A9 /* TUITextViewEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = 88EFFB5013F417E200CF91A9 /* TUITextViewEditor.m */; };
 		88EFFB5513F417E200CF91A9 /* TUITextViewEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = 88EFFB5013F417E200CF91A9 /* TUITextViewEditor.m */; };
 		88EFFB5613F417E200CF91A9 /* TUITextViewEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = 88EFFB5013F417E200CF91A9 /* TUITextViewEditor.m */; };
+		C653472C18DE762E0069C8B5 /* TUITextAttachment.h in Headers */ = {isa = PBXBuildFile; fileRef = C653472A18DE762E0069C8B5 /* TUITextAttachment.h */; };
+		C653472D18DE762E0069C8B5 /* TUITextAttachment.h in Headers */ = {isa = PBXBuildFile; fileRef = C653472A18DE762E0069C8B5 /* TUITextAttachment.h */; };
+		C653472E18DE762E0069C8B5 /* TUITextAttachment.h in Headers */ = {isa = PBXBuildFile; fileRef = C653472A18DE762E0069C8B5 /* TUITextAttachment.h */; };
+		C653472F18DE762E0069C8B5 /* TUITextAttachment.m in Sources */ = {isa = PBXBuildFile; fileRef = C653472B18DE762E0069C8B5 /* TUITextAttachment.m */; };
+		C653473018DE762E0069C8B5 /* TUITextAttachment.m in Sources */ = {isa = PBXBuildFile; fileRef = C653472B18DE762E0069C8B5 /* TUITextAttachment.m */; };
+		C653473118DE762E0069C8B5 /* TUITextAttachment.m in Sources */ = {isa = PBXBuildFile; fileRef = C653472B18DE762E0069C8B5 /* TUITextAttachment.m */; };
 		CB5B265A13BE6DA200579B1E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = CB5B265813BE6DA200579B1E /* InfoPlist.strings */; };
 		CB5B266313BE6DA300579B1E /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB5B266213BE6DA300579B1E /* SenTestingKit.framework */; };
 		CB5B266413BE6DA300579B1E /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB5B264F13BE6DA200579B1E /* Cocoa.framework */; };
@@ -464,6 +470,8 @@
 		88D81CFE1577EF0D009D453B /* TUIStyledView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TUIStyledView.m; sourceTree = "<group>"; };
 		88EFFB4F13F417E200CF91A9 /* TUITextViewEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TUITextViewEditor.h; sourceTree = "<group>"; };
 		88EFFB5013F417E200CF91A9 /* TUITextViewEditor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TUITextViewEditor.m; sourceTree = "<group>"; };
+		C653472A18DE762E0069C8B5 /* TUITextAttachment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TUITextAttachment.h; sourceTree = "<group>"; };
+		C653472B18DE762E0069C8B5 /* TUITextAttachment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TUITextAttachment.m; sourceTree = "<group>"; };
 		CB5B264C13BE6DA200579B1E /* TwUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = TwUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB5B264F13BE6DA200579B1E /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		CB5B265213BE6DA200579B1E /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -855,6 +863,8 @@
 				CBB74C7413BE6E1900C85CB5 /* TUITableViewCell.m */,
 				887F272A13F9969800D75DE6 /* TUITableViewSectionHeader.h */,
 				887F272B13F9969800D75DE6 /* TUITableViewSectionHeader.m */,
+				C653472A18DE762E0069C8B5 /* TUITextAttachment.h */,
+				C653472B18DE762E0069C8B5 /* TUITextAttachment.m */,
 				CBB74C7513BE6E1900C85CB5 /* TUITextEditor.h */,
 				CBB74C7613BE6E1900C85CB5 /* TUITextEditor.m */,
 				CBB74C7713BE6E1900C85CB5 /* TUITextField.h */,
@@ -928,6 +938,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				886EBA8113D64393006DE018 /* TUIControl+Private.h in Headers */,
+				C653472E18DE762E0069C8B5 /* TUITextAttachment.h in Headers */,
 				8819794613E26E0200AA39EB /* TUIView+Accessibility.h in Headers */,
 				8819794E13E26E5800AA39EB /* TUINSView+Accessibility.h in Headers */,
 				88CC1F3113E365B600827793 /* TUIControl+Accessibility.h in Headers */,
@@ -999,6 +1010,7 @@
 				CBB74CDE13BE6E1900C85CB5 /* TUIView+PasteboardDragging.h in Headers */,
 				CBB74CE013BE6E1900C85CB5 /* TUIView+Private.h in Headers */,
 				CBB74CE213BE6E1900C85CB5 /* TUIView.h in Headers */,
+				C653472C18DE762E0069C8B5 /* TUITextAttachment.h in Headers */,
 				CBB74CE413BE6E1900C85CB5 /* TUIViewController.h in Headers */,
 				CBB74CE613BE6E1900C85CB5 /* TUIViewNSViewContainer.h in Headers */,
 				887F272C13F9969800D75DE6 /* TUITableViewSectionHeader.h in Headers */,
@@ -1031,6 +1043,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				886EBA8013D64393006DE018 /* TUIControl+Private.h in Headers */,
+				C653472D18DE762E0069C8B5 /* TUITextAttachment.h in Headers */,
 				8819794513E26E0200AA39EB /* TUIView+Accessibility.h in Headers */,
 				8819794D13E26E5800AA39EB /* TUINSView+Accessibility.h in Headers */,
 				88CC1F3013E365B600827793 /* TUIControl+Accessibility.h in Headers */,
@@ -1292,6 +1305,7 @@
 				5EE983D013BE7834005F430D /* TUINSView+Hyperfocus.m in Sources */,
 				5EE983D213BE7834005F430D /* TUINSView.m in Sources */,
 				5EE983D313BE7834005F430D /* TUINSWindow.m in Sources */,
+				C653473118DE762E0069C8B5 /* TUITextAttachment.m in Sources */,
 				5EE983D413BE7834005F430D /* TUIResponder.m in Sources */,
 				5EE983D513BE7834005F430D /* TUIScrollKnob.m in Sources */,
 				5EE983D613BE7834005F430D /* TUIScrollView.m in Sources */,
@@ -1412,6 +1426,7 @@
 				D0C7656015B6297300E7AC2C /* NSClipView+TUIExtensions.m in Sources */,
 				D0C7656615B6297300E7AC2C /* NSScrollView+TUIExtensions.m in Sources */,
 				D0C7657415B6341800E7AC2C /* TUICAAction.m in Sources */,
+				C653472F18DE762E0069C8B5 /* TUITextAttachment.m in Sources */,
 				D040610D15B6A77500F753ED /* TUIAnimationManager.m in Sources */,
 				D040611615B6A7CD00F753ED /* NSTextView+TUIExtensions.m in Sources */,
 				48A10E8215B7769A007F9EE3 /* TUILayoutConstraint.m in Sources */,
@@ -1456,6 +1471,7 @@
 				CB5E323D13BE70CA004B7899 /* TUINSView+Hyperfocus.m in Sources */,
 				CB5E324013BE70CA004B7899 /* TUINSView.m in Sources */,
 				CB5E324213BE70CA004B7899 /* TUINSWindow.m in Sources */,
+				C653473018DE762E0069C8B5 /* TUITextAttachment.m in Sources */,
 				CB5E324413BE70CA004B7899 /* TUIResponder.m in Sources */,
 				CB5E324613BE70CA004B7899 /* TUIScrollKnob.m in Sources */,
 				CB5E324813BE70CA004B7899 /* TUIScrollView.m in Sources */,

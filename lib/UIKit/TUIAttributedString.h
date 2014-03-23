@@ -91,7 +91,7 @@ typedef enum {
 
 @interface NSAttributedString (TUIAdditions)
 
-- (void)enumerateTextAttachments:(void (^)(TUITextAttachment * attachment, NSRange range, BOOL *stop))block;
+- (void)tui_enumerateTextAttachments:(void (^)(TUITextAttachment * attachment, NSRange range, BOOL *stop))block;
 
 @end
 

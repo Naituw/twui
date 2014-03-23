@@ -309,7 +309,7 @@
             
             CFRelease(f);
             
-            [_attributedString enumerateTextAttachments:^(TUITextAttachment * value, NSRange range, BOOL *stop) {
+            [_attributedString tui_enumerateTextAttachments:^(TUITextAttachment * value, NSRange range, BOOL *stop) {
                 CGRect placeholderRect = [[[self rectsForCharacterRange:CFRangeMake(range.location, range.length)] firstObject] CGRectValue];
                 value.derivedFrame = ABIntegralRectWithSizeCenteredInRect(value.contentSize, placeholderRect);
                 if (_flags.delegateRenderTextAttachment) {

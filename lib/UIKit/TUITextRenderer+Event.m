@@ -163,7 +163,7 @@
     TUITextAttachment * __block hitTextAttachment = nil;
     id<ABActiveTextRange> hitActiveRange = nil;
     
-    [self.attributedString enumerateTextAttachments:^(TUITextAttachment *attachment, NSRange range, BOOL *stop) {
+    [self.attributedString tui_enumerateTextAttachments:^(TUITextAttachment *attachment, NSRange range, BOOL *stop) {
         if (CGRectContainsPoint(attachment.derivedFrame, eventLocation)) {
             hitTextAttachment = attachment;
             *stop = YES;

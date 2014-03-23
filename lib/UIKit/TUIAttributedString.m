@@ -274,11 +274,11 @@ NSParagraphStyle *ABNSParagraphStyleForTextAlignment(TUITextAlignment alignment)
 
 @implementation NSAttributedString (TUIAdditions)
 
-- (void)enumerateTextAttachments:(void (^)(TUITextAttachment * attachment, NSRange range, BOOL *stop))block
+- (void)tui_enumerateTextAttachments:(void (^)(TUITextAttachment * attachment, NSRange range, BOOL *stop))block
 {
     if (!block) return;
     
-    [self enumerateAttribute:TUIAttributedStringAttachmentName inRange:[self _stringRange] options:0 usingBlock:^(id value, NSRange range, BOOL *stop) {
+    [self enumerateAttribute:TUIAttributedStringAttachmentName inRange:NSMakeRange(0, self.length) options:0 usingBlock:^(id value, NSRange range, BOOL *stop) {
         if (value) {
             block(value, range, stop);
         }

@@ -16,6 +16,7 @@
 @property (nonatomic, assign) CGFloat fontLeading;
 @property (nonatomic, assign) CGFloat fontAscent;
 @property (nonatomic, assign) CGFloat fontDescent;
+@property (nonatomic, assign) BOOL userInteractionEnabled;
 
 @property (nonatomic, assign) NSInteger tag;
 

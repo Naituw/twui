@@ -313,7 +313,7 @@
                 CGRect placeholderRect = [[[self rectsForCharacterRange:CFRangeMake(range.location, range.length)] firstObject] rectValue];
                 value.derivedFrame = ABIntegralRectWithSizeCenteredInRect(value.contentSize, placeholderRect);
                 if (_flags.delegateRenderTextAttachment) {
-                    [self.delegate textRenderer:self renderTextAttachment:value highlighted:value == hitAttachment];
+                    [self.delegate textRenderer:self renderTextAttachment:value highlighted:value == hitAttachment inContext:context];
                 }
             }];
             

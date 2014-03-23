@@ -38,7 +38,7 @@
 - (NSArray *)activeRangesForTextRenderer:(TUITextRenderer *)textRenderer;
 - (void)textRenderer:(TUITextRenderer *)textRenderer didClickActiveRange:(id<ABActiveTextRange>)textRange;
 
-- (void)textRenderer:(TUITextRenderer *)textRenderer renderTextAttachment:(TUITextAttachment *)attachment highlighted:(BOOL)highlighted;
+- (void)textRenderer:(TUITextRenderer *)textRenderer renderTextAttachment:(TUITextAttachment *)attachment highlighted:(BOOL)highlighted inContext:(CGContextRef)ctx;
 - (void)textRenderer:(TUITextRenderer *)textRenderer didClickTextAttachment:(TUITextAttachment *)attachment;
 
 - (void)textRendererWillBecomeFirstResponder:(TUITextRenderer *)textRenderer;

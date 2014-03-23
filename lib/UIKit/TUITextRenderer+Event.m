@@ -54,7 +54,7 @@
     _flags.delegateTextRendererActiveRangeAtIndex = [delegate respondsToSelector:@selector(textRenderer:activeRangeAtIndex:)];
     _flags.delegateTextRendererDidClickActiveRange = [delegate respondsToSelector:@selector(textRenderer:didClickActiveRange:)];
 	_flags.delegateActiveRangesForTextRenderer = [delegate respondsToSelector:@selector(activeRangesForTextRenderer:)];
-    _flags.delegateRenderTextAttachment = [delegate respondsToSelector:@selector(textRenderer:renderTextAttachment:)];
+    _flags.delegateRenderTextAttachment = [delegate respondsToSelector:@selector(textRenderer:renderTextAttachment:highlighted:inContext:)];
     _flags.delegateDidClickTextAttachment = [delegate respondsToSelector:@selector(textRenderer:didClickTextAttachment:)];
 	_flags.delegateWillBecomeFirstResponder = [delegate respondsToSelector:@selector(textRendererWillBecomeFirstResponder:)];
 	_flags.delegateDidBecomeFirstResponder = [delegate respondsToSelector:@selector(textRendererDidBecomeFirstResponder:)];
@@ -164,7 +164,7 @@
     id<ABActiveTextRange> hitActiveRange = nil;
     
     [self.attributedString tui_enumerateTextAttachments:^(TUITextAttachment *attachment, NSRange range, BOOL *stop) {
-        if (CGRectContainsPoint(attachment.derivedFrame, eventLocation)) {
+        if (attachment.userInteractionEnabled && CGRectContainsPoint(attachment.derivedFrame, eventLocation)) {
             hitTextAttachment = attachment;
             *stop = YES;
         }

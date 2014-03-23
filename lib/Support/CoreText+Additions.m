@@ -52,7 +52,7 @@ CGSize AB_CTFrameGetSize(CTFrameRef frame)
 		h = CGRectGetMaxY(frameRect) - lastLineOrigin.y + descent;
 	}
 	
-	return CGSizeMake(ceil(w), ceil(h));
+	return CGSizeMake(ceil(w), ceil(h + 1));
 }
 
 CGFloat AB_CTFrameGetHeight(CTFrameRef f)

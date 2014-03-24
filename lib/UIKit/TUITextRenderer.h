@@ -123,6 +123,10 @@ typedef enum {
 @property (nonatomic, strong) id<ABActiveTextRange> hitRange;
 @property (nonatomic, strong) TUITextAttachment * hitAttachment;
 
+@property (nonatomic, assign) CGFloat baselineAscent;
+@property (nonatomic, assign) CGFloat baselineDescent;
+@property (nonatomic, assign) CGFloat baselineLeading;
+
 @end
 
 #import "TUITextRenderer+Event.h"

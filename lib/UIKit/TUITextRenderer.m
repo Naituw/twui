@@ -305,7 +305,44 @@
             if(shadowColor)
                 CGContextSetShadowWithColor(context, shadowOffset, shadowBlur, shadowColor.CGColor);
             
-            CTFrameDraw(f, context); // draw actual text
+            
+            NSArray *lines = (NSArray *)CTFrameGetLines(f);
+            NSInteger n = [lines count];
+            CGPoint lineOrigins[n];
+            CTFrameGetLineOrigins(f, CFRangeMake(0, n), lineOrigins);
+            CGFloat baseDescent = self.baselineDescent;
+            CGFloat baseAscent = self.baselineAscent;
+            CGFloat baseLeading = self.baselineLeading;
+            CGFloat ascent, descent, leading, originalLineWidth;
+            CGFloat lineOriginDeltaY = 0;
+            
+            for(int i = 0; i < n; i++)
+            {
+                CTLineRef line = (__bridge CTLineRef)[lines objectAtIndex:i];
+                CGPoint lineOrigin = lineOrigins[i];
+                originalLineWidth = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
+                if (baseDescent == NSNotFound) baseDescent = descent;
+                if (baseAscent == NSNotFound) baseAscent = ascent;
+                if (baseLeading == NSNotFound) baseLeading = leading;
+                
+                if (n == 1)
+                {
+                    lineOrigin.y += (descent - baseDescent);
+                    lineOrigin.y -= (ascent - baseAscent);
+                    // lineOrigin.y += (leading - baseLeading);
+                }
+                else
+                {
+                    lineOrigin.y -= (descent - baseDescent);
+                }
+                
+                lineOrigin.y -= lineOriginDeltaY;
+                lineOrigins[i] = lineOrigin;
+                
+                CGContextSetTextPosition(context, frame.origin.x + lineOrigin.x, frame.origin.y + lineOrigin.y);
+
+                CTLineDraw(line, context);
+            }
             
             CFRelease(f);
             
@@ -372,6 +409,10 @@
 	attributedString = a;
 	
 	[self _resetFramesetter];
+    
+    self.baselineAscent = NSNotFound;
+    self.baselineDescent = NSNotFound;
+    self.baselineLeading = NSNotFound;
 }
 
 - (void)setFrame:(CGRect)f

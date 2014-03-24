@@ -346,11 +346,17 @@
             
             CFRelease(f);
             
+            CGPoint * origins = lineOrigins;
             [_attributedString tui_enumerateTextAttachments:^(TUITextAttachment * value, NSRange range, BOOL *stop) {
-                CGRect placeholderRect = [[[self rectsForCharacterRange:CFRangeMake(range.location, range.length)] firstObject] rectValue];
-                value.derivedFrame = ABIntegralRectWithSizeCenteredInRect(value.contentSize, placeholderRect);
-                if (_flags.delegateRenderTextAttachment) {
-                    [self.delegate textRenderer:self renderTextAttachment:value highlighted:value == hitAttachment inContext:context];
+                CFIndex rectCount = 100;
+                CGRect rects[rectCount];
+                AB_CTLinesGetRectsForRangeWithAggregationType(lines, origins, frame, CFRangeMake(range.location, range.length), AB_CTLineRectAggregationTypeInline, rects, &rectCount);
+                if (rectCount > 0) {
+                    CGRect placeholderRect = rects[0];
+                    value.derivedFrame = ABIntegralRectWithSizeCenteredInRect(value.contentSize, placeholderRect);
+                    if (_flags.delegateRenderTextAttachment) {
+                        [self.delegate textRenderer:self renderTextAttachment:value highlighted:value == hitAttachment inContext:context];
+                    }
                 }
             }];
             

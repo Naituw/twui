@@ -222,7 +222,14 @@
 
 - (NSString *)selectedString
 {
-	return [[attributedString string] substringWithRange:[self selectedRange]];
+    NSAttributedString * attributedSubstring = [attributedString attributedSubstringFromRange:[self selectedRange]];
+    NSMutableString * result = [attributedSubstring.string mutableCopy];
+    
+    [attributedString tui_enumerateTextAttachments:^(TUITextAttachment *attachment, NSRange range, BOOL *stop) {
+        [result replaceCharactersInRange:range withString:attachment.contents];
+    } options:NSAttributedStringEnumerationReverse];
+    
+	return result;
 }
 
 - (void)draw

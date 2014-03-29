@@ -42,17 +42,38 @@ NSString * const TUIAttributedStringAttachmentName = @"TUIAttributedStringAttach
 
 - (void)setFont:(TUIFont *)font inRange:(NSRange)range
 {
-	[self addAttribute:(NSString *)kCTFontAttributeName value:(id)[font ctFont] range:range];
+    if (font)
+    {
+        [self addAttribute:(NSString *)kCTFontAttributeName value:(id)[font ctFont] range:range];
+    }
+    else
+    {
+        [self removeAttribute:(NSString *)kCTFontAttributeName range:range];
+    }
 }
 
 - (void)setColor:(TUIColor *)color inRange:(NSRange)range
 {
-	[self addAttribute:(NSString *)kCTForegroundColorAttributeName value:(id)[color CGColor] range:range];
+    if (color)
+    {
+        [self addAttribute:(NSString *)kCTForegroundColorAttributeName value:(id)[color CGColor] range:range];
+    }
+    else
+    {
+        [self removeAttribute:(NSString *)kCTForegroundColorAttributeName range:range];
+    }
 }
 
 - (void)setShadow:(NSShadow *)shadow inRange:(NSRange)range
 {
-	[self addAttribute:NSShadowAttributeName value:shadow range:range];
+    if (shadow)
+    {
+        [self addAttribute:NSShadowAttributeName value:shadow range:range];
+    }
+    else
+    {
+        [self removeAttribute:NSShadowAttributeName range:range];
+    }
 }
 
 - (void)setKerning:(CGFloat)k inRange:(NSRange)range

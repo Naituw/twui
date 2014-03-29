@@ -27,7 +27,7 @@ static inline TUIEdgeInsets TUIEdgeInsetsMake(CGFloat top, CGFloat left, CGFloat
 
 static inline CGRect TUIEdgeInsetsInsetRect(CGRect rect, TUIEdgeInsets insets) {
 	rect.origin.x    += insets.left;
-	rect.origin.y    += insets.top;
+	rect.origin.y    += insets.bottom;
 	rect.size.width  -= (insets.left + insets.right);
 	rect.size.height -= (insets.top  + insets.bottom);
 	return rect;

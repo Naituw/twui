@@ -103,7 +103,7 @@ NSInteger makeFirstResponderCount = 0;
 @interface TUINSWindowFrame : NSView
 {
 	@public
-	TUINSWindow *w;
+	TUINSWindow __weak *w;
 }
 @end
 

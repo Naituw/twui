@@ -63,6 +63,12 @@
 		_viewFlags.didStartResizeByDragging = 0;
 		[self.nsView viewDidEndLiveResize];
 	}
+    
+    if(_viewFlags.didStartMovingByDragging) {
+        _viewFlags.didStartMovingByDragging = 0;
+        if([self.nsWindow respondsToSelector:@selector(windowDidEndLiveDrag)])
+            [self.nsWindow performSelector:@selector(windowDidEndLiveDrag)];
+    }
 	
 	if(self.superview != nil){
         [self.superview mouseUp:event fromSubview:self];

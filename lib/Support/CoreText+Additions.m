@@ -313,7 +313,7 @@ void AB_CTFrameGetRectsForRangeWithNumberOfLines(CTFrameRef frame, CFRange range
         else if(RangeContainsIndex(range, lineRange.location))
         {
             // 三行以上时的中间行
-			CGRect r = CGRectMake(bounds.origin.x + lineOrigin.x, line_y, bounds.size.width, lineHeight);
+			CGRect r = CGRectMake(bounds.origin.x + lineOrigin.x, line_y, bounds.size.width - lineOrigin.x, lineHeight);
 			if(rectIndex < maxRects)
             {
                 AB_addRectToRects(r, rects, rectIndex++, previousLineY, aggregationType);

@@ -102,6 +102,42 @@
 	}
 }
 
+- (CTFrameRef)newCTFrameWithAttributedString:(NSAttributedString *)string
+{
+    CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)string);
+    
+    CGMutablePathRef path = CGPathCreateMutable();
+	CGPathAddRect(path, NULL, frame);
+    
+	CTFrameRef ctFrame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, 0), path, NULL);
+    
+    CGPathRelease(path);
+    
+    if (verticalAlignment != TUITextVerticalAlignmentTop) {
+        CGRect effectiveFrame = frame;
+        
+        CGSize size = AB_CTFrameGetSize(ctFrame);
+        if(verticalAlignment == TUITextVerticalAlignmentMiddle) {
+            effectiveFrame.origin.y = size.height/2 - frame.size.height/2;
+        } else if(verticalAlignment == TUITextVerticalAlignmentBottom) {
+            effectiveFrame.origin.y = size.height;
+        }
+        effectiveFrame = CGRectIntegral(effectiveFrame);
+        
+        CGMutablePathRef path = CGPathCreateMutable();
+        CGPathAddRect(path, NULL, effectiveFrame);
+        
+        CFRelease(ctFrame);
+        ctFrame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, 0), path, NULL);
+        
+        CGPathRelease(path);
+    }
+    
+    CFRelease(framesetter);
+    
+    return ctFrame;
+}
+
 - (void)_buildFramesetter
 {
 	if(!_ct_framesetter) {
@@ -121,21 +157,6 @@
 {
 	[self _buildFramesetter];
 	return _ct_frame;
-}
-
-- (CTFrameRef)newCTFrameWithAttributedString:(NSAttributedString *)string
-{
-    CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)string);
-    
-    CGMutablePathRef path = CGPathCreateMutable();
-	CGPathAddRect(path, NULL, frame);
-    
-	CTFrameRef ctFrame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, 0), path, NULL);
-    
-    CGPathRelease(path);
-    CFRelease(framesetter);
-    
-    return ctFrame;
 }
 
 - (CGPathRef)ctPath

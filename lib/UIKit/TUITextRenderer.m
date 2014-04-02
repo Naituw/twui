@@ -361,9 +361,7 @@
                 if (rectCount > 0) {
                     CGRect placeholderRect = rects[0];
                     value.derivedFrame = ABIntegralRectWithSizeCenteredInRect(value.contentSize, placeholderRect);
-                    if (_flags.delegateRenderTextAttachment) {
-                        [self.delegate textRenderer:self renderTextAttachment:value highlighted:value == hitAttachment inContext:context];
-                    }
+                    [self renderAttachment:value highlighted:(value == hitAttachment) inContext:context];
                 }
             }];
             
@@ -512,6 +510,13 @@
 - (void)setNeedsDisplay {
 	[self _resetFramesetter];
 	[view setNeedsDisplay];
+}
+
+- (void)renderAttachment:(TUITextAttachment *)attachment highlighted:(BOOL)highlighted inContext:(CGContextRef)ctx
+{
+    if (_flags.delegateRenderTextAttachment) {
+        [self.delegate textRenderer:self renderTextAttachment:attachment highlighted:highlighted inContext:ctx];
+    }
 }
 
 @end

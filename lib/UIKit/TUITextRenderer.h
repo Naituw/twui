@@ -127,6 +127,9 @@ typedef enum {
 @property (nonatomic, assign) CGFloat baselineDescent;
 @property (nonatomic, assign) CGFloat baselineLeading;
 
+- (void)renderAttachment:(TUITextAttachment *)attachment highlighted:(BOOL)highlighted inContext:(CGContextRef)ctx;
+
+
 @end
 
 #import "TUITextRenderer+Event.h"

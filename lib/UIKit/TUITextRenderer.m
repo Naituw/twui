@@ -283,6 +283,9 @@
         
         if(f)
         {
+            CGPathRef path = CTFrameGetPath(f);
+            CGRect textFrame = CGPathGetPathBoundingBox(path);
+            
             CGContextSaveGState(context);
             
             if(hitRange && !_flags.drawMaskDragSelection) {
@@ -367,7 +370,7 @@
                 lineOrigin.y -= lineOriginDeltaY;
                 lineOrigins[i] = lineOrigin;
                 
-                CGContextSetTextPosition(context, frame.origin.x + lineOrigin.x, frame.origin.y + lineOrigin.y);
+                CGContextSetTextPosition(context, textFrame.origin.x + lineOrigin.x, textFrame.origin.y + lineOrigin.y);
 
                 CTLineDraw(line, context);
             }
@@ -378,7 +381,7 @@
             [_attributedString tui_enumerateTextAttachments:^(TUITextAttachment * value, NSRange range, BOOL *stop) {
                 CFIndex rectCount = 100;
                 CGRect rects[rectCount];
-                AB_CTLinesGetRectsForRangeWithAggregationType(lines, origins, frame, CFRangeMake(range.location, range.length), AB_CTLineRectAggregationTypeInline, rects, &rectCount);
+                AB_CTLinesGetRectsForRangeWithAggregationType(lines, origins, textFrame, CFRangeMake(range.location, range.length), AB_CTLineRectAggregationTypeInline, rects, &rectCount);
                 if (rectCount > 0) {
                     CGRect placeholderRect = rects[0];
                     value.derivedFrame = ABIntegralRectWithSizeCenteredInRect(value.contentSize, placeholderRect);

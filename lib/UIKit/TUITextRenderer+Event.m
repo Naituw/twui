@@ -159,7 +159,7 @@
 	}
     
 	CFIndex eventIndex = [self stringIndexForEvent:event];
-    CGPoint eventLocation = [self localPointForEvent:event];
+    CGPoint eventLocation = [view localPointForEvent:event];
     TUITextAttachment * __block hitTextAttachment = nil;
     id<ABActiveTextRange> hitActiveRange = nil;
     

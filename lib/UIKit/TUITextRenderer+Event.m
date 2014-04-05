@@ -170,8 +170,10 @@
         }
     }];
     
-    if (hitTextAttachment)
-    {
+    if (hitTextAttachment) {
+        if (hitTextAttachment.userInteractionEnabled) {
+            _selectionAffinity = TUITextSelectionAffinityCharacter; // don't select text when we are clicking interactable attachment
+        }
         goto normal;
     }
     

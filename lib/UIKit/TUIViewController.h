@@ -21,7 +21,7 @@
 @interface TUIViewController : TUIResponder <NSCopying>
 {
 	TUIView           *_view;
-	__unsafe_unretained TUIViewController *_parentViewController; // Nonretained
+	__weak TUIViewController *_parentViewController; // Nonretained
 }
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil;

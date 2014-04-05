@@ -333,7 +333,7 @@ CGFloat TUICurrentContextScaleFactor(void)
 	return 1.0;
 }
 
-static void TUISetCurrentContextScaleFactor(CGFloat s)
+void TUISetCurrentContextScaleFactor(CGFloat s)
 {
 	CGFloat *v = pthread_getspecific(TUICurrentContextScaleFactorTLSKey);
 	if(!v) {

@@ -28,3 +28,4 @@
 @end
 
 extern CGFloat TUICurrentContextScaleFactor(void);
+extern void TUISetCurrentContextScaleFactor(CGFloat scale);

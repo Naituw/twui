@@ -855,7 +855,7 @@ void TUISetCurrentContextScaleFactor(CGFloat s)
 		return;
 	
 	[self prepareSubview:view insertionBlock:^{
-		[self.subviews insertObject:view atIndex:siblingIndex + 1];
+		[self.subviews insertObject:view atIndex:siblingIndex];
 		[self.layer insertSublayer:view.layer below:siblingSubview.layer];
 	}];
 }
@@ -867,7 +867,7 @@ void TUISetCurrentContextScaleFactor(CGFloat s)
 		return;
 	
 	[self prepareSubview:view insertionBlock:^{
-		[self.subviews insertObject:view atIndex:siblingIndex];
+		[self.subviews insertObject:view atIndex:siblingIndex + 1];
 		[self.layer insertSublayer:view.layer above:siblingSubview.layer];
 	}];
 }

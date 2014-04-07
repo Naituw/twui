@@ -256,6 +256,8 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 
 - (void)setNextResponder:(NSResponder *)r
 {
+    if (!r) [super setNextResponder:r];
+    
 	NSResponder *nextResponder = [self nextResponder];
 	if([nextResponder isKindOfClass:[NSViewController class]]) {
 		// keep view controller in chain

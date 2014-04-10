@@ -284,6 +284,31 @@ normal:
     self.hitAttachment = nil;
 }
 
+- (void)rightMouseDown:(NSEvent *)theEvent
+{
+    if ([self.delegate respondsToSelector:@selector(textRenderer:contextMenuForTextAttachment:)]) {
+        CGPoint eventLocation = [view localPointForEvent:theEvent];
+        TUITextAttachment * __block hitTextAttachment = nil;
+        
+        [self.attributedString tui_enumerateTextAttachments:^(TUITextAttachment *attachment, NSRange range, BOOL *stop) {
+            if (attachment.userInteractionEnabled && CGRectContainsPoint(attachment.derivedFrame, eventLocation)) {
+                hitTextAttachment = attachment;
+                *stop = YES;
+            }
+        }];
+        
+        if (hitTextAttachment) {
+            NSMenu * menu = [self.delegate textRenderer:self contextMenuForTextAttachment:hitTextAttachment];
+            if (menu) {
+                [NSMenu popUpContextMenu:menu withEvent:theEvent forView:self.view.nsView];
+                return;
+            }
+        }
+    }
+    
+    [super rightMouseDown:theEvent];
+}
+
 - (CGRect)rectForCurrentSelection {
 	return [self rectForRange:[self _selectedRange]];
 }

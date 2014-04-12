@@ -46,6 +46,7 @@
 
 @property (nonatomic, readonly) NSInteger leftCapWidth;   // default is 0. if non-zero, horiz. stretchable. right cap is calculated as width - leftCapWidth - 1
 @property (nonatomic, readonly) NSInteger topCapHeight;   // default is 0. if non-zero, vert. stretchable. bottom cap is calculated as height - topCapWidth - 1
+@property (nonatomic, readonly) TUIEdgeInsets capEdgeInsets;
 
 @end
 

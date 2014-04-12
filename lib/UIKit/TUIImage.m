@@ -337,6 +337,11 @@ CGImageRef TUICreateImageRefForNameAndScaleFactor(NSString *name, CGFloat scaleF
 	return 0;
 }
 
+- (TUIEdgeInsets)capEdgeInsets
+{
+    return TUIEdgeInsetsZero;
+}
+
 - (TUIImage *)stretchableImageWithLeftCapWidth:(NSInteger)leftCapWidth topCapHeight:(NSInteger)topCapHeight
 {
 	return [self stretchableImageWithEdgeInsets:TUIEdgeInsetsMake(topCapHeight, leftCapWidth, -1, -1)];
@@ -389,6 +394,11 @@ CGImageRef TUICreateImageRefForNameAndScaleFactor(NSString *name, CGFloat scaleF
 - (NSInteger)topCapHeight
 {
 	return topCapHeight;
+}
+
+- (TUIEdgeInsets)capEdgeInsets
+{
+    return TUIEdgeInsetsMake(topCapHeight, leftCapWidth, bottomCapHeight, rightCapWidth);
 }
 
 /*

@@ -160,8 +160,20 @@ static CGRect ButtonRectCenteredInRect(CGRect a, CGRect b)
 	return r;
 }
 
-- (CGSize)sizeThatFits:(CGSize)size {
-	return self.currentImage.size;
+- (CGSize)sizeThatFits:(CGSize)size
+{
+    TUIImage *image = self.currentImage;
+    NSString *title = self.currentTitle;
+    
+    CGSize imageSize = image ? image.size : CGSizeZero;
+    imageSize.width += _imageEdgeInsets.left + _imageEdgeInsets.right;
+    imageSize.height += _imageEdgeInsets.top + _imageEdgeInsets.bottom;
+    
+    CGSize titleSize = title ? [title ab_sizeWithFont:self.titleLabel.font] : CGSizeZero;
+    titleSize.width += _titleEdgeInsets.left + _titleEdgeInsets.right;
+    titleSize.height += _titleEdgeInsets.top + _titleEdgeInsets.bottom;
+    
+    return CGSizeMake(MAX(imageSize.width, titleSize.width), MAX(imageSize.height, titleSize.height));
 }
 
 

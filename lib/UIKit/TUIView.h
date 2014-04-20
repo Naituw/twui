@@ -222,6 +222,8 @@ extern CGRect(^TUIViewCenteredLayout)(TUIView*);
  */
 @property (nonatomic, assign) BOOL needsDisplayWhenWindowsKeyednessChanges;
 
+@property (nonatomic, assign) BOOL cachesCGContext; // Default to NO, if you want dirty drawing, you should enable this.
+
 @end
 
 @interface TUIView (TUIViewGeometry)
@@ -274,8 +276,6 @@ extern CGRect(^TUIViewCenteredLayout)(TUIView*);
 - (void)sizeToFit;                       // calls sizeThatFits: with current view bounds and changes bounds size.
 
 - (NSArray *)sortedSubviews;
-
-@property (nonatomic, assign) BOOL cachesCGContext; // Default to NO, if you want dirty drawing, you should enable this.
 
 @end
 

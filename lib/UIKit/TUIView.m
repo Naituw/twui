@@ -403,6 +403,15 @@ void TUISetCurrentContextScaleFactor(CGFloat s)
 		CGContextScaleCTM(context, 1.0f / scale, 1.0f / scale);
 		TUIGraphicsPopContext();
         
+        if (!self.cachesCGContext)
+        {
+            if (_context.context)
+            {
+                CGContextRelease(_context.context);
+                _context.context = NULL;
+            }
+        }
+        
 		if (self.drawInBackground) [CATransaction flush];
 	};
 	

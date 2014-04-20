@@ -275,6 +275,8 @@ extern CGRect(^TUIViewCenteredLayout)(TUIView*);
 
 - (NSArray *)sortedSubviews;
 
+@property (nonatomic, assign) BOOL cachesCGContext; // Default to NO, if you want dirty drawing, you should enable this.
+
 @end
 
 @interface TUIView (TUIViewHierarchy)

@@ -184,14 +184,12 @@ NSInteger makeFirstResponderCount = 0;
 - (void)becomeKeyWindow
 {
 	[super becomeKeyWindow];
-	[self setEverythingNeedsDisplay];
 }
 
 - (void)resignKeyWindow
 {
 	[super resignKeyWindow];
 	[nsView endHyperFocus:YES];
-	[self setEverythingNeedsDisplay];
 }
 
 - (BOOL)canBecomeKeyWindow

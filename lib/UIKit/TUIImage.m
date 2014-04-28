@@ -501,7 +501,7 @@ NSData *TUIImageJPEGRepresentation(TUIImage *image, CGFloat compressionQuality)
 
 - (id)nsImage
 {
-	return [[NSImage alloc] initWithCGImage:self.CGImage size:NSZeroSize];
+	return [[NSImage alloc] initWithCGImage:self.CGImage size:self.size];
 }
 
 @end

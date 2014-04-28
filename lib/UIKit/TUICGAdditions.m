@@ -199,7 +199,7 @@ TUIImage* TUIGraphicsContextGetImage(CGContextRef ctx)
 	CGImageRef CGImage = TUICreateCGImageFromBitmapContext(ctx);
     CGFloat scale = 1;
     CGAffineTransform ctm = CGContextGetCTM(ctx);
-    if (ctm.a == ctm.d == 2)
+    if (ctm.a == 2 && ctm.d == 2)
     {
         scale = 2;
     }
@@ -217,6 +217,8 @@ void TUIGraphicsBeginImageContextWithOptions(CGSize size, BOOL opaque, CGFloat s
 	if(size.width < 1) size.width = 1;
 	if(size.height < 1) size.height = 1;
 	CGContextRef ctx = TUICreateGraphicsContextWithOptions(size, opaque);
+    TUISetCurrentContextScaleFactor(scale);
+    CGContextScaleCTM(ctx, scale, scale);
 	TUIGraphicsPushContext(ctx);
 	CGContextRelease(ctx);
 }

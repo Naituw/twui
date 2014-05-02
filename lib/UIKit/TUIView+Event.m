@@ -90,6 +90,15 @@
 	}
 }
 
+- (NSMenu *)menuForEvent:(NSEvent *)event
+{
+    TUITextRenderer * renderer = [self _textRendererForEvent:event];
+    
+    NSMenu * menu = [renderer menuForEvent:event];
+    
+    return menu ? : [super menuForEvent:event];
+}
+
 - (void)mouseDragged:(NSEvent *)event
 {
 	[_currentTextRenderer mouseDragged:event];

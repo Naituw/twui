@@ -284,10 +284,10 @@ normal:
     self.hitAttachment = nil;
 }
 
-- (void)rightMouseDown:(NSEvent *)theEvent
+- (NSMenu *)menuForEvent:(NSEvent *)event
 {
     if ([self.delegate respondsToSelector:@selector(textRenderer:contextMenuForTextAttachment:)]) {
-        CGPoint eventLocation = [view localPointForEvent:theEvent];
+        CGPoint eventLocation = [view localPointForEvent:event];
         TUITextAttachment * __block hitTextAttachment = nil;
         
         [self.attributedString tui_enumerateTextAttachments:^(TUITextAttachment *attachment, NSRange range, BOOL *stop) {
@@ -300,13 +300,11 @@ normal:
         if (hitTextAttachment) {
             NSMenu * menu = [self.delegate textRenderer:self contextMenuForTextAttachment:hitTextAttachment];
             if (menu) {
-                [NSMenu popUpContextMenu:menu withEvent:theEvent forView:self.view.nsView];
-                return;
+                return menu;
             }
         }
     }
-    
-    [super rightMouseDown:theEvent];
+    return [super menuForEvent:event];
 }
 
 - (CGRect)rectForCurrentSelection {

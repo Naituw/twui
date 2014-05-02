@@ -40,7 +40,7 @@
 
 - (void)textRenderer:(TUITextRenderer *)textRenderer renderTextAttachment:(TUITextAttachment *)attachment highlighted:(BOOL)highlighted inContext:(CGContextRef)ctx;
 - (void)textRenderer:(TUITextRenderer *)textRenderer didClickTextAttachment:(TUITextAttachment *)attachment;
-- (NSMenu *)textRenderer:(TUITextRenderer *)textRenderer contextMenuForTextAttachment:(TUITextAttachment *)attachment;
+- (NSMenu *)textRenderer:(TUITextRenderer *)textRenderer contextMenuForTextAttachment:(TUITextAttachment *)attachment event:(NSEvent *)event;
 
 - (void)textRendererWillBecomeFirstResponder:(TUITextRenderer *)textRenderer;
 - (void)textRendererDidBecomeFirstResponder:(TUITextRenderer *)textRenderer;

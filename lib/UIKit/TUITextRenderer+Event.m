@@ -286,7 +286,7 @@ normal:
 
 - (NSMenu *)menuForEvent:(NSEvent *)event
 {
-    if ([self.delegate respondsToSelector:@selector(textRenderer:contextMenuForTextAttachment:)]) {
+    if ([self.delegate respondsToSelector:@selector(textRenderer:contextMenuForTextAttachment:event:)]) {
         CGPoint eventLocation = [view localPointForEvent:event];
         TUITextAttachment * __block hitTextAttachment = nil;
         
@@ -298,7 +298,7 @@ normal:
         }];
         
         if (hitTextAttachment) {
-            NSMenu * menu = [self.delegate textRenderer:self contextMenuForTextAttachment:hitTextAttachment];
+            NSMenu * menu = [self.delegate textRenderer:self contextMenuForTextAttachment:hitTextAttachment event:event];
             if (menu) {
                 return menu;
             }

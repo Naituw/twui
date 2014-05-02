@@ -59,6 +59,7 @@
 + (id)buttonWithType:(TUIButtonType)buttonType
 {
 	TUIButton *b = [[self alloc] initWithFrame:CGRectZero];
+    b->_buttonFlags.buttonType = buttonType;
 	return b;
 }
 

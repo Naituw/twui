@@ -314,7 +314,7 @@
             CFRange selectedRange = [self _selectedRange];
             
             if(selectedRange.length > 0) {
-                [[NSColor selectedTextBackgroundColor] set];
+                [[self selectedTextBackgroundColor] set];
                 // draw (or mask) selection
                 CFIndex rectCount = 100;
                 CGRect rects[rectCount];
@@ -541,6 +541,11 @@
     if (_flags.delegateRenderTextAttachment) {
         [self.delegate textRenderer:self renderTextAttachment:attachment highlighted:highlighted inContext:ctx];
     }
+}
+
+- (NSColor *)selectedTextBackgroundColor
+{
+    return [NSColor selectedTextBackgroundColor];
 }
 
 @end

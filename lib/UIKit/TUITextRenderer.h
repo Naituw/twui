@@ -129,6 +129,7 @@ typedef enum {
 
 - (void)renderAttachment:(TUITextAttachment *)attachment highlighted:(BOOL)highlighted inContext:(CGContextRef)ctx;
 
+- (NSColor *)selectedTextBackgroundColor;
 
 @end
 

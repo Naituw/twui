@@ -482,7 +482,7 @@ CGFloat const TUIPopoverBackgroundViewArrowWidth = 35.0;
 	_strokeColor = [TUIColor blackColor];
 	_fillColor = [TUIColor whiteColor];
 	
-	__block __unsafe_unretained TUIPopoverBackgroundView *weakSelf = self;
+	__weak TUIPopoverBackgroundView *weakSelf = self;
     self.drawRect = ^ (TUIView *view, CGRect rect) 
     {
 		TUIPopoverBackgroundView *strongSelf = weakSelf;

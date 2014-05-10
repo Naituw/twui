@@ -26,7 +26,7 @@
 
 @interface TUITextView : TUIControl
 {
-	id<TUITextViewDelegate> __unsafe_unretained delegate;
+	id<TUITextViewDelegate> __weak delegate;
 	TUIViewDrawRect drawFrame;
 	
 	NSString *placeholder;

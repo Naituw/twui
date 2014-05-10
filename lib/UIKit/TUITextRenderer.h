@@ -44,7 +44,7 @@ typedef enum {
 {
 	NSAttributedString *attributedString;
 	CGRect frame;
-	TUIView *__unsafe_unretained view; // unsafe_unretained
+	TUIView *__weak view; // unsafe_unretained
 	
 	CTFramesetterRef _ct_framesetter;
 	CGPathRef _ct_path;
@@ -54,7 +54,7 @@ typedef enum {
 	CFIndex _selectionEnd;
 	TUITextSelectionAffinity _selectionAffinity;
 	
-	__unsafe_unretained id<TUITextRendererDelegate> delegate;
+	__weak id<TUITextRendererDelegate> delegate;
 	id<ABActiveTextRange> hitRange;
     TUITextAttachment * hitAttachment;
 	

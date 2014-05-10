@@ -82,11 +82,11 @@ extern CGRect(^TUIViewCenteredLayout)(TUIView*);
 	CALayer		*_layer;
 	NSInteger	 _tag;
 	NSArray		*_textRenderers;
-	__unsafe_unretained id   _currentTextRenderer; // weak
+	__weak id   _currentTextRenderer; // weak
 	
 	CGPoint		startDrag;
 	
-	__unsafe_unretained id<TUIViewDelegate> _viewDelegate;
+	__weak id<TUIViewDelegate> _viewDelegate;
 	
 	TUIViewDrawRect	drawRect;
 	TUIViewLayout		layout;
@@ -95,7 +95,7 @@ extern CGRect(^TUIViewCenteredLayout)(TUIView*);
 	NSTimeInterval toolTipDelay;
 	
 	@public
-	__unsafe_unretained TUINSView *_nsView; // keep this updated, fast way of getting .nsView
+	__weak TUINSView *_nsView; // keep this updated, fast way of getting .nsView
 	
 	struct {
 		NSInteger lastWidth;

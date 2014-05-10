@@ -20,7 +20,7 @@
 
 @interface TUIScrollKnob : TUIView
 {
-	TUIScrollView *__unsafe_unretained scrollView;
+	TUIScrollView *__weak scrollView;
 	TUIView *knob;
 	CGPoint _mouseDown;
 	CGRect _knobStartFrame;

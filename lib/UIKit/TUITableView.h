@@ -68,7 +68,7 @@ typedef enum {
 @interface TUITableView : TUIScrollView
 {
 	TUITableViewStyle             _style;
-	__unsafe_unretained id <TUITableViewDataSource>	_dataSource; // weak
+	__weak id <TUITableViewDataSource>	_dataSource; // weak
 	NSArray                     * _sectionInfo;
 	
 	TUIView                     * _pullDownView;

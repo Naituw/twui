@@ -21,7 +21,7 @@
 	void *context;
 	NSString *animationID;
     
-	id __unsafe_unretained delegate;
+	id __weak delegate;
 	SEL animationWillStartSelector;
 	SEL animationDidStopSelector;
 	void (^animationCompletionBlock)(BOOL finished);

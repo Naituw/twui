@@ -18,7 +18,7 @@
 
 @interface TUIControlTargetAction : NSObject
 {
-	id __unsafe_unretained target; // nil goes up the responder chain
+	id __weak target; // nil goes up the responder chain
 	SEL action;
 	void (^block)(void);
 	TUIControlEvents controlEvents;

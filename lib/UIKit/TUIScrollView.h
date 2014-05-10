@@ -77,7 +77,7 @@ typedef enum {
   CGSize          resizeKnobSize;
   TUIEdgeInsets   _contentInset;
 	
-	__unsafe_unretained id _delegate;
+	__weak id _delegate;
 	
   TUIScrollKnob * _verticalScrollKnob;
   TUIScrollKnob * _horizontalScrollKnob;

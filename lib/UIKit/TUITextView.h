@@ -63,7 +63,7 @@
 
 - (Class)textEditorClass;
 
-@property (nonatomic, unsafe_unretained) id<TUITextViewDelegate> delegate;
+@property (nonatomic, weak) id<TUITextViewDelegate> delegate;
 
 @property (nonatomic, copy) NSString *text;
 @property (nonatomic, copy) NSString *placeholder;

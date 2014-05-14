@@ -24,6 +24,6 @@
  * The TUIViewNSViewContainer that is hosting this view, or nil if it exists
  * independently of a TwUI hierarchy.
  */
-@property (nonatomic, unsafe_unretained) TUIViewNSViewContainer<TUIHostView> *hostView;
+@property (nonatomic, weak) TUIViewNSViewContainer<TUIHostView> *hostView;
 
 @end

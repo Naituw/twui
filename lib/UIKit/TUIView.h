@@ -140,7 +140,7 @@ extern CGRect(^TUIViewCenteredLayout)(TUIView*);
  */
 + (Class)layerClass;
 
-@property (nonatomic, unsafe_unretained) id<TUIViewDelegate> viewDelegate;
+@property (nonatomic, weak) id<TUIViewDelegate> viewDelegate;
 
 /**
  Designated initializer

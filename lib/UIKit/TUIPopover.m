@@ -26,8 +26,8 @@
 
 @interface TUIPopoverBackgroundView ()
 
-@property (nonatomic, unsafe_unretained) CGRect screenOriginRect;
-@property (nonatomic, unsafe_unretained) CGRectEdge popoverEdge;
+@property (nonatomic, assign) CGRect screenOriginRect;
+@property (nonatomic, assign) CGRectEdge popoverEdge;
 
 - (CGRectEdge)arrowEdgeForPopoverEdge:(CGRectEdge)popoverEdge;
 - (void)updateMaskLayer;
@@ -39,7 +39,7 @@
 @interface TUIPopoverWindowContentView : NSView
 
 @property (nonatomic, readonly) TUINSView *nsView;
-@property (nonatomic, unsafe_unretained) CGRectEdge arrowEdge;
+@property (nonatomic, assign) CGRectEdge arrowEdge;
 
 @end
 
@@ -52,8 +52,8 @@ NSTimeInterval const TUIPopoverDefaultFadeoutDuration = 0.3;
 @interface TUIPopover ()
 
 @property (nonatomic, strong) TUINSWindow *popoverWindow;
-@property (nonatomic, unsafe_unretained) id transientEventMonitor;
-@property (nonatomic, unsafe_unretained) BOOL animating;
+@property (nonatomic, assign) id transientEventMonitor;
+@property (nonatomic, assign) BOOL animating;
 @property (nonatomic, assign) CGSize originalViewSize;
 
 - (void)removeEventMonitor;

@@ -64,7 +64,7 @@
  *
  * This property should not be set except by the TUIHostView itself.
  */
-@property (nonatomic, unsafe_unretained) id<TUIHostView> hostView;
+@property (nonatomic, weak) id<TUIHostView> hostView;
 
 /**
  * Returns the receiver's hostView or superview, whichever is closer in the

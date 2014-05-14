@@ -34,10 +34,10 @@ typedef void (^TUIPopoverDelegateBlock)(TUIPopover *popover);
 @interface TUIPopover : NSResponder
 
 @property (nonatomic, strong) TUIViewController *contentViewController;
-@property (nonatomic, unsafe_unretained) Class backgroundViewClass; //Must be a subclass of TUIPopoverBackgroundView
-@property (nonatomic, unsafe_unretained) CGSize contentSize; //CGSizeZero uses the size of the view on contentViewController
-@property (nonatomic, unsafe_unretained) BOOL animates;
-@property (nonatomic, unsafe_unretained) TUIPopoverViewControllerBehaviour behaviour;
+@property (nonatomic, weak) Class backgroundViewClass; //Must be a subclass of TUIPopoverBackgroundView
+@property (nonatomic, assign) CGSize contentSize; //CGSizeZero uses the size of the view on contentViewController
+@property (nonatomic, assign) BOOL animates;
+@property (nonatomic, assign) TUIPopoverViewControllerBehaviour behaviour;
 @property (nonatomic, readonly) BOOL shown;
 @property (nonatomic, readonly) CGRect positioningRect;
 

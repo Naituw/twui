@@ -34,7 +34,7 @@
 	} _scrollKnobFlags;
 }
 
-@property (nonatomic, unsafe_unretained) TUIScrollView * scrollView;
+@property (nonatomic, weak) TUIScrollView * scrollView;
 @property (nonatomic, assign) unsigned int    scrollIndicatorStyle;
 @property (nonatomic, readonly) TUIView     * knob;
 @property (nonatomic, readonly) BOOL flashing;

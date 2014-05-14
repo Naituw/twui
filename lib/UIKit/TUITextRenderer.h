@@ -85,7 +85,7 @@ typedef enum {
 
 @property (nonatomic, strong) NSAttributedString *attributedString;
 @property (nonatomic, assign) CGRect frame;
-@property (nonatomic, unsafe_unretained) TUIView *view; // unsafe_unretained, remember to set to nil before view goes away
+@property (nonatomic, weak) TUIView *view; // unsafe_unretained, remember to set to nil before view goes away
 
 @property (nonatomic, assign) CGSize shadowOffset;
 @property (nonatomic, assign) CGFloat shadowBlur;

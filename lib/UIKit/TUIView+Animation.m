@@ -32,7 +32,7 @@
 @property (nonatomic, assign) void *context;
 @property (nonatomic, copy) NSString *animationID;
 
-@property (nonatomic, unsafe_unretained) id delegate;
+@property (nonatomic, weak) id delegate;
 @property (nonatomic, assign) SEL animationWillStartSelector;
 @property (nonatomic, assign) SEL animationDidStopSelector;
 @property (nonatomic, copy) void (^animationCompletionBlock)(BOOL finished);

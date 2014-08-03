@@ -13,7 +13,7 @@
 @property (copy, readonly) NSString * name;
 
 - (instancetype)initWithAppearanceNamed:(NSString *)name;
-+ (instancetype)appearanceNamed:(NSString *)name:
++ (instancetype)appearanceNamed:(NSString *)name;
 
 @end
 

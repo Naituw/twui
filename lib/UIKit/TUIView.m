@@ -601,6 +601,29 @@ void TUISetCurrentContextScaleFactor(CGFloat s)
 	[self _blockLayout];
 }
 
+- (void)setAppearance:(TUIAppearance *)appearance
+{
+    if (_appearance != appearance) {
+        _appearance = appearance;
+        
+        [self appearanceDidUpdate];
+    }
+}
+
+- (void)appearanceDidUpdate
+{
+    
+}
+
+- (void)setAppearanceForViewHierarchy:(TUIAppearance *)appearance
+{
+    self.appearance = appearance;
+    
+    for (TUIView * v in self.subviews) {
+        [v setAppearanceForViewHierarchy:appearance];
+    }
+}
+
 @end
 
 

@@ -130,6 +130,8 @@
 		88EFFB5413F417E200CF91A9 /* TUITextViewEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = 88EFFB5013F417E200CF91A9 /* TUITextViewEditor.m */; };
 		88EFFB5513F417E200CF91A9 /* TUITextViewEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = 88EFFB5013F417E200CF91A9 /* TUITextViewEditor.m */; };
 		88EFFB5613F417E200CF91A9 /* TUITextViewEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = 88EFFB5013F417E200CF91A9 /* TUITextViewEditor.m */; };
+		C605B970198E5354002BD5C0 /* TUIAppearance.h in Headers */ = {isa = PBXBuildFile; fileRef = C605B96E198E5354002BD5C0 /* TUIAppearance.h */; };
+		C605B971198E5354002BD5C0 /* TUIAppearance.m in Sources */ = {isa = PBXBuildFile; fileRef = C605B96F198E5354002BD5C0 /* TUIAppearance.m */; };
 		C653472C18DE762E0069C8B5 /* TUITextAttachment.h in Headers */ = {isa = PBXBuildFile; fileRef = C653472A18DE762E0069C8B5 /* TUITextAttachment.h */; };
 		C653472D18DE762E0069C8B5 /* TUITextAttachment.h in Headers */ = {isa = PBXBuildFile; fileRef = C653472A18DE762E0069C8B5 /* TUITextAttachment.h */; };
 		C653472E18DE762E0069C8B5 /* TUITextAttachment.h in Headers */ = {isa = PBXBuildFile; fileRef = C653472A18DE762E0069C8B5 /* TUITextAttachment.h */; };
@@ -470,6 +472,8 @@
 		88D81CFE1577EF0D009D453B /* TUIStyledView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TUIStyledView.m; sourceTree = "<group>"; };
 		88EFFB4F13F417E200CF91A9 /* TUITextViewEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TUITextViewEditor.h; sourceTree = "<group>"; };
 		88EFFB5013F417E200CF91A9 /* TUITextViewEditor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TUITextViewEditor.m; sourceTree = "<group>"; };
+		C605B96E198E5354002BD5C0 /* TUIAppearance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TUIAppearance.h; sourceTree = "<group>"; };
+		C605B96F198E5354002BD5C0 /* TUIAppearance.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TUIAppearance.m; sourceTree = "<group>"; };
 		C653472A18DE762E0069C8B5 /* TUITextAttachment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TUITextAttachment.h; sourceTree = "<group>"; };
 		C653472B18DE762E0069C8B5 /* TUITextAttachment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TUITextAttachment.m; sourceTree = "<group>"; };
 		CB5B264C13BE6DA200579B1E /* TwUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = TwUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -903,6 +907,8 @@
 				CBB74C8F13BE6E1900C85CB5 /* TUIViewNSViewContainer.h */,
 				CBB74C9013BE6E1900C85CB5 /* TUIViewNSViewContainer.m */,
 				D0C7656D15B6322A00E7AC2C /* TUIViewNSViewContainer+Private.h */,
+				C605B96E198E5354002BD5C0 /* TUIAppearance.h */,
+				C605B96F198E5354002BD5C0 /* TUIAppearance.m */,
 			);
 			name = UIKit;
 			path = lib/UIKit;
@@ -979,6 +985,7 @@
 				CBB74CA013BE6E1900C85CB5 /* TUIColor.h in Headers */,
 				CBB74CA313BE6E1900C85CB5 /* TUIControl.h in Headers */,
 				CBB74CA513BE6E1900C85CB5 /* TUIFastIndexPath.h in Headers */,
+				C605B970198E5354002BD5C0 /* TUIAppearance.h in Headers */,
 				CBB74CA713BE6E1900C85CB5 /* TUIFont.h in Headers */,
 				CBB74CA913BE6E1900C85CB5 /* TUIGeometry.h in Headers */,
 				CBB74CAB13BE6E1900C85CB5 /* TUIImage+Drawing.h in Headers */,
@@ -1126,7 +1133,7 @@
 			name = Tests;
 			productName = TwUITests;
 			productReference = CB5B266113BE6DA300579B1E /* Tests.octest */;
-			productType = "com.apple.product-type.bundle";
+			productType = "com.apple.product-type.bundle.ocunit-test";
 		};
 		CB5E321713BE7098004B7899 /* Dynamic Library */ = {
 			isa = PBXNativeTarget;
@@ -1428,6 +1435,7 @@
 				D0C7657415B6341800E7AC2C /* TUICAAction.m in Sources */,
 				C653472F18DE762E0069C8B5 /* TUITextAttachment.m in Sources */,
 				D040610D15B6A77500F753ED /* TUIAnimationManager.m in Sources */,
+				C605B971198E5354002BD5C0 /* TUIAppearance.m in Sources */,
 				D040611615B6A7CD00F753ED /* NSTextView+TUIExtensions.m in Sources */,
 				48A10E8215B7769A007F9EE3 /* TUILayoutConstraint.m in Sources */,
 				48A10E8415B7769A007F9EE3 /* TUILayoutManager.m in Sources */,

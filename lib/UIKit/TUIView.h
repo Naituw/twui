@@ -16,6 +16,7 @@
 
 #import "TUIResponder.h"
 #import "TUIAccessibility.h"
+#import "TUIAppearance.h"
 
 extern NSString * const TUIViewWillMoveToWindowNotification; // both notification's userInfo will contain the new window under the key TUIViewWindow
 extern NSString * const TUIViewDidMoveToWindowNotification;
@@ -223,6 +224,11 @@ extern CGRect(^TUIViewCenteredLayout)(TUIView*);
 @property (nonatomic, assign) BOOL needsDisplayWhenWindowsKeyednessChanges;
 
 @property (nonatomic, assign) BOOL cachesCGContext; // Default to NO, if you want dirty drawing, you should enable this.
+
+@property (nonatomic, strong) TUIAppearance * appearance;
+
+- (void)appearanceDidUpdate;
+- (void)setAppearanceForViewHierarchy:(TUIAppearance *)appearance;
 
 @end
 

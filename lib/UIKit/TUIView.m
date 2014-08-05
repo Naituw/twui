@@ -590,7 +590,8 @@ void TUISetCurrentContextScaleFactor(CGFloat s)
 	[view willMoveToTUINSView:_nsView];
 	[view willMoveToSuperview:self];
 	view.nsView = _nsView;
-
+    view.appearance = self.appearance;
+    
 	block();
 
 	[self didAddSubview:view];

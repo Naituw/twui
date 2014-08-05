@@ -10,29 +10,29 @@
 	<string>TwUI</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
-		<key>C863FC59-A0B3-49EF-BF1E-F09E63930CB0</key>
+		<key>69AE0CC40F1D3995B9E93093503F561C3BE16A5F</key>
 		<string>https://github.com/Naituw/twui.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
 	<string>TwUI.xcodeproj/project.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>C863FC59-A0B3-49EF-BF1E-F09E63930CB0</key>
+		<key>69AE0CC40F1D3995B9E93093503F561C3BE16A5F</key>
 		<string>../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
 	<string>https://github.com/Naituw/twui.git</string>
 	<key>IDESourceControlProjectVersion</key>
-	<integer>110</integer>
+	<integer>111</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>C863FC59-A0B3-49EF-BF1E-F09E63930CB0</string>
+	<string>69AE0CC40F1D3995B9E93093503F561C3BE16A5F</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>C863FC59-A0B3-49EF-BF1E-F09E63930CB0</string>
+			<string>69AE0CC40F1D3995B9E93093503F561C3BE16A5F</string>
 			<key>IDESourceControlWCCName</key>
 			<string>twui</string>
 		</dict>

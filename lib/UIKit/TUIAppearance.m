@@ -60,7 +60,7 @@ NSString *const TUIAppearanceNameLight = @"TUIAppearanceNameLight";
     static TUIAppearance * _appearance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        _appearance = [self appearanceNamed:TUIAppearanceNameDark];
+        _appearance = [[self alloc] initWithAppearanceNamed:TUIAppearanceNameDark];
     });
     return _appearance;
 }
@@ -70,7 +70,7 @@ NSString *const TUIAppearanceNameLight = @"TUIAppearanceNameLight";
     static TUIAppearance * _appearance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        _appearance = [self appearanceNamed:TUIAppearanceNameLight];
+        _appearance = [[self alloc] initWithAppearanceNamed:TUIAppearanceNameLight];
     });
     return _appearance;
 }

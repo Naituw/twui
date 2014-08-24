@@ -17,15 +17,16 @@
 #import "TUIView.h"
 
 typedef enum {
-	TUIActivityIndicatorViewStyleGray,
+    TUIActivityIndicatorViewStyleGray,
+    TUIActivityIndicatorViewStyleLight,
 } TUIActivityIndicatorViewStyle;
 
 @interface TUIActivityIndicatorView : TUIView
 {
     BOOL                           _animating;
     TUIActivityIndicatorViewStyle _activityIndicatorViewStyle;
-	
-	TUIView *spinner;
+    
+    TUIView *spinner;
 }
 
 - (id)initWithActivityIndicatorStyle:(TUIActivityIndicatorViewStyle)style;

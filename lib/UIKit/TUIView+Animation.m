@@ -70,6 +70,7 @@
     //	NSLog(@"-anims %d", --animcount);
 	if(animationCompletionBlock != nil) {
 		animationCompletionBlock(NO);
+        animationCompletionBlock = nil;
 		NSLog(@"Error: completion block didn't complete! %@", self);
 		
 		NSAssert(animationCompletionBlock == nil, @"animationCompletionBlock should be nil after executing from dealloc");

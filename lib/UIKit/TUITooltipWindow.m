@@ -39,14 +39,12 @@ static NSTimer *FadeOutTimer = nil;
 	
 	CGContextRef ctx = TUIGraphicsGetCurrentContext();
 	
-	CGContextSaveGState(ctx);
-	CGFloat _a[] = {1.0, 1.0, 198/255., 1.0};
-	CGFloat _b[] = {1.0, 1.0, 158/255., 1.0};
-	CGContextClipToRoundRect(ctx, b, 2);
-	CGContextDrawLinearGradientBetweenPoints(ctx, CGPointMake(0, b.size.height), _a, CGPointMake(0, 0), _b);
-	CGContextRestoreGState(ctx);
-	
-	[CurrentTooltipString ab_drawInRect:CGRectMake(0, -2, b.size.width, b.size.height)];
+    CGContextSetFillColorWithColor(ctx, [TUIColor colorWithWhite:228./255 alpha:1.0].CGColor);
+    CGContextFillRect(ctx, b);
+    
+    CGSize size = [CurrentTooltipString ab_size];
+    
+	[CurrentTooltipString ab_drawInRect:ABIntegralRectWithSizeCenteredInRect(size, b)];
 }
 
 @end

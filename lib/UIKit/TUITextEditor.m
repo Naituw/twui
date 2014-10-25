@@ -372,7 +372,7 @@
  */
 - (NSAttributedString *)attributedString
 {
-	return backingStore;
+    return [[NSAttributedString alloc] initWithString:backingStore.string ? : @""];
 }
 
 /* Returns the fraction of distance for aPoint from the left side of the character. 

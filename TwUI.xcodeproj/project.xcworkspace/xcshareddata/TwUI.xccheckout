@@ -14,7 +14,7 @@
 		<string>https://github.com/Naituw/twui.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>TwUI.xcodeproj/project.xcworkspace</string>
+	<string>TwUI.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>69AE0CC40F1D3995B9E93093503F561C3BE16A5F</key>

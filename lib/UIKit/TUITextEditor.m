@@ -35,6 +35,8 @@
 		inputContext.acceptsGlyphInfo = YES; // fucker
 		
 		self.attributedString = backingStore;
+        
+        wasValidKeyEquivalentSelector = YES;
 	}
 	return self;
 }

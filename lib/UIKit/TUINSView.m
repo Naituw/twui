@@ -29,6 +29,7 @@
 #import "TUIView+Private.h"
 #import "TUITextRenderer+Event.h"
 #import "TUITooltipWindow.h"
+#import "TUIGestureRecognizer_Private.h"
 #import <CoreFoundation/CoreFoundation.h>
 
 // If enabled, NSViews contained within TUIViewNSViewContainers will be clipped
@@ -446,6 +447,8 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 
 - (void)mouseDown:(NSEvent *)event
 {
+    [self _updateGestureRecognizersWithEvent:event];
+    
 	if(_hyperFocusView) {
 		TUIView *v = [self viewForEvent:event];
 		if([v isDescendantOfView:_hyperFocusView]) {
@@ -469,6 +472,8 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 
 - (void)mouseUp:(NSEvent *)event
 {
+    [self _updateGestureRecognizersWithEvent:event];
+    
     if (_viewFlags.delegateMouseUp)
     {
         [_viewDelegate nsView:self mouseUp:event];
@@ -485,6 +490,8 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 
 - (void)mouseDragged:(NSEvent *)event
 {
+    [self _updateGestureRecognizersWithEvent:event];
+    
 	[_trackingView mouseDragged:event];
 }
 
@@ -518,6 +525,8 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 
 - (void)rightMouseDown:(NSEvent *)event
 {
+    [self _updateGestureRecognizersWithEvent:event];
+    
 	_trackingView = [self viewForEvent:event];
 	[_trackingView rightMouseDown:event];
 	[TUITooltipWindow endTooltip];
@@ -531,6 +540,8 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 
 - (void)rightMouseUp:(NSEvent *)event
 {
+    [self _updateGestureRecognizersWithEvent:event];
+    
 	TUIView *lastTrackingView = _trackingView;
 	
 	_trackingView = nil;
@@ -543,8 +554,16 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
     }
 }
 
+- (void)rightMouseDragged:(NSEvent *)theEvent
+{
+    [self _updateHoverViewWithEvent:theEvent];
+    
+    [_trackingView rightMouseDragged:theEvent];
+}
+
 - (void)scrollWheel:(NSEvent *)event
 {
+    [self _updateGestureRecognizersWithEvent:event];
 	[[self viewForEvent:event] scrollWheel:event];
 	[self _updateHoverView:nil withEvent:event]; // don't pop in while scrolling
     
@@ -556,16 +575,22 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 
 - (void)beginGestureWithEvent:(NSEvent *)event
 {
+    [self _updateGestureRecognizersWithEvent:event];
+
 	[[self viewForEvent:event] beginGestureWithEvent:event];
 }
 
 - (void)endGestureWithEvent:(NSEvent *)event
 {
+    [self _updateGestureRecognizersWithEvent:event];
+
 	[[self viewForEvent:event] endGestureWithEvent:event];
 }
 
 - (void)magnifyWithEvent:(NSEvent *)event
 {
+    [self _updateGestureRecognizersWithEvent:event];
+    
 	if(!deliveringEvent) {
 		deliveringEvent = YES;
 		[[self viewForEvent:event] magnifyWithEvent:event];	
@@ -575,6 +600,8 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 
 - (void)rotateWithEvent:(NSEvent *)event
 {
+    [self _updateGestureRecognizersWithEvent:event];
+    
 	if(!deliveringEvent) {
 		deliveringEvent = YES;
 		[[self viewForEvent:event] rotateWithEvent:event];
@@ -584,6 +611,8 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 
 - (void)swipeWithEvent:(NSEvent *)event
 {
+    [self _updateGestureRecognizersWithEvent:event];
+    
 	if(!deliveringEvent) {
 		deliveringEvent = YES;
 		[[self viewForEvent:event] swipeWithEvent:event];
@@ -956,6 +985,31 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 	// message onto all subviews and our rootView, doing so could result in
 	// crazy behavior, since the TUINSView of those views is and will remain
 	// 'self' by definition
+}
+
+#pragma mark - Gesture Recognizers
+
+- (NSArray *)_gestureRecognizersForView:(TUIView *)view
+{
+    NSMutableArray *recognizers = [[NSMutableArray alloc] initWithCapacity:0];
+    
+    while (view) {
+        [recognizers addObjectsFromArray:view.gestureRecognizers];
+        view = [view superview];
+    }
+    
+    return recognizers;
+}
+
+- (void)_updateGestureRecognizersWithEvent:(NSEvent *)event
+{
+    TUIView * view = [self viewForEvent:event];
+    
+    NSArray * gestureRecognizers = [self _gestureRecognizersForView:view];
+    
+    for (TUIGestureRecognizer *recognizer in gestureRecognizers) {
+        [recognizer _recognizeEvent:event];
+    }
 }
 
 @end

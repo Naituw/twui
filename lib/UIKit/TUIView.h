@@ -66,6 +66,7 @@ typedef enum {
 @class TUINSView;
 @class TUINSWindow;
 @class TUIView;
+@class TUIGestureRecognizer;
 
 typedef void(^TUIViewDrawRect)(TUIView *, CGRect);
 typedef CGRect(^TUIViewLayout)(TUIView *);
@@ -229,6 +230,10 @@ extern CGRect(^TUIViewCenteredLayout)(TUIView*);
 
 - (void)appearanceDidUpdate;
 - (void)setAppearanceForViewHierarchy:(TUIAppearance *)appearance;
+
+- (void)addGestureRecognizer:(TUIGestureRecognizer *)gestureRecognizer;
+- (void)removeGestureRecognizer:(TUIGestureRecognizer *)gestureRecognizer;
+@property (nonatomic, copy) NSArray * gestureRecognizers;
 
 @end
 

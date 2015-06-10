@@ -156,6 +156,8 @@ static pthread_key_t TUICurrentContextScaleFactorTLSKey;
 		toolTipDelay = 1.5;
 		self.isAccessibilityElement = YES;
 		accessibilityFrame = CGRectNull; // null rect means we'll just get the view's frame and use that
+        
+        _gestureRecognizers = [[NSMutableSet alloc] init];
 	}
 	return self;
 }

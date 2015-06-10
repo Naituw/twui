@@ -19,6 +19,7 @@
 #import "TUINSView.h"
 #import "TUIScrollKnob.h"
 #import "TUIView+Private.h"
+#import "TUIPinchGestureRecognizer.h"
 
 #define KNOB_Z_POSITION 6000
 
@@ -26,6 +27,8 @@
 
 #define TUIScrollViewContinuousScrollDragBoundary 25.0
 #define TUIScrollViewContinuousScrollRate         10.0
+
+static const NSTimeInterval TUIScrollViewAnimationDuration = 0.33;
 
 enum {
 	ScrollPhaseNormal = 0,
@@ -53,6 +56,17 @@ enum {
 
 @end
 
+@interface TUIScrollView () <TUIGestureRecognizerDelegate>
+{
+    CGFloat _lastScale;
+    CGPoint _lastZoomPoint;
+}
+
+@property (nonatomic, strong) TUIPinchGestureRecognizer * pinchGestureRecognizer;
+@property (nonatomic) BOOL zooming;
+@property (nonatomic) BOOL zoomBouncing;
+
+@end
 @implementation TUIScrollView
 
 @synthesize decelerationRate;
@@ -91,6 +105,15 @@ enum {
 		_verticalScrollKnob.hidden = YES;
 		_verticalScrollKnob.opaque = NO;
 		[self addSubview:_verticalScrollKnob];
+        
+        _maximumZoomScale = 1;
+        _minimumZoomScale = 1;
+        _bouncesZoom = YES;
+        _zooming = NO;
+        
+        TUIPinchGestureRecognizer * pinch = [[TUIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchGestureRecognized:)];
+//        [self addGestureRecognizer:pinch];
+        [self setPinchGestureRecognizer:pinch];
 	}
 	return self;
 }
@@ -119,6 +142,10 @@ enum {
 	_scrollViewFlags.delegateScrollViewWillHideScrollIndicator = [_delegate respondsToSelector:@selector(scrollView:willHideScrollIndicator:)];
 	_scrollViewFlags.delegateScrollViewDidHideScrollIndicator = [_delegate respondsToSelector:@selector(scrollView:didHideScrollIndicator:)];
     _scrollViewFlags.delegateScrollViewDidEndScroll = [_delegate respondsToSelector:@selector(scrollViewDidEndScroll:)];
+    _scrollViewFlags.delegateViewForZoomingInScrollView = [_delegate respondsToSelector:@selector(viewForZoomingInScrollView:)];
+    _scrollViewFlags.delegateScrollViewWillBeginZooming = [_delegate respondsToSelector:@selector(scrollViewWillBeginZooming:withView:)];
+    _scrollViewFlags.delegateScrollViewDidEndZooming = [_delegate respondsToSelector:@selector(scrollViewDidEndZooming:withView:atScale:)];
+    _scrollViewFlags.delegateScrollViewDidZoom = [_delegate respondsToSelector:@selector(scrollViewDidZoom:)];
 }
 
 - (TUIScrollViewIndicatorStyle)scrollIndicatorStyle
@@ -484,7 +511,7 @@ static CVReturn scrollCallback(CVDisplayLinkRef displayLink, const CVTimeStamp *
 
 - (void)layoutSubviews
 {
-	self.contentOffset = _unroundedContentOffset;
+	[self _setContentOffset:_unroundedContentOffset];
 	[self _updateScrollKnobs];
 }
 
@@ -552,6 +579,8 @@ static CGPoint PointLerp(CGPoint a, CGPoint b, CGFloat t)
 
 - (void)_setContentOffset:(CGPoint)p
 {
+    NSLog(@"%@", NSStringFromPoint(p));
+
 	_unroundedContentOffset = p;
 	p.x = round(-p.x - self.bounceOffset.x - self.pullOffset.x);
 	p.y = round(-p.y - self.bounceOffset.y - self.pullOffset.y);
@@ -1223,6 +1252,155 @@ static float clampBounce(float x) {
 			return YES;
 	}
 	return NO;
+}
+
+#pragma mark - Zooming
+
+//- (BOOL)pointInside:(CGPoint)point withEvent:(id)event
+//{
+//    CGRect bounds = self.frame;
+//    bounds.origin = CGPointZero;
+//    return CGRectContainsPoint(bounds, point);
+//}
+
+- (TUIView *)_zoomingView
+{
+    return (_scrollViewFlags.delegateViewForZoomingInScrollView) ? [_delegate viewForZoomingInScrollView:self] : nil;
+}
+
+- (float)zoomScale
+{
+    TUIView * zoomingView = [self _zoomingView];
+    
+    return zoomingView? zoomingView.transform.a : 1.f;
+}
+
+- (void)zoomToPoint:(CGPoint)zoomPoint scale:(float)scale animated:(BOOL)animated confined:(BOOL)confined completion:(void (^)(BOOL finished))completion
+{
+    TUIView *zoomingView = [self _zoomingView];
+    
+    if (self.zoomScale <= 0.0f){
+        return;
+    }
+    
+    if (zoomingView && self.zoomScale != scale) {
+        
+        void (^updating)(void) = ^(void) {
+            
+            // cache contentOffset, we don't want any side effects which changes this value
+            CGPoint contentOffset = self.contentOffset;
+            
+            CGAffineTransform newTransform = CGAffineTransformScale(zoomingView.transform, scale, scale);
+            [zoomingView setTransform:newTransform];
+            
+            CGSize size = zoomingView.frame.size;
+            zoomingView.layer.position = CGPointMake(size.width/2.f, size.height/2.f);
+            self.contentSize = size;
+            
+            CGPoint scaledContentOffset = CGPointMake(-zoomPoint.x*scale + (zoomPoint.x + contentOffset.x), -zoomPoint.y*scale + (zoomPoint.y + contentOffset.y));
+            
+            if (confined) {
+                scaledContentOffset = [self _fixProposedContentOffset:scaledContentOffset];
+            }
+            
+            if (!CGPointEqualToPoint(scaledContentOffset, self.contentOffset)) {
+                [self _setContentOffset:scaledContentOffset];
+            }
+        };
+        
+        if (animated) {
+            [TUIView animateWithDuration:TUIScrollViewAnimationDuration delay:0 curve:TUIViewAnimationCurveEaseOut animations:updating completion:completion];
+        } else {
+            updating();
+            if (completion) {
+                completion(YES);
+            }
+        }
+    }
+}
+
+- (void)setZoomScale:(float)scale animated:(BOOL)animated
+{
+    TUIView *zoomingView = [self _zoomingView];
+    scale = MIN(MAX(scale, _minimumZoomScale), _maximumZoomScale);
+    
+    if (zoomingView && self.zoomScale != scale) {
+        CGPoint zoomPoint = CGPointMake(self.contentOffset.x + self.bounds.size.width * 0.5, self.contentOffset.y + self.bounds.size.height * 0.5);
+        [self zoomToPoint:zoomPoint scale:scale/self.zoomScale animated:animated confined:YES  completion:NULL];
+    }
+}
+
+- (void)setZoomScale:(float)zoomScale
+{
+    [self setZoomScale:zoomScale animated:NO];
+}
+
+- (BOOL)gestureRecognizerShouldBegin:(TUIGestureRecognizer *)gestureRecognizer
+{
+    return [self _zoomingView] != nil && self.maximumZoomScale > self.minimumZoomScale;
+}
+
+- (void)pinchGestureRecognized:(TUIPinchGestureRecognizer *)gestureRecognizer
+{
+    TUIGestureRecognizerState state = gestureRecognizer.state;
+    
+    if(state == TUIGestureRecognizerStateEnded) {
+        _lastScale = 1.0;
+        self.zooming = NO;
+        // NSLog(@"reset to 1.0");
+        
+        BOOL didConfineOffset = NO;
+        if (self.bouncesZoom && !self.zoomBouncing) {
+            // perform bounces zoom animation
+            CGFloat scale = MIN(MAX(self.zoomScale, self.minimumZoomScale), self.maximumZoomScale);
+            if (scale != self.zoomScale && self.zoomScale > 0.0f){
+                self.zoomBouncing = YES;
+                CGFloat relScale = scale / self.zoomScale;
+                // TODO: should fire willDecelerate?
+                [self zoomToPoint:_lastZoomPoint
+                            scale:relScale
+                         animated:YES
+                         confined:YES
+                       completion:^(BOOL finished) {
+                           self.zoomBouncing = NO;
+                       }];
+                didConfineOffset = YES;
+            }
+        }
+
+        return;
+    }
+
+    self.zooming = YES; // user begins zooming
+    self.zoomBouncing = NO;
+    
+    CGFloat scaleDiff = _lastScale - [gestureRecognizer scale];
+    CGFloat scale = 1.0 - scaleDiff;
+    CGFloat absScale = self.zoomScale*scale;
+    
+    if (absScale > self.maximumZoomScale || absScale < self.minimumZoomScale) {
+        if (self.bouncesZoom) {
+            CGFloat damping = MAX(absScale/self.maximumZoomScale, self.minimumZoomScale/absScale);
+            NSAssert(damping >= 1.0f, @"");
+            scaleDiff /= (10.0f*damping); //add some damping
+            scale = 1.0f - scaleDiff;
+        }else{
+            if (self.zoomScale > 0) {
+                absScale = MIN(self.maximumZoomScale, MAX(self.minimumZoomScale, absScale));
+                scale = absScale/self.zoomScale;
+            }
+            
+        }
+    }
+    
+    CGPoint zoomPoint = [gestureRecognizer locationInView:self];
+    zoomPoint.x += self.contentOffset.x;
+    zoomPoint.y += self.contentOffset.y;
+    
+    _lastScale = [gestureRecognizer scale];
+    _lastZoomPoint = zoomPoint;
+    
+    [self zoomToPoint:zoomPoint scale:scale animated:NO confined:NO completion:nil];
 }
 
 @end

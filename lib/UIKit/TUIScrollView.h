@@ -145,6 +145,10 @@ typedef enum {
 		unsigned int delegateScrollViewWillHideScrollIndicator:1;
 		unsigned int delegateScrollViewDidHideScrollIndicator:1;
         unsigned int delegateScrollViewDidEndScroll:1;
+        unsigned int delegateViewForZoomingInScrollView:1;
+        unsigned int delegateScrollViewWillBeginZooming:1;
+        unsigned int delegateScrollViewDidEndZooming:1;
+        unsigned int delegateScrollViewDidZoom:1;
 	} _scrollViewFlags;
 }
 
@@ -186,6 +190,13 @@ typedef enum {
 @property (nonatomic, readonly, getter=isDragging) BOOL dragging;
 @property (nonatomic, readonly, getter=isDecelerating) BOOL decelerating;
 
+@property (nonatomic) float maximumZoomScale;
+@property (nonatomic) float minimumZoomScale;
+@property (nonatomic) float zoomScale;
+@property (nonatomic, readonly, getter=isZooming) BOOL zooming;
+@property (nonatomic, readonly, getter=isZoomBouncing) BOOL zoomBouncing;
+@property (nonatomic) BOOL bouncesZoom;
+
 @end
 
 @protocol TUIScrollViewDelegate <NSObject>
@@ -201,5 +212,10 @@ typedef enum {
 - (void)scrollView:(TUIScrollView *)scrollView didShowScrollIndicator:(TUIScrollViewIndicator)indicator;
 - (void)scrollView:(TUIScrollView *)scrollView willHideScrollIndicator:(TUIScrollViewIndicator)indicator;
 - (void)scrollView:(TUIScrollView *)scrollView didHideScrollIndicator:(TUIScrollViewIndicator)indicator;
+
+- (TUIView *)viewForZoomingInScrollView:(TUIScrollView *)scrollView;
+- (void)scrollViewWillBeginZooming:(TUIScrollView *)scrollView withView:(TUIView *)view;
+- (void)scrollViewDidEndZooming:(TUIScrollView *)scrollView withView:(TUIView *)view atScale:(float)scale;
+- (void)scrollViewDidZoom:(TUIScrollView *)scrollView;
 
 @end

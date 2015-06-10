@@ -10,7 +10,13 @@
 
 @interface TUIGestureRecognizer ()
 
+#pragma mark - Accessor
+
 @property (nonatomic, readwrite) TUIGestureRecognizerState state;
+
+- (BOOL)delegateGestureRecognizerShouldBegin;
+
+#pragma mark - Override
 
 - (void)reset;
 

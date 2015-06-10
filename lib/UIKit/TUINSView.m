@@ -1008,7 +1008,7 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
     NSArray * gestureRecognizers = [self _gestureRecognizersForView:view];
     
     for (TUIGestureRecognizer *recognizer in gestureRecognizers) {
-        [recognizer _recognizeEvent:event];
+//        [recognizer _recognizeEvent:event];
     }
 }
 

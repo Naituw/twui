@@ -26,7 +26,6 @@
 #import "TUIView+Private.h"
 #import "TUIView+TUIBridgedView.h"
 #import "TUIViewController.h"
-#import "TUIGestureRecognizer_Private.h"
 
 /*
  * Enable this to debug blending.
@@ -73,10 +72,6 @@ CGRect(^TUIViewCenteredLayout)(TUIView*) = nil;
 
 
 @interface TUIView ()
-{
-    NSMutableSet * _gestureRecognizers;
-}
-
 @property (nonatomic, strong) NSMutableArray *subviews;
 
 /*
@@ -628,39 +623,6 @@ void TUISetCurrentContextScaleFactor(CGFloat s)
     for (TUIView * v in self.subviews) {
         [v setAppearanceForViewHierarchy:appearance];
     }
-}
-
-- (void)addGestureRecognizer:(TUIGestureRecognizer *)gestureRecognizer
-{
-    if (![_gestureRecognizers containsObject:gestureRecognizer]) {
-        [gestureRecognizer.view removeGestureRecognizer:gestureRecognizer];
-        [_gestureRecognizers addObject:gestureRecognizer];
-        [gestureRecognizer _setView:self];
-    }
-}
-
-- (void)removeGestureRecognizer:(TUIGestureRecognizer *)gestureRecognizer
-{
-    if ([_gestureRecognizers containsObject:gestureRecognizer]) {
-        [gestureRecognizer _setView:nil];
-        [_gestureRecognizers removeObject:gestureRecognizer];
-    }
-}
-
-- (void)setGestureRecognizers:(NSArray *)gestureRecognizers
-{
-    for (TUIGestureRecognizer * gesture in [_gestureRecognizers allObjects]) {
-        [self removeGestureRecognizer:gesture];
-    }
-    
-    for (TUIGestureRecognizer * gesture in gestureRecognizers) {
-        [self addGestureRecognizer:gesture];
-    }
-}
-
-- (NSArray *)gestureRecognizers
-{
-    return [_gestureRecognizers allObjects];
 }
 
 @end

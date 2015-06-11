@@ -68,15 +68,6 @@
     [_registeredActions removeObject:actionRecord];
 }
 
-- (void)setDelegate:(id<TUIGestureRecognizerDelegate>)delegate
-{
-    if (_delegate != delegate) {
-        _delegate = delegate;
-        
-        _delegateHas.shouldBegin = [delegate respondsToSelector:@selector(gestureRecognizerShouldBegin:)];
-    }
-}
-
 - (void)setState:(TUIGestureRecognizerState)state
 {
     // the docs didn't say explicitly if these state transitions were verified, but I suspect they are. if anything, a check like this
@@ -154,17 +145,6 @@
     } else {
         return CGPointZero;
     }
-}
-
-- (CGPoint)locationOfTouch:(NSUInteger)touchIndex inView:(TUIView *)view
-{
-    NSArray * touches = [[self touches] allObjects];
-    
-    if (touchIndex >= touches.count) {
-        return CGPointZero;
-    }
-    
-    NSTouch * touch = [touches objectAtIndex:touchIndex];
 }
 
 - (NSSet *)touches
@@ -314,13 +294,6 @@
 - (void)swipeWithEvent:(NSEvent *)event
 {
     
-}
-
-#pragma mark - Subclass Accessors
-
-- (BOOL)delegateGestureRecognizerShouldBegin
-{
-    return (!_delegateHas.shouldBegin || [_delegate gestureRecognizerShouldBegin:self]);
 }
 
 @end

@@ -31,7 +31,6 @@ typedef NS_ENUM(NSInteger, TUIGestureRecognizerState)
 - (void)removeTarget:(id)target action:(SEL)action;
 
 - (CGPoint)locationInView:(TUIView *)view;
-- (CGPoint)locationOfTouch:(NSUInteger)touchIndex inView:(TUIView*)view; // the location of a particular touch
 
 - (NSUInteger)numberOfTouches;
 
@@ -40,13 +39,5 @@ typedef NS_ENUM(NSInteger, TUIGestureRecognizerState)
 @property (nonatomic, readonly) TUIGestureRecognizerState state;
 @property (nonatomic, readonly) TUIView * view;
 @property (nonatomic, readonly) NSSet * touches;
-
-@end
-
-@protocol TUIGestureRecognizerDelegate <NSObject>
-
-@optional
-// called when a gesture recognizer attempts to transition out of TUIGestureRecognizerStatePossible. returning NO causes it to transition to TUIGestureRecognizerStateFailed
-- (BOOL)gestureRecognizerShouldBegin:(TUIGestureRecognizer *)gestureRecognizer;
 
 @end

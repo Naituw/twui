@@ -11,11 +11,6 @@
 @class TUIView;
 
 @interface TUIGestureRecognizer ()
-{
-    struct {
-        unsigned int shouldBegin:1;
-    } _delegateHas;
-}
 
 - (void)_setView:(TUIView *)v;
 - (void)_recognizeEvent:(NSEvent *)event;

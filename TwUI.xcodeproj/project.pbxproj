@@ -138,12 +138,6 @@
 		C653472F18DE762E0069C8B5 /* TUITextAttachment.m in Sources */ = {isa = PBXBuildFile; fileRef = C653472B18DE762E0069C8B5 /* TUITextAttachment.m */; };
 		C653473018DE762E0069C8B5 /* TUITextAttachment.m in Sources */ = {isa = PBXBuildFile; fileRef = C653472B18DE762E0069C8B5 /* TUITextAttachment.m */; };
 		C653473118DE762E0069C8B5 /* TUITextAttachment.m in Sources */ = {isa = PBXBuildFile; fileRef = C653472B18DE762E0069C8B5 /* TUITextAttachment.m */; };
-		C6957A1D1A3D43B000C781A5 /* TUIPinchGestureRecognizer.h in Headers */ = {isa = PBXBuildFile; fileRef = C6957A1B1A3D43B000C781A5 /* TUIPinchGestureRecognizer.h */; };
-		C6957A1E1A3D43B000C781A5 /* TUIPinchGestureRecognizer.h in Headers */ = {isa = PBXBuildFile; fileRef = C6957A1B1A3D43B000C781A5 /* TUIPinchGestureRecognizer.h */; };
-		C6957A1F1A3D43B000C781A5 /* TUIPinchGestureRecognizer.h in Headers */ = {isa = PBXBuildFile; fileRef = C6957A1B1A3D43B000C781A5 /* TUIPinchGestureRecognizer.h */; };
-		C6957A201A3D43B000C781A5 /* TUIPinchGestureRecognizer.m in Sources */ = {isa = PBXBuildFile; fileRef = C6957A1C1A3D43B000C781A5 /* TUIPinchGestureRecognizer.m */; };
-		C6957A211A3D43B000C781A5 /* TUIPinchGestureRecognizer.m in Sources */ = {isa = PBXBuildFile; fileRef = C6957A1C1A3D43B000C781A5 /* TUIPinchGestureRecognizer.m */; };
-		C6957A221A3D43B000C781A5 /* TUIPinchGestureRecognizer.m in Sources */ = {isa = PBXBuildFile; fileRef = C6957A1C1A3D43B000C781A5 /* TUIPinchGestureRecognizer.m */; };
 		C6E99B981A34245E00346A5D /* TUIGestureRecognizer.h in Headers */ = {isa = PBXBuildFile; fileRef = C6E99B961A34245E00346A5D /* TUIGestureRecognizer.h */; };
 		C6E99B991A34245E00346A5D /* TUIGestureRecognizer.h in Headers */ = {isa = PBXBuildFile; fileRef = C6E99B961A34245E00346A5D /* TUIGestureRecognizer.h */; };
 		C6E99B9A1A34245E00346A5D /* TUIGestureRecognizer.h in Headers */ = {isa = PBXBuildFile; fileRef = C6E99B961A34245E00346A5D /* TUIGestureRecognizer.h */; };
@@ -494,8 +488,6 @@
 		C605B96F198E5354002BD5C0 /* TUIAppearance.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TUIAppearance.m; sourceTree = "<group>"; };
 		C653472A18DE762E0069C8B5 /* TUITextAttachment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TUITextAttachment.h; sourceTree = "<group>"; };
 		C653472B18DE762E0069C8B5 /* TUITextAttachment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TUITextAttachment.m; sourceTree = "<group>"; };
-		C6957A1B1A3D43B000C781A5 /* TUIPinchGestureRecognizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TUIPinchGestureRecognizer.h; sourceTree = "<group>"; };
-		C6957A1C1A3D43B000C781A5 /* TUIPinchGestureRecognizer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TUIPinchGestureRecognizer.m; sourceTree = "<group>"; };
 		C6E99B961A34245E00346A5D /* TUIGestureRecognizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TUIGestureRecognizer.h; sourceTree = "<group>"; };
 		C6E99B971A34245E00346A5D /* TUIGestureRecognizer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TUIGestureRecognizer.m; sourceTree = "<group>"; };
 		C6E99B9E1A3424E700346A5D /* TUIGestureRecognizer_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TUIGestureRecognizer_Private.h; sourceTree = "<group>"; };
@@ -687,8 +679,6 @@
 				C6E99B971A34245E00346A5D /* TUIGestureRecognizer.m */,
 				C6E99B9E1A3424E700346A5D /* TUIGestureRecognizer_Private.h */,
 				C6E99BA21A347E0700346A5D /* TUIGestureRecognizer_Subclass.h */,
-				C6957A1B1A3D43B000C781A5 /* TUIPinchGestureRecognizer.h */,
-				C6957A1C1A3D43B000C781A5 /* TUIPinchGestureRecognizer.m */,
 			);
 			path = GestureRecognizer;
 			sourceTree = "<group>";
@@ -989,7 +979,6 @@
 				88CC1F3913E3684700827793 /* TUIButton+Accessibility.h in Headers */,
 				C6E99BA51A347E0700346A5D /* TUIGestureRecognizer_Subclass.h in Headers */,
 				88EFFB5313F417E200CF91A9 /* TUITextViewEditor.h in Headers */,
-				C6957A1F1A3D43B000C781A5 /* TUIPinchGestureRecognizer.h in Headers */,
 				88D25F5713F5D96500CFAAA9 /* TUITableView+Cell.h in Headers */,
 				C6E99BA11A3424E700346A5D /* TUIGestureRecognizer_Private.h in Headers */,
 				887F272E13F9969800D75DE6 /* TUITableViewSectionHeader.h in Headers */,
@@ -1036,7 +1025,6 @@
 				CBB74CAF13BE6E1900C85CB5 /* TUIImageView.h in Headers */,
 				CBB74CB113BE6E1900C85CB5 /* TUIKit.h in Headers */,
 				CBB74CB313BE6E1900C85CB5 /* TUILabel.h in Headers */,
-				C6957A1D1A3D43B000C781A5 /* TUIPinchGestureRecognizer.h in Headers */,
 				CBB74CB513BE6E1900C85CB5 /* TUINSView+Hyperfocus.h in Headers */,
 				CBB74CB813BE6E1900C85CB5 /* TUINSView.h in Headers */,
 				CBB74CBA13BE6E1900C85CB5 /* TUINSWindow.h in Headers */,
@@ -1103,7 +1091,6 @@
 				88CC1F3813E3684700827793 /* TUIButton+Accessibility.h in Headers */,
 				C6E99BA41A347E0700346A5D /* TUIGestureRecognizer_Subclass.h in Headers */,
 				88EFFB5213F417E200CF91A9 /* TUITextViewEditor.h in Headers */,
-				C6957A1E1A3D43B000C781A5 /* TUIPinchGestureRecognizer.h in Headers */,
 				88D25F5613F5D96500CFAAA9 /* TUITableView+Cell.h in Headers */,
 				C6E99BA01A3424E700346A5D /* TUIGestureRecognizer_Private.h in Headers */,
 				887F272D13F9969800D75DE6 /* TUITableViewSectionHeader.h in Headers */,
@@ -1405,7 +1392,6 @@
 				D0C7656215B6297300E7AC2C /* NSClipView+TUIExtensions.m in Sources */,
 				D0C7656815B6297300E7AC2C /* NSScrollView+TUIExtensions.m in Sources */,
 				D0C7657615B6341800E7AC2C /* TUICAAction.m in Sources */,
-				C6957A221A3D43B000C781A5 /* TUIPinchGestureRecognizer.m in Sources */,
 				D040610F15B6A77500F753ED /* TUIAnimationManager.m in Sources */,
 				D040611815B6A7CD00F753ED /* NSTextView+TUIExtensions.m in Sources */,
 				D039724115B7D7CC0092CD26 /* TUILayoutConstraint.m in Sources */,
@@ -1476,7 +1462,6 @@
 				884E8F5515387E11000F7A8D /* TUIPopover.m in Sources */,
 				884E8F5E1538809C000F7A8D /* CAAnimation+TUIExtensions.m in Sources */,
 				30D399C9156D8ADD006ECDAE /* TUIProgressBar.m in Sources */,
-				C6957A201A3D43B000C781A5 /* TUIPinchGestureRecognizer.m in Sources */,
 				88D81D001577EF0D009D453B /* TUIStyledView.m in Sources */,
 				D0C7651115B6189D00E7AC2C /* TUINSHostView.m in Sources */,
 				D0C7652715B6232100E7AC2C /* CALayer+TUIExtensions.m in Sources */,
@@ -1576,7 +1561,6 @@
 				D0C7656115B6297300E7AC2C /* NSClipView+TUIExtensions.m in Sources */,
 				D0C7656715B6297300E7AC2C /* NSScrollView+TUIExtensions.m in Sources */,
 				D0C7657515B6341800E7AC2C /* TUICAAction.m in Sources */,
-				C6957A211A3D43B000C781A5 /* TUIPinchGestureRecognizer.m in Sources */,
 				D040610E15B6A77500F753ED /* TUIAnimationManager.m in Sources */,
 				D040611715B6A7CD00F753ED /* NSTextView+TUIExtensions.m in Sources */,
 				D039723F15B7D7CB0092CD26 /* TUILayoutConstraint.m in Sources */,

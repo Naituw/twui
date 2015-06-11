@@ -38,32 +38,21 @@ static NSRange MakeNSRangeFromEndpoints(NSUInteger first, NSUInteger last) {
 	return NSMakeRange(first, last - first + 1);
 }
 
-static NSArray * defaultFallbacks = nil;
+static NSFontDescriptor *arialUniDescFallback = nil;
 static NSDictionary *CachedFontDescriptors = nil;
 
 + (void)initialize
 {
 	if(self == [TUIFont class]) {
-        NSMutableArray * fallbacks = [NSMutableArray array];
-        
-        NSArray * externalFons = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"TUIExternalFonts"];
-        [externalFons enumerateObjectsUsingBlock:^(NSString * fontName, NSUInteger idx, BOOL *stop) {
-            NSURL * path = [[NSBundle mainBundle] URLForResource:fontName withExtension:nil];
-            NSArray * descriptors = CFBridgingRelease(CTFontManagerCreateFontDescriptorsFromURL((CFURLRef)path));
-            [fallbacks addObjectsFromArray:descriptors];
-        }];
-        
+		
 		// fallback stuff prevents massive stalls
 		NSRange range = MakeNSRangeFromEndpoints(0x2100, 0x214F);
 		NSCharacterSet *letterlikeSymbolsSet = [NSCharacterSet characterSetWithRange:range];
-		[fallbacks addObject:[NSFontDescriptor fontDescriptorWithFontAttributes:
+		arialUniDescFallback = [NSFontDescriptor fontDescriptorWithFontAttributes:
 												   [NSDictionary dictionaryWithObjectsAndKeys:
 													@"ArialUnicodeMS", NSFontNameAttribute, 
 													letterlikeSymbolsSet, NSFontCharacterSetAttribute, 
-													nil]]];
-        
-        defaultFallbacks = fallbacks;
-        
+													nil]];
 		NSString *normalFontName;
 		NSString *lightFontName;
 		NSString *mediumFontName;
@@ -76,22 +65,22 @@ static NSDictionary *CachedFontDescriptors = nil;
 		NSFontDescriptor *D_HelveticaNeue = [NSFontDescriptor fontDescriptorWithFontAttributes:
 											  [NSDictionary dictionaryWithObjectsAndKeys:
 											   normalFontName, NSFontNameAttribute,
-											   defaultFallbacks, NSFontCascadeListAttribute,
+											   [NSArray arrayWithObject:arialUniDescFallback], NSFontCascadeListAttribute,
 											   nil]];
 		NSFontDescriptor *D_HelveticaNeue_Light = [NSFontDescriptor fontDescriptorWithFontAttributes:
 													[NSDictionary dictionaryWithObjectsAndKeys:
 													 lightFontName, NSFontNameAttribute,
-													 defaultFallbacks, NSFontCascadeListAttribute,
+													 [NSArray arrayWithObject:arialUniDescFallback], NSFontCascadeListAttribute,
 													 nil]];
 		NSFontDescriptor *D_HelveticaNeue_Medium = [NSFontDescriptor fontDescriptorWithFontAttributes:
 													 [NSDictionary dictionaryWithObjectsAndKeys:
 													  mediumFontName, NSFontNameAttribute,
-													  defaultFallbacks, NSFontCascadeListAttribute,
+													  [NSArray arrayWithObject:arialUniDescFallback], NSFontCascadeListAttribute,
 													  nil]];
 		NSFontDescriptor *D_HelveticaNeue_Bold = [NSFontDescriptor fontDescriptorWithFontAttributes:
 												   [NSDictionary dictionaryWithObjectsAndKeys:
 													boldFontName, NSFontNameAttribute,
-													defaultFallbacks, NSFontCascadeListAttribute,
+													[NSArray arrayWithObject:arialUniDescFallback], NSFontCascadeListAttribute,
 													nil]];
 		
 		CachedFontDescriptors = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -110,7 +99,7 @@ static NSDictionary *CachedFontDescriptors = nil;
 		desc = [NSFontDescriptor fontDescriptorWithFontAttributes:
 				[NSDictionary dictionaryWithObjectsAndKeys:
 				 fontName, NSFontNameAttribute, 
-				 defaultFallbacks, NSFontCascadeListAttribute, // oh thank you jesus
+				 [NSArray arrayWithObject:arialUniDescFallback], NSFontCascadeListAttribute, // oh thank you jesus
 				 nil]];
 		
 	}

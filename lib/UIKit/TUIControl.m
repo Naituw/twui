@@ -91,10 +91,12 @@
  * @see #state
  */
 -(void)setSelected:(BOOL)selected {
-	[self _stateWillChange];
-	_controlFlags.selected = selected;
-	[self _stateDidChange];
-	[self setNeedsDisplay];
+    if (_controlFlags.selected != selected) {
+        [self _stateWillChange];
+        _controlFlags.selected = selected;
+        [self _stateDidChange];
+        [self setNeedsDisplay];
+    }
 }
 
 - (BOOL)highlighted {
@@ -102,10 +104,12 @@
 }
 
 - (void)setHighlighted:(BOOL)highlighted {
-	[self _stateWillChange];
-	_controlFlags.highlighted = highlighted;
-	[self _stateDidChange];
-	[self setNeedsDisplay];
+    if (_controlFlags.highlighted != highlighted) {
+        [self _stateWillChange];
+        _controlFlags.highlighted = highlighted;
+        [self _stateDidChange];
+        [self setNeedsDisplay];
+    }
 }
 
 - (BOOL)acceptsFirstMouse

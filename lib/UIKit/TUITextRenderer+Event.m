@@ -336,11 +336,13 @@ normal:
 
 - (void)resetSelection
 {
-	_selectionStart = 0;
-	_selectionEnd = 0;
-	_selectionAffinity = TUITextSelectionAffinityCharacter;
-	self.hitRange = nil;
-	[view setNeedsDisplay];
+    if (_selectionStart || _selectionEnd || _selectionAffinity != TUITextSelectionAffinityCharacter || self.hitRange) {
+        _selectionStart = 0;
+        _selectionEnd = 0;
+        _selectionAffinity = TUITextSelectionAffinityCharacter;
+        self.hitRange = nil;
+        [view setNeedsDisplay];
+    }
 }
 
 - (void)selectAll:(id)sender

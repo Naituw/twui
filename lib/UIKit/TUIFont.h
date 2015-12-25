@@ -27,6 +27,8 @@
 
 + (TUIFont *)fontWithName:(NSString *)fontName size:(CGFloat)fontSize;
 
++ (TUIFont *)fontWithNSFont:(NSFont *)font;
+
 + (TUIFont *)systemFontOfSize:(CGFloat)fontSize;
 + (TUIFont *)boldSystemFontOfSize:(CGFloat)fontSize;
 
@@ -40,5 +42,10 @@
 @property(nonatomic,readonly)        CGFloat   xHeight;
 
 @property (nonatomic, readonly) CTFontRef ctFont;
+
++ (NSString *)defaultFontName;
++ (NSString *)lightDefaultFontName;
++ (NSString *)mediumDefaultFontName;
++ (NSString *)boldDefaultFontName;
 
 @end

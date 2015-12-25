@@ -570,8 +570,10 @@ void TUISetCurrentContextScaleFactor(CGFloat s)
 		}
 		
 		if([self.layer respondsToSelector:@selector(setContentsScale:)]) {
-			self.layer.contentsScale = scale;
-			[self setNeedsDisplay];
+            if (self.layer.contentsScale != scale) {
+                self.layer.contentsScale = scale;
+                [self setNeedsDisplay];
+            }
 		}
 	}
 }

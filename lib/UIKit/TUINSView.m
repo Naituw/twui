@@ -110,6 +110,8 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
  */
 @property (nonatomic, strong) CAShapeLayer *maskLayer;
 
+@property (nonatomic, weak) TUIView * gesturePerformingView;
+
 /*
  * Returns any existing AppKit-created focus ring layer for the given view, or
  * nil if one could not be found.
@@ -554,12 +556,12 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
     }
 }
 
-- (void)beginGestureWithEvent:(NSEvent *)event
+- (void)beginGestureWithEvent:(nonnull NSEvent *)event
 {
 	[[self viewForEvent:event] beginGestureWithEvent:event];
 }
 
-- (void)endGestureWithEvent:(NSEvent *)event
+- (void)endGestureWithEvent:(nonnull NSEvent *)event
 {
 	[[self viewForEvent:event] endGestureWithEvent:event];
 }
@@ -589,6 +591,50 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 		[[self viewForEvent:event] swipeWithEvent:event];
 		deliveringEvent = NO;
 	}
+}
+
+- (void)beginGesturePerformingIfNeededWithEvent:(NSEvent *)event
+{
+    if (_gesturePerformingView) {
+        return;
+    }
+    
+    if ([event touchesMatchingPhase:NSTouchPhaseTouching inView:self].count > 1) {
+        _gesturePerformingView = [self viewForEvent:event];
+        [_gesturePerformingView beginGestureWithEvent:event];
+    }
+}
+
+- (void)endGesturePerformingWithEvent:(NSEvent *)event
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (!_gesturePerformingView) {
+            return;
+        }
+        
+        [_gesturePerformingView endGestureWithEvent:event];
+        _gesturePerformingView = nil;
+    });
+}
+
+- (void)touchesBeganWithEvent:(NSEvent *)event
+{
+    [self beginGesturePerformingIfNeededWithEvent:event];
+}
+
+- (void)touchesMovedWithEvent:(NSEvent *)event
+{
+    [self beginGesturePerformingIfNeededWithEvent:event];
+}
+
+- (void)touchesCancelledWithEvent:(NSEvent *)event
+{
+    [self endGesturePerformingWithEvent:event];
+}
+
+- (void)touchesEndedWithEvent:(NSEvent *)event
+{
+    [self endGesturePerformingWithEvent:event];
 }
 
 - (void)keyDown:(NSEvent *)event
@@ -733,6 +779,9 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 }
 
 - (void)setUp {
+    
+    self.acceptsTouchEvents = YES;
+    
 	opaque = YES;
 
 	_maskLayer = [CAShapeLayer layer];

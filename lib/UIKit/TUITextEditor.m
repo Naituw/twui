@@ -60,13 +60,13 @@
 
 - (BOOL)becomeFirstResponder
 {
-	[view setNeedsDisplay];
+	[self.eventDelegateContextView setNeedsDisplay];
 	return [super becomeFirstResponder];
 }
 
 - (BOOL)resignFirstResponder
 {
-	[view setNeedsDisplay];
+	[self.eventDelegateContextView setNeedsDisplay];
 	return [super resignFirstResponder];
 }
 
@@ -74,8 +74,8 @@
 {
 	[inputContext invalidateCharacterCoordinates];
 	[self reset];
-	[view setNeedsDisplay];
-	[view performSelector:@selector(_textDidChange)];
+	[self.eventDelegateContextView setNeedsDisplay];
+	[self.eventDelegateContextView performSelector:@selector(_textDidChange)];
 }
 
 - (NSString *)text
@@ -289,7 +289,7 @@
 - (void)setSelectedRange:(NSRange)r
 {
 	[self setSelection:r]; // will reset selectionAffinity to per-character
-	[view setNeedsDisplay];
+	[self.eventDelegateContextView setNeedsDisplay];
 }
 
 /* Returns the marked range. Returns {NSNotFound, 0} if no marked range.
@@ -332,39 +332,6 @@
 	return [NSArray arrayWithObjects:NSMarkedClauseSegmentAttributeName, NSGlyphInfoAttributeName, nil];
 }
 
-/* Returns the first logical rectangular area for aRange. The return value is in the screen 
- coordinate. The size value can be negative if the text flows to the left. 
- If non-NULL, actuallRange contains the character range corresponding to the returned area.
- */
-- (NSRect)firstRectForCharacterRange:(NSRange)aRange actualRange:(NSRangePointer)actualRange
-{
-	if(actualRange)
-        *actualRange = aRange;
-    CGRect f = [self firstRectForCharacterRange:CFRangeMake(aRange.location, aRange.length)];
-	
-    NSRect vf = [self.view convertRect:f toView:nil];
-    NSRect windowRelativeRect = [self.view.nsView convertRect:vf toView:nil];
-	
-    NSRect screenRect = windowRelativeRect;
-    screenRect.origin = [self.view.nsWindow convertBaseToScreen:windowRelativeRect.origin];
-	
-    return screenRect;
-}
-
-/* Returns the index for character that is nearest to aPoint. aPoint is in the 
- screen coordinate system.
- */
-- (NSUInteger)characterIndexForPoint:(NSPoint)screenPoint
-{
-	NSPoint locationInWindow = [[view nsWindow] convertScreenToBase:screenPoint];
-	CGPoint vp = [view localPointForLocationInWindow:locationInWindow];
-	
-	CGRect trFrame = self.frame;
-	vp.x -= trFrame.origin.x;
-	vp.y -= trFrame.origin.y;
-	CFIndex index = [self stringIndexForPoint:vp];
-	return (NSUInteger)index;
-}
 
 #pragma mark optional
 /* Returns an attributed string representing the receiver's document content. 
@@ -403,7 +370,7 @@
  */
 - (NSInteger)windowLevel
 {
-	return [[view nsWindow] level];
+	return [[self.eventDelegateContextView nsWindow] level];
 }
 
 /* Returns if the marked text is in vertical layout.

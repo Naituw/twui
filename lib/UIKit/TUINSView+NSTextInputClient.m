@@ -71,7 +71,7 @@
 	_tempTextRendererForTextInputClient = [self _textRendererAtScreenPoint:screenPoint];
 	if(_tempTextRendererForTextInputClient) {
 		NSPoint locationInWindow = [[self window] convertScreenToBase:screenPoint];
-		CGPoint vp = [_tempTextRendererForTextInputClient.view localPointForLocationInWindow:locationInWindow];
+		CGPoint vp = [_tempTextRendererForTextInputClient.eventDelegateContextView localPointForLocationInWindow:locationInWindow];
         //		NSLog(@"vp = %@", NSStringFromPoint(vp));
 		CGRect trFrame = _tempTextRendererForTextInputClient.frame;
 		vp.x -= trFrame.origin.x;
@@ -96,14 +96,14 @@
         //		NSLog(@"getting first rect for range: %@", NSStringFromRange(r));
 		CGRect f = [_tempTextRendererForTextInputClient firstRectForCharacterRange:CFRangeMake(r.location, r.length)];
         //		NSLog(@"f = %@", NSStringFromRect(f));
-		NSRect vf = [_tempTextRendererForTextInputClient.view convertRect:f toView:nil];
+		NSRect vf = [_tempTextRendererForTextInputClient.eventDelegateContextView convertRect:f toView:nil];
         //		NSLog(@"vf = %@", NSStringFromRect(vf));
 		
-		NSRect windowRelativeRect = [_tempTextRendererForTextInputClient.view.nsView convertRect:vf toView:nil];
+		NSRect windowRelativeRect = [_tempTextRendererForTextInputClient.eventDelegateContextView.nsView convertRect:vf toView:nil];
         //		NSLog(@"windowRelativeRect = %@", NSStringFromRect(windowRelativeRect));
 		
 		NSRect screenRect = windowRelativeRect;
-		screenRect.origin = [_tempTextRendererForTextInputClient.view.nsWindow convertBaseToScreen:windowRelativeRect.origin];
+		screenRect.origin = [_tempTextRendererForTextInputClient.eventDelegateContextView.nsWindow convertBaseToScreen:windowRelativeRect.origin];
         
 		ret = screenRect;
 	}

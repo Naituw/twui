@@ -90,7 +90,7 @@ doClear:
 
 - (TUITextField *)_textField
 {
-	return (TUITextField *)view;
+	return (TUITextField *)self.eventDelegateContextView;
 }
 
 - (void)insertTab:(id)sender

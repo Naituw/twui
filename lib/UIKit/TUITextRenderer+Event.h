@@ -18,6 +18,8 @@
 #import "ABActiveRange.h"
 #import "TUITextAttachment.h"
 
+@protocol TUITextRendererEventDelegate;
+
 @interface TUITextRenderer (Event)
 
 - (CFIndex)stringIndexForPoint:(CGPoint)p;
@@ -27,18 +29,21 @@
 
 - (void)copy:(id)sender;
 
-@property (nonatomic, assign) id<TUITextRendererDelegate> delegate;
+@property (nonatomic, weak) id<TUITextRendererEventDelegate> eventDelegate;
+
+@property (nonatomic, assign, readonly) TUIView * eventDelegateContextView;
 
 @end
 
-@protocol TUITextRendererDelegate <NSObject>
+@protocol TUITextRendererEventDelegate <NSObject>
+
+@required
+- (TUIView *)contextViewForTextRenderer:(TUITextRenderer *)textRenderer;
 
 @optional
-- (id<ABActiveTextRange>)textRenderer:(TUITextRenderer *)textRenderer activeRangeAtIndex:(NSInteger)index;
 - (NSArray *)activeRangesForTextRenderer:(TUITextRenderer *)textRenderer;
 - (void)textRenderer:(TUITextRenderer *)textRenderer didClickActiveRange:(id<ABActiveTextRange>)textRange;
 
-- (void)textRenderer:(TUITextRenderer *)textRenderer renderTextAttachment:(TUITextAttachment *)attachment highlighted:(BOOL)highlighted inContext:(CGContextRef)ctx;
 - (void)textRenderer:(TUITextRenderer *)textRenderer didClickTextAttachment:(TUITextAttachment *)attachment;
 - (NSMenu *)textRenderer:(TUITextRenderer *)textRenderer contextMenuForTextAttachment:(TUITextAttachment *)attachment event:(NSEvent *)event;
 

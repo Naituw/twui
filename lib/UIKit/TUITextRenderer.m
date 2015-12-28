@@ -15,6 +15,7 @@
  */
 
 #import "TUITextRenderer.h"
+#import "TUITextRenderer_Private.h"
 #import "ABActiveRange.h"
 #import "TUIAttributedString.h"
 #import "TUICGAdditions.h"
@@ -32,7 +33,6 @@
 
 @synthesize attributedString;
 @synthesize frame;
-@synthesize view;
 @synthesize hitRange;
 @synthesize hitAttachment;
 @synthesize shadowColor;
@@ -238,7 +238,7 @@
 	_selectionAffinity = TUITextSelectionAffinityCharacter;
 	_selectionStart = selection.location;
 	_selectionEnd = selection.location + selection.length;
-	[view setNeedsDisplay];
+	[self.eventDelegateContextView setNeedsDisplay];
 }
 
 - (NSString *)selectedString
@@ -251,6 +251,25 @@
     } options:NSAttributedStringEnumerationReverse];
     
 	return result;
+}
+
+- (void)setRenderDelegate:(id<TUITextRendererDelegate>)renderDelegate
+{
+    if (_renderDelegate != renderDelegate) {
+        _renderDelegate = renderDelegate;
+        
+        _renderDelegateHas.placeAttachment = [renderDelegate respondsToSelector:@selector(textRenderer:renderTextAttachment:highlighted:inContext:)];
+    }
+}
+
+- (id<TUITextLayoutDelegate>)layoutDelegate
+{
+    return self.textLayout.delegate;
+}
+
+- (void)setLayoutDelegate:(id<TUITextLayoutDelegate>)layoutDelegate
+{
+    self.textLayout.delegate = layoutDelegate;
 }
 
 - (void)draw
@@ -533,13 +552,13 @@
 
 - (void)setNeedsDisplay {
 	[self _resetFramesetter];
-	[view setNeedsDisplay];
+	[self.eventDelegateContextView setNeedsDisplay];
 }
 
 - (void)renderAttachment:(TUITextAttachment *)attachment highlighted:(BOOL)highlighted inContext:(CGContextRef)ctx
 {
-    if (_flags.delegateRenderTextAttachment) {
-        [self.delegate textRenderer:self renderTextAttachment:attachment highlighted:highlighted inContext:ctx];
+    if (_renderDelegateHas.placeAttachment) {
+        [self.renderDelegate textRenderer:self renderTextAttachment:attachment highlighted:highlighted inContext:ctx];
     }
 }
 

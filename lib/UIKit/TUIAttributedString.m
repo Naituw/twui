@@ -23,6 +23,7 @@ NSString * const TUIAttributedStringBackgroundColorAttributeName = @"TUIAttribut
 NSString * const TUIAttributedStringBackgroundFillStyleName = @"TUIAttributedStringBackgroundFillStyleName";
 NSString * const TUIAttributedStringPreDrawBlockName = @"TUIAttributedStringPreDrawBlockName";
 NSString * const TUIAttributedStringAttachmentName = @"TUIAttributedStringAttachmentName";
+NSString * const TUITextDefaultForegroundColorAttributeName = @"TUITextDefaultForegroundColorAttributeName";
 
 @implementation TUIAttributedString
 

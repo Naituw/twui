@@ -43,7 +43,7 @@
 
 - (id)accessibilityAttributeValue:(NSString *)attribute
 {
-	id practicalSuperview = (id) self.view;
+	id practicalSuperview = (id) self.eventDelegateContextView;
     if([attribute isEqualToString:NSAccessibilityRoleAttribute]) {
 		return NSAccessibilityStaticTextRole;
     } else if([attribute isEqualToString:NSAccessibilityRoleDescriptionAttribute]) {
@@ -58,9 +58,9 @@
     } else if([attribute isEqualToString:NSAccessibilityTopLevelUIElementAttribute]) {
 		return [practicalSuperview accessibilityAttributeValue:NSAccessibilityTopLevelUIElementAttribute];
     } else if([attribute isEqualToString:NSAccessibilityPositionAttribute]) {
-		CGRect viewFrame = [self.view frameInNSView];
+		CGRect viewFrame = [self.eventDelegateContextView frameInNSView];
 		
-		NSPoint p = [[(NSView *)[self.view nsView] window] convertBaseToScreen:NSMakePoint(viewFrame.origin.x + self.frame.origin.x, viewFrame.origin.y + self.frame.origin.y)];
+		NSPoint p = [[(NSView *)[self.eventDelegateContextView nsView] window] convertBaseToScreen:NSMakePoint(viewFrame.origin.x + self.frame.origin.x, viewFrame.origin.y + self.frame.origin.y)];
 		return [NSValue valueWithPoint:p];
     } else if([attribute isEqualToString:NSAccessibilitySizeAttribute]) {
 		return [NSValue valueWithSize:[self frame].size];

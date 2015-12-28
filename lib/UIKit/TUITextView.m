@@ -55,7 +55,7 @@
 }
 @end
 
-@interface TUITextView () <TUITextRendererDelegate>
+@interface TUITextView () <TUITextRendererEventDelegate>
 - (void)_checkSpelling;
 - (void)_replaceMisspelledWord:(NSMenuItem *)menuItem;
 - (CGRect)_cursorRect;
@@ -84,7 +84,9 @@
 @synthesize placeholderRenderer;
 
 - (void)dealloc {
-	renderer.delegate = nil;
+	renderer.eventDelegate = nil;
+    renderer.renderDelegate = nil;
+    renderer.layoutDelegate = nil;
 }
 
 - (void)_updateDefaultAttributes
@@ -112,7 +114,7 @@
 		self.backgroundColor = [TUIColor clearColor];
 		
 		renderer = [[[self textEditorClass] alloc] init];
-		renderer.delegate = self;
+		renderer.eventDelegate = self;
 		self.textRenderers = [NSArray arrayWithObject:renderer];
 		
 		cursor = [[TUIView alloc] initWithFrame:CGRectZero];
@@ -682,6 +684,11 @@ static CAAnimation *ThrobAnimation()
 - (void)textRendererDidResignFirstResponder:(TUITextRenderer *)textRenderer
 {
 	if(_textViewFlags.delegateDidResignFirstResponder) [delegate textViewDidResignFirstResponder:self];
+}
+
+- (TUIView *)contextViewForTextRenderer:(TUITextRenderer *)textRenderer
+{
+    return self;
 }
 
 @end

@@ -13,7 +13,7 @@
 
 - (TUITextView *)_textView
 {
-	return (TUITextView *)view;
+	return (TUITextView *)self.eventDelegateContextView;
 }
 
 - (void)doCommandBySelector:(SEL)selector

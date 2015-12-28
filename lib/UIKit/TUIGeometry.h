@@ -57,3 +57,62 @@ static inline CGPoint CGPointConstrainToRect(CGPoint point, CGRect rect) {
   return CGPointMake(MAX(rect.origin.x, MIN((rect.origin.x + rect.size.width), point.x)), MAX(rect.origin.y, MIN((rect.origin.y + rect.size.height), point.y)));
 }
 
+struct TUIFontMetrics {
+    CGFloat ascent;
+    CGFloat descent;
+    CGFloat leading;
+};
+typedef struct TUIFontMetrics TUIFontMetrics;
+
+static inline TUIFontMetrics TUIFontMetricsMake(CGFloat a, CGFloat d, CGFloat l)
+{
+    TUIFontMetrics metrics;
+    metrics.ascent = a;
+    metrics.descent = d;
+    metrics.leading = l;
+    return metrics;
+}
+
+extern const TUIFontMetrics TUIFontMetricsZero;
+extern const TUIFontMetrics TUIFontMetricsNull;
+
+static inline TUIFontMetrics TUIFontMetricsMakeFromNSFont(NSFont * font)
+{
+    if (!font) {
+        return TUIFontMetricsNull;
+    }
+    
+    TUIFontMetrics metrics;
+    metrics.ascent = ABS(font.ascender);
+    metrics.descent = ABS(font.descender);
+    metrics.leading = ABS(font.leading) - metrics.ascent - metrics.descent;
+    return metrics;
+}
+static inline TUIFontMetrics TUIFontMetricsMakeFromCTFont(CTFontRef font)
+{
+    return TUIFontMetricsMake(ABS(CTFontGetAscent(font)), ABS(CTFontGetDescent(font)), ABS(CTFontGetLeading(font)));
+}
+static inline TUIFontMetrics TUIFontMetricsMakeWithTargetLineHeight(TUIFontMetrics metrics, CGFloat targetLineHeight)
+{
+    return TUIFontMetricsMake(targetLineHeight - metrics.descent - metrics.leading, metrics.descent, metrics.leading);
+}
+
+static inline CGFloat TUIFontMetricsGetLineHeight(TUIFontMetrics metrics)
+{
+    return ceil(metrics.ascent + metrics.descent + metrics.leading);
+}
+
+static inline BOOL TUIFontMetricsEqual(TUIFontMetrics m1, TUIFontMetrics m2)
+{
+    return m1.ascent == m2.ascent && m1.descent == m2.descent && m1.leading == m2.leading;
+}
+
+extern TUIFontMetrics TUIFontMetricsGetDefault(NSInteger pointSize);
+
+@interface NSCoder (TUIFontMetricsKeyedCoding)
+
+- (void)tui_encodeFontMetrics:(TUIFontMetrics)metrics forKey:(NSString *)key;
+- (TUIFontMetrics)tui_decodeFontMetricsForKey:(NSString *)key;
+
+@end
+

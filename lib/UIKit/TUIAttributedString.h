@@ -20,6 +20,7 @@ extern NSString * const TUIAttributedStringBackgroundColorAttributeName;
 extern NSString * const TUIAttributedStringBackgroundFillStyleName;
 extern NSString * const TUIAttributedStringPreDrawBlockName;
 extern NSString * const TUIAttributedStringAttachmentName;
+extern NSString * const TUITextDefaultForegroundColorAttributeName;
 
 @class TUIFont;
 @class TUIColor;

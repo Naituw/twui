@@ -15,6 +15,7 @@
  */
 
 #import "TUITextRenderer+Event.h"
+#import "TUITextRenderer_Private.h"
 #import "CoreText+Additions.h"
 #import "TUICGAdditions.h"
 #import "TUIImage.h"
@@ -38,33 +39,33 @@
 	if(!initialized) {
 		initialized = YES;
 		// set up Services
-		[NSApp registerServicesMenuSendTypes:[NSArray arrayWithObjects:NSStringPboardType, nil] returnTypes:nil];
+		[NSApp registerServicesMenuSendTypes:[NSArray arrayWithObjects:NSStringPboardType, nil] returnTypes:@[]];
 	}
 }
 
-- (id<TUITextRendererDelegate>)delegate
+- (id<TUITextRendererEventDelegate>)eventDelegate
 {
-	return delegate;
+    return _eventDelegate;
 }
 
-- (void)setDelegate:(id<TUITextRendererDelegate>)d
+- (void)setEventDelegate:(id<TUITextRendererEventDelegate>)eventDelegate
 {
-	delegate = d;
+    _eventDelegate = eventDelegate;
 	
-    _flags.delegateTextRendererActiveRangeAtIndex = [delegate respondsToSelector:@selector(textRenderer:activeRangeAtIndex:)];
-    _flags.delegateTextRendererDidClickActiveRange = [delegate respondsToSelector:@selector(textRenderer:didClickActiveRange:)];
-	_flags.delegateActiveRangesForTextRenderer = [delegate respondsToSelector:@selector(activeRangesForTextRenderer:)];
-    _flags.delegateRenderTextAttachment = [delegate respondsToSelector:@selector(textRenderer:renderTextAttachment:highlighted:inContext:)];
-    _flags.delegateDidClickTextAttachment = [delegate respondsToSelector:@selector(textRenderer:didClickTextAttachment:)];
-	_flags.delegateWillBecomeFirstResponder = [delegate respondsToSelector:@selector(textRendererWillBecomeFirstResponder:)];
-	_flags.delegateDidBecomeFirstResponder = [delegate respondsToSelector:@selector(textRendererDidBecomeFirstResponder:)];
-	_flags.delegateWillResignFirstResponder = [delegate respondsToSelector:@selector(textRendererWillResignFirstResponder:)];
-	_flags.delegateDidResignFirstResponder = [delegate respondsToSelector:@selector(textRendererDidResignFirstResponder:)];
+    _eventDelegateHas.contextView = [eventDelegate respondsToSelector:@selector(contextViewForTextRenderer:)];
+    _eventDelegateHas.didPressActiveRange = [eventDelegate respondsToSelector:@selector(textRenderer:didClickActiveRange:)];
+    _eventDelegateHas.activeRanges = [eventDelegate respondsToSelector:@selector(activeRangesForTextRenderer:)];
+    _eventDelegateHas.didPressAttachment = [eventDelegate respondsToSelector:@selector(textRenderer:didClickTextAttachment:)];
+    _eventDelegateHas.contextMenuForAttachment = [eventDelegate respondsToSelector:@selector(textRenderer:contextMenuForTextAttachment:event:)];
+    _eventDelegateHas.willBecomeFirstResponder = [eventDelegate respondsToSelector:@selector(textRendererWillBecomeFirstResponder:)];
+    _eventDelegateHas.didBecomeFirstResponder = [eventDelegate respondsToSelector:@selector(textRendererDidBecomeFirstResponder:)];
+    _eventDelegateHas.willResignFirstResponder = [eventDelegate respondsToSelector:@selector(textRendererWillResignFirstResponder:)];
+    _eventDelegateHas.didResignFirstResponder = [eventDelegate respondsToSelector:@selector(textRendererDidResignFirstResponder:)];
 }
 
 - (CGPoint)localPointForEvent:(NSEvent *)event
 {
-	CGPoint p = [view localPointForEvent:event];
+	CGPoint p = [self.eventDelegateContextView localPointForEvent:event];
 	p.x -= frame.origin.x;
 	p.y -= frame.origin.y;
 	return p;
@@ -92,7 +93,7 @@
 
 - (TUIImage *)dragImageForSelection:(NSRange)selection
 {
-	CGRect b = self.view.frame;
+	CGRect b = self.eventDelegateContextView.frame;
 	
 	_flags.drawMaskDragSelection = 1;
 	TUIImage *image = TUIGraphicsDrawAsImage(b.size, ^{
@@ -114,7 +115,7 @@
 		NSPasteboard *pasteboard = [NSPasteboard pasteboardWithName:NSDragPboard];
 		[pasteboard clearContents];
 		[pasteboard writeObjects:[NSArray arrayWithObject:string]];
-		NSRect f = [view frameInNSView];
+		NSRect f = [self.eventDelegateContextView frameInNSView];
 		
 		CFIndex saveStart = _selectionStart;
 		CFIndex saveEnd = _selectionEnd;
@@ -126,7 +127,7 @@
 		
 		NSImage *image = [[NSImage alloc] initWithCGImage:dragImage.CGImage size:NSZeroSize];
 		
-		[view.nsView dragImage:image 
+		[self.eventDelegateContextView.nsView dragImage:image
 							at:f.origin
 						offset:NSZeroSize
 						 event:nextEvent 
@@ -159,7 +160,7 @@
 	}
     
 	CFIndex eventIndex = [self stringIndexForEvent:event];
-    CGPoint eventLocation = [view localPointForEvent:event];
+    CGPoint eventLocation = [self.eventDelegateContextView localPointForEvent:event];
     TUITextAttachment * __block hitTextAttachment = nil;
     id<ABActiveTextRange> hitActiveRange = nil;
     
@@ -177,11 +178,11 @@
         goto normal;
     }
     
-    if (_flags.delegateTextRendererActiveRangeAtIndex) {
-        hitActiveRange = [delegate textRenderer:self activeRangeAtIndex:eventIndex];
-    } else if (_flags.delegateActiveRangesForTextRenderer) {
-        NSArray * ranges = [delegate activeRangesForTextRenderer:self];
-        hitActiveRange = [self rangeInRanges:ranges forStringIndex:eventIndex];
+    {
+        NSArray * ranges = [self eventDelegateActiveRanges];
+        if (ranges) {
+            hitActiveRange = [self rangeInRanges:ranges forStringIndex:eventIndex];
+        }
     }
 
 	if([event clickCount] > 1)
@@ -189,7 +190,7 @@
 	
 	if(hitActiveRange) {
 		self.hitRange = hitActiveRange;
-		[self.view redraw];
+		[self.eventDelegateContextView redraw];
 		self.hitRange = nil;
 		
 		NSRange r = [hitActiveRange rangeValue];
@@ -228,9 +229,9 @@ normal:
 	}
 	
 	CGRect totalRect = CGRectUnion(previousSelectionRect, [self rectForCurrentSelection]);
-	[view setNeedsDisplayInRect:totalRect];
+	[self.eventDelegateContextView setNeedsDisplayInRect:totalRect];
 	if([self acceptsFirstResponder])
-		[[view nsWindow] tui_makeFirstResponder:self];
+		[[self.eventDelegateContextView nsWindow] tui_makeFirstResponder:self];
 }
 
 - (void)mouseUp:(NSEvent *)event
@@ -257,15 +258,15 @@ normal:
 	_selectionAffinity = TUITextSelectionAffinityCharacter; // reset affinity
 	
 	CGRect totalRect = CGRectUnion(previousSelectionRect, [self rectForCurrentSelection]);
-	[view setNeedsDisplayInRect:totalRect];
+	[self.eventDelegateContextView setNeedsDisplayInRect:totalRect];
     
-    if (self.hitRange && _flags.delegateTextRendererDidClickActiveRange) {
-        [self.delegate textRenderer:self didClickActiveRange:self.hitRange];
+    if (self.hitRange) {
+        [self eventDelegateDidClickActiveRange:self.hitRange];
     }
     self.hitRange = nil;
     
-    if (self.hitAttachment && _flags.delegateDidClickTextAttachment) {
-        [self.delegate textRenderer:self didClickTextAttachment:self.hitAttachment];
+    if (self.hitAttachment) {
+        [self eventDelegateDidClickAttachment:self.hitAttachment];
     }
     self.hitAttachment = nil;
 }
@@ -278,7 +279,7 @@ normal:
 	_selectionEnd = i;
 	
 	CGRect totalRect = CGRectUnion(previousSelectionRect, [self rectForCurrentSelection]);
-	[view setNeedsDisplayInRect:totalRect];
+	[self.eventDelegateContextView setNeedsDisplayInRect:totalRect];
     
     self.hitRange = nil;
     self.hitAttachment = nil;
@@ -286,8 +287,8 @@ normal:
 
 - (NSMenu *)menuForEvent:(NSEvent *)event
 {
-    if ([self.delegate respondsToSelector:@selector(textRenderer:contextMenuForTextAttachment:event:)]) {
-        CGPoint eventLocation = [view localPointForEvent:event];
+    if (_eventDelegateHas.contextMenuForAttachment) {
+        CGPoint eventLocation = [self.eventDelegateContextView localPointForEvent:event];
         TUITextAttachment * __block hitTextAttachment = nil;
         
         [self.attributedString tui_enumerateTextAttachments:^(TUITextAttachment *attachment, NSRange range, BOOL *stop) {
@@ -298,7 +299,7 @@ normal:
         }];
         
         if (hitTextAttachment) {
-            NSMenu * menu = [self.delegate textRenderer:self contextMenuForTextAttachment:hitTextAttachment event:event];
+            NSMenu * menu = [_eventDelegate textRenderer:self contextMenuForTextAttachment:hitTextAttachment event:event];
             if (menu) {
                 return menu;
             }
@@ -341,7 +342,7 @@ normal:
         _selectionEnd = 0;
         _selectionAffinity = TUITextSelectionAffinityCharacter;
         self.hitRange = nil;
-        [view setNeedsDisplay];
+        [self.eventDelegateContextView setNeedsDisplay];
     }
 }
 
@@ -350,7 +351,7 @@ normal:
 	_selectionStart = 0;
 	_selectionEnd = [[attributedString string] length];
 	_selectionAffinity = TUITextSelectionAffinityCharacter;
-	[view setNeedsDisplay];
+	[self.eventDelegateContextView setNeedsDisplay];
 }
 
 - (void)copy:(id)sender
@@ -372,8 +373,8 @@ normal:
 - (BOOL)becomeFirstResponder
 {
 	// TODO: obviously these shouldn't be called at exactly the same time...
-	if(_flags.delegateWillBecomeFirstResponder) [delegate textRendererWillBecomeFirstResponder:self];
-	if(_flags.delegateDidBecomeFirstResponder) [delegate textRendererDidBecomeFirstResponder:self];
+	if(_eventDelegateHas.willBecomeFirstResponder) [_eventDelegate textRendererWillBecomeFirstResponder:self];
+	if(_eventDelegateHas.didBecomeFirstResponder) [_eventDelegate textRendererDidBecomeFirstResponder:self];
 	
 	return YES;
 }
@@ -381,9 +382,9 @@ normal:
 - (BOOL)resignFirstResponder
 {
 	// TODO: obviously these shouldn't be called at exactly the same time...
-	if(_flags.delegateWillResignFirstResponder) [delegate textRendererWillResignFirstResponder:self];
+	if(_eventDelegateHas.willResignFirstResponder) [_eventDelegate textRendererWillResignFirstResponder:self];
 	[self resetSelection];
-	if(_flags.delegateDidResignFirstResponder) [delegate textRendererDidResignFirstResponder:self];
+	if(_eventDelegateHas.didResignFirstResponder) [_eventDelegate textRendererDidResignFirstResponder:self];
 	return YES;
 }
 
@@ -428,9 +429,39 @@ normal:
     point.y += descent;
     //point.y += leading;
     
-    point = [self.view convertPoint:point toView:self.view.nsView.rootView];
+    point = [self.eventDelegateContextView convertPoint:point toView:self.eventDelegateContextView.nsView.rootView];
     
-    [self.view.nsView showDefinitionForAttributedString:target atPoint:point];
+    [self.eventDelegateContextView.nsView showDefinitionForAttributedString:target atPoint:point];
+}
+
+- (TUIView *)eventDelegateContextView
+{
+    if (_eventDelegateHas.contextView) {
+        return [_eventDelegate contextViewForTextRenderer:self];
+    }
+    return nil;
+}
+
+- (NSArray *)eventDelegateActiveRanges
+{
+    if (_eventDelegateHas.activeRanges) {
+        return [_eventDelegate activeRangesForTextRenderer:self];
+    }
+    return nil;
+}
+
+- (void)eventDelegateDidClickActiveRange:(id<ABActiveTextRange>)activeRange
+{
+    if (_eventDelegateHas.didPressActiveRange) {
+        [_eventDelegate textRenderer:self didClickActiveRange:activeRange];
+    }
+}
+
+- (void)eventDelegateDidClickAttachment:(TUITextAttachment *)attachment
+{
+    if (_eventDelegateHas.didPressAttachment) {
+        [_eventDelegate textRenderer:self didClickTextAttachment:attachment];
+    }
 }
 
 @end

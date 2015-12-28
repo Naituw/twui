@@ -16,12 +16,15 @@
 
 #import "TUIResponder.h"
 #import "CoreText+Additions.h"
+#import "TUITextLayout.h"
 
 @class TUIColor;
 @class TUIFont;
 @class TUIView;
 @class TUITextAttachment;
 @protocol ABActiveTextRange;
+@protocol TUITextRendererDelegate;
+@protocol TUITextLayoutDelegate;
 
 typedef enum {
 	TUITextSelectionAffinityCharacter = 0,
@@ -44,7 +47,6 @@ typedef enum {
 {
 	NSAttributedString *attributedString;
 	CGRect frame;
-	TUIView *__weak view; // unsafe_unretained
 	
 	CTFramesetterRef _ct_framesetter;
 	CGPathRef _ct_path;
@@ -54,7 +56,6 @@ typedef enum {
 	CFIndex _selectionEnd;
 	TUITextSelectionAffinity _selectionAffinity;
 	
-	__weak id<TUITextRendererDelegate> delegate;
 	id<ABActiveTextRange> hitRange;
     TUITextAttachment * hitAttachment;
 	
@@ -69,23 +70,18 @@ typedef enum {
 	struct {
 		unsigned int drawMaskDragSelection:1;
 		unsigned int backgroundDrawingEnabled:1;
-		unsigned int preDrawBlocksEnabled:1;
-		
-        unsigned int delegateTextRendererActiveRangeAtIndex:1;
-        unsigned int delegateTextRendererDidClickActiveRange:1;
-		unsigned int delegateActiveRangesForTextRenderer:1;
-        unsigned int delegateRenderTextAttachment:1;
-        unsigned int delegateDidClickTextAttachment:1;
-		unsigned int delegateWillBecomeFirstResponder:1;
-		unsigned int delegateDidBecomeFirstResponder:1;
-		unsigned int delegateWillResignFirstResponder:1;
-		unsigned int delegateDidResignFirstResponder:1;
+		unsigned int preDrawBlocksEnabled:1;		
 	} _flags;
 }
 
 @property (nonatomic, strong) NSAttributedString *attributedString;
+
+@property (nonatomic, strong) TUITextLayout * textLayout;
+
 @property (nonatomic, assign) CGRect frame;
-@property (nonatomic, weak) TUIView *view; // unsafe_unretained, remember to set to nil before view goes away
+
+@property (nonatomic, weak) id<TUITextRendererDelegate> renderDelegate;
+@property (nonatomic, weak) id<TUITextLayoutDelegate> layoutDelegate;
 
 @property (nonatomic, assign) CGSize shadowOffset;
 @property (nonatomic, assign) CGFloat shadowBlur;
@@ -133,7 +129,64 @@ typedef enum {
 
 @end
 
+@protocol TUITextRendererDelegate <NSObject>
+
+@optional
+
+/**
+ *  TextAttachment 渲染的回调方法，delegate 可以通过此方法定义 Attachment 的样式，具体显示的方式可以是绘制到 context 或者添加一个自定义 View
+ *
+ *  @param textRenderer 执行文字渲染的 TextRenderer
+ *  @param attachment   需要渲染的 TextAttachment
+ *  @param frame        建议渲染到的 frame
+ *  @param context      当前的 CGContext
+ */
+- (void)textRenderer:(TUITextRenderer *)textRenderer renderTextAttachment:(TUITextAttachment *)attachment highlighted:(BOOL)highlighted inContext:(CGContextRef)ctx;
+
+@end
+
+@interface TUITextRenderer (Coordinates)
+
+/**
+ *  将坐标点从文字布局中转换到 TextRenderer 的绘制区域中
+ *
+ *  @param point 需要转换的坐标点
+ *
+ *  @return 转换过的坐标点
+ */
+- (CGPoint)convertPointFromLayout:(CGPoint)point;
+
+/**
+ *  将坐标点从 TextRenderer 的绘制区域转换到文字布局中
+ *
+ *  @param point 需要转换的坐标点
+ *
+ *  @return 转换过的坐标点
+ */
+- (CGPoint)convertPointToLayout:(CGPoint)point;
+
+/**
+ *  将一个 rect 从文字布局中转换到 TextRenderer 的绘制区域中
+ *
+ *  @param rect 需要转换的 rect
+ *
+ *  @return 转换后的 rect
+ */
+- (CGRect)convertRectFromLayout:(CGRect)rect;
+
+/**
+ *  将一个 rect 从 TextRenderer 的绘制区域转换到文字布局中
+ *
+ *  @param rect 需要转换的 rect
+ *
+ *  @return 转换后的 rect
+ */
+- (CGRect)convertRectToLayout:(CGRect)rect;
+
+@end
+
 #import "TUITextRenderer+Event.h"
+#import "TUITextRenderer+LayoutResult.h"
 
 NS_INLINE NSRange ABNSRangeFromCFRange(CFRange r) { return NSMakeRange(r.location, r.length); }
 NS_INLINE CFRange ABCFRangeFromNSRange(NSRange r) { return CFRangeMake(r.location, r.length); }

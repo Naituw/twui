@@ -78,7 +78,7 @@
 	NSInteger selectionLength = abs((int)(_selectionStart - _selectionEnd));
 	NSInteger max = [TEXT length];
 	_selectionStart = _selectionEnd = MIN(MAX(_selectionStart, _selectionEnd) + (selectionLength?0:1), max);
-	[self.view setNeedsDisplay];
+	[self.eventDelegateContextView setNeedsDisplay];
 }
 
 - (void)moveLeft:(id)sender
@@ -86,69 +86,69 @@
 	NSInteger selectionLength = abs((int)(_selectionStart - _selectionEnd));
 	NSInteger min = 0;
 	_selectionStart = _selectionEnd = MAX(MIN(_selectionStart, _selectionEnd) - (selectionLength?0:1), min);
-	[self.view setNeedsDisplay];
+	[self.eventDelegateContextView setNeedsDisplay];
 }
 
 - (void)moveRightAndModifySelection:(id)sender
 {
 	NSInteger max = [TEXT length];
 	_selectionEnd = MIN(_selectionEnd + 1, max);
-	[self.view setNeedsDisplay];
+	[self.eventDelegateContextView setNeedsDisplay];
 }
 
 - (void)moveLeftAndModifySelection:(id)sender
 {
 	NSInteger min = 0;
 	_selectionEnd = MAX(_selectionEnd - 1, min);
-	[self.view setNeedsDisplay];
+	[self.eventDelegateContextView setNeedsDisplay];
 }
 
 - (void)moveWordRight:(id)sender
 {
 	_selectionStart = _selectionEnd = [TEXT ab_endOfWordGivenCursor:MAX(_selectionStart, _selectionEnd)];
-	[self.view setNeedsDisplay];
+	[self.eventDelegateContextView setNeedsDisplay];
 }
 
 - (void)moveWordLeft:(id)sender
 {
 	_selectionStart = _selectionEnd = [TEXT ab_beginningOfWordGivenCursor:MIN(_selectionStart, _selectionEnd)];
-	[self.view setNeedsDisplay];
+	[self.eventDelegateContextView setNeedsDisplay];
 }
 
 - (void)moveWordRightAndModifySelection:(id)sender
 {
 	_selectionEnd = [TEXT ab_endOfWordGivenCursor:_selectionEnd];
-	[self.view setNeedsDisplay];
+	[self.eventDelegateContextView setNeedsDisplay];
 }
 
 - (void)moveWordLeftAndModifySelection:(id)sender
 {
 	_selectionEnd = [TEXT ab_beginningOfWordGivenCursor:_selectionEnd];
-	[self.view setNeedsDisplay];
+	[self.eventDelegateContextView setNeedsDisplay];
 }
 
 - (void)moveToBeginningOfLineAndModifySelection:(id)sender
 {
 	_selectionEnd = 0; // fixme for multiline
-	[self.view setNeedsDisplay];
+	[self.eventDelegateContextView setNeedsDisplay];
 }
 
 - (void)moveToEndOfLineAndModifySelection:(id)sender
 {
 	_selectionEnd = [TEXT length]; // fixme for multiline
-	[self.view setNeedsDisplay];
+	[self.eventDelegateContextView setNeedsDisplay];
 }
 
 - (void)moveToBeginningOfLine:(id)sender
 {
 	_selectionStart = _selectionEnd = 0;
-	[self.view setNeedsDisplay];
+	[self.eventDelegateContextView setNeedsDisplay];
 }
 
 - (void)moveToEndOfLine:(id)sender
 {
 	_selectionStart = _selectionEnd = [TEXT length];
-	[self.view setNeedsDisplay];
+	[self.eventDelegateContextView setNeedsDisplay];
 }
 
 - (void)insertNewline:(id)sender
@@ -227,7 +227,7 @@
 	
 	_selectionStart = _selectionEnd = ret;
 		
-	[self.view setNeedsDisplay];
+	[self.eventDelegateContextView setNeedsDisplay];
 }
 
 - (void)moveToEndOfParagraph:(id)sender
@@ -248,21 +248,21 @@
 	
 	_selectionStart = _selectionEnd = ret;
 	
-	[self.view setNeedsDisplay];
+	[self.eventDelegateContextView setNeedsDisplay];
 }
 
 - (void)moveToBeginningOfDocument:(id)sender
 {
 	_selectionStart = _selectionEnd = 0;
 	
-	[self.view setNeedsDisplay];
+	[self.eventDelegateContextView setNeedsDisplay];
 }
 
 - (void)moveToEndOfDocument:(id)sender
 {
 	_selectionStart = _selectionEnd = [TEXT length];
 	
-	[self.view setNeedsDisplay];
+	[self.eventDelegateContextView setNeedsDisplay];
 }
 
 @end

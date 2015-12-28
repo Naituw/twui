@@ -73,9 +73,15 @@
 - (void)_textDidChange
 {
 	[inputContext invalidateCharacterCoordinates];
-	[self reset];
+    [self reset];
 	[self.eventDelegateContextView setNeedsDisplay];
 	[self.eventDelegateContextView performSelector:@selector(_textDidChange)];
+}
+
+- (void)reset
+{
+    self.attributedString = nil;
+    self.attributedString = backingStore;
 }
 
 - (NSString *)text

@@ -7,7 +7,10 @@
 //
 
 #import "TUITextRenderer.h"
+#import "TUITextLayoutFrame.h"
 
 @interface TUITextRenderer (Debug)
+
+- (void)debugModeDrawLineFramesWithLayoutFrame:(TUITextLayoutFrame *)layoutFrame context:(CGContextRef)ctx offset:(CGPoint)offset;
 
 @end

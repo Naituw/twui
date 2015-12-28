@@ -92,6 +92,7 @@ static inline TUIFontMetrics TUIFontMetricsMakeFromCTFont(CTFontRef font)
 {
     return TUIFontMetricsMake(ABS(CTFontGetAscent(font)), ABS(CTFontGetDescent(font)), ABS(CTFontGetLeading(font)));
 }
+
 static inline TUIFontMetrics TUIFontMetricsMakeWithTargetLineHeight(TUIFontMetrics metrics, CGFloat targetLineHeight)
 {
     return TUIFontMetricsMake(targetLineHeight - metrics.descent - metrics.leading, metrics.descent, metrics.leading);
@@ -116,3 +117,12 @@ extern TUIFontMetrics TUIFontMetricsGetDefault(NSInteger pointSize);
 
 @end
 
+#import "TUIFont.h"
+
+static inline TUIFontMetrics TUIFontMetricsMakeFromTUIFont(TUIFont * font)
+{
+    if (!font) {
+        return TUIFontMetricsNull;
+    }
+    return TUIFontMetricsMake(font.ascender, font.descender, font.leading);
+}

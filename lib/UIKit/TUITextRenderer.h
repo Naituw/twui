@@ -45,13 +45,6 @@ typedef enum {
 
 @interface TUITextRenderer : TUIResponder
 {
-	NSAttributedString *attributedString;
-	CGRect frame;
-	
-	CTFramesetterRef _ct_framesetter;
-	CGPathRef _ct_path;
-	CTFrameRef _ct_frame;
-	
 	CFIndex _selectionStart;
 	CFIndex _selectionEnd;
 	TUITextSelectionAffinity _selectionAffinity;
@@ -93,21 +86,18 @@ typedef enum {
 @property (nonatomic, assign) BOOL backgroundDrawingEnabled; // default = NO
 @property (nonatomic, assign) BOOL preDrawBlocksEnabled; // default = NO
 
+@property (nonatomic, assign, readonly) CGPoint drawingOrigin;
+
 - (void)draw;
 - (void)drawInContext:(CGContextRef)context;
 - (void)drawInContext:(CGContextRef)context threadSafely:(BOOL)threadSafe;
-- (CGSize)size; // calculates vertical size based on frame width
+
 - (CGSize)sizeConstrainedToWidth:(CGFloat)width;
 - (CGSize)sizeConstrainedToWidth:(CGFloat)width numberOfLines:(NSUInteger)numberOfLines;
-- (void)reset;
 
 - (NSRange)selectedRange;
 - (void)setSelection:(NSRange)selection;
 - (NSString *)selectedString;
-
-- (CGRect)firstRectForCharacterRange:(CFRange)range;
-- (NSArray *)rectsForCharacterRange:(CFRange)range;
-- (NSArray *)rectsForCharacterRange:(CFRange)range aggregationType:(AB_CTLineRectAggregationType)aggregationType;
 
 // Draw the selection for the given rects. You probably shouldn't ever call this directly but it is exposed to allow for overriding. This will only get called if the selection is not empty and the selected text isn't being dragged.
 // Note that at the point at which this is called, the selection color has already been set.

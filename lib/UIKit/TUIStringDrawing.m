@@ -41,7 +41,7 @@
 	TUITextRenderer *t = [self ab_sharedTextRenderer];
 	t.attributedString = self;
 	t.frame = CGRectMake(0, 0, size.width, size.height);
-	return [t size];
+	return t.textLayout.layoutSize;
 }
 
 - (CGSize)ab_size
@@ -55,7 +55,7 @@
 	t.attributedString = self;
 	t.frame = rect;
 	[t drawInContext:ctx];
-	return [t size];
+	return t.textLayout.layoutSize;
 }
 
 - (CGSize)ab_drawInRect:(CGRect)rect

@@ -22,6 +22,7 @@
 #import "TUINSWindow.h"
 #import "TUITextViewEditor.h"
 #import "TUITextRenderer+Event.h"
+#import "TUITextRenderer+LayoutResult.h"
 
 @interface TUITextViewAutocorrectedPair : NSObject <NSCopying> {
 	NSTextCheckingResult *correctionResult;
@@ -323,7 +324,7 @@ static CAAnimation *ThrobAnimation()
 	}
 	
 	// Ugh. So this seems to be a decent approximation for the height of the cursor. It doesn't always match the native cursor but what ev.
-	CGRect r = CGRectIntegral([renderer firstRectForCharacterRange:ABCFRangeFromNSRange(selection)]);
+	CGRect r = CGRectIntegral([renderer firstSelectionRectForCharacterRange:selection]);
 	r.size.width = 2.0f;
 	CGRect fontBoundingBox = CTFontGetBoundingBox(self.font.ctFont);
 	r.size.height = round(fontBoundingBox.origin.y + fontBoundingBox.size.height);
@@ -334,7 +335,7 @@ static CAAnimation *ThrobAnimation()
 		unichar lastCharacter = [self.text characterAtIndex:MAX(selection.location - 1, 0)];
 		// Sigh. So if the string ends with a return, CTFrameGetLines doesn't consider that a new line. So we have to fudge it.
 		if(lastCharacter == '\n') {
-			CGRect firstCharacterRect = [renderer firstRectForCharacterRange:CFRangeMake(0, 0)];
+			CGRect firstCharacterRect = [renderer firstSelectionRectForCharacterRange:NSMakeRange(0, 0)];
 			r.origin.y -= firstCharacterRect.size.height;
 			r.origin.x = firstCharacterRect.origin.x;
 		}
@@ -616,8 +617,8 @@ static CAAnimation *ThrobAnimation()
 		if([self singleLine]) {
 			self.selectedRange = NSMakeRange(0, 0);
 		} else {
-			CGRect rect = [renderer firstRectForCharacterRange:ABCFRangeFromNSRange(self.selectedRange)];
-			CFIndex aboveIndex = [renderer stringIndexForPoint:CGPointMake(rect.origin.x - rect.size.width, rect.origin.y + rect.size.height*2)];
+			CGRect rect = [renderer firstSelectionRectForCharacterRange:self.selectedRange];
+			CFIndex aboveIndex = [renderer characterIndexForPoint:CGPointMake(rect.origin.x - rect.size.width, rect.origin.y + rect.size.height*2)];
 			self.selectedRange = NSMakeRange(MAX(aboveIndex - 1, 0), 0);
 		}
 		
@@ -626,12 +627,12 @@ static CAAnimation *ThrobAnimation()
 		if([self singleLine]) {
 			self.selectedRange = NSMakeRange(self.text.length, 0);
 		} else {
-			CGRect rect = [renderer firstRectForCharacterRange:ABCFRangeFromNSRange(self.selectedRange)];
-			CFIndex belowIndex = [renderer stringIndexForPoint:CGPointMake(rect.origin.x - rect.size.width, rect.origin.y)];
+			CGRect rect = [renderer firstSelectionRectForCharacterRange:self.selectedRange];
+			CFIndex belowIndex = [renderer characterIndexForPoint:CGPointMake(rect.origin.x - rect.size.width, rect.origin.y)];
 			belowIndex = MAX(belowIndex - 1, 0);
 			
 			// if we're on the same level as the belowIndex, then we've hit the last line and want to go to the end
-			CGRect belowRect = [renderer firstRectForCharacterRange:CFRangeMake(belowIndex, 0)];
+			CGRect belowRect = [renderer firstSelectionRectForCharacterRange:NSMakeRange(belowIndex, 0)];
 			if(belowRect.origin.y == rect.origin.y) {
 				belowIndex = MIN(belowIndex + 1, self.text.length);
 			}
@@ -656,7 +657,7 @@ static CAAnimation *ThrobAnimation()
 	CGSize textSize = [renderer sizeConstrainedToWidth:CGRectGetWidth([self textRect])];
 	// Sigh. So if the string ends with a return, CTFrameGetLines doesn't consider that a new line. So we have to fudge it.
 	if([self.text hasSuffix:@"\n"]) {
-		CGRect firstCharacterRect = [renderer firstRectForCharacterRange:CFRangeMake(0, 0)];
+		CGRect firstCharacterRect = [renderer firstSelectionRectForCharacterRange:NSMakeRange(0, 0)];
 		textSize.height += firstCharacterRect.size.height;
 	}
 	

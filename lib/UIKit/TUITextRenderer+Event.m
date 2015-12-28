@@ -16,6 +16,7 @@
 
 #import "TUITextRenderer+Event.h"
 #import "TUITextRenderer_Private.h"
+#import "TUITextRenderer+LayoutResult.h"
 #import "CoreText+Additions.h"
 #import "TUICGAdditions.h"
 #import "TUIImage.h"
@@ -66,19 +67,15 @@
 - (CGPoint)localPointForEvent:(NSEvent *)event
 {
 	CGPoint p = [self.eventDelegateContextView localPointForEvent:event];
-	p.x -= frame.origin.x;
-	p.y -= frame.origin.y;
+    CGPoint origin = self.drawingOrigin;
+	p.x -= origin.x;
+	p.y -= origin.y;
 	return p;
-}
-
-- (CFIndex)stringIndexForPoint:(CGPoint)p
-{
-	return AB_CTFrameGetStringIndexForPosition([self ctFrame], p);
 }
 
 - (CFIndex)stringIndexForEvent:(NSEvent *)event
 {
-	return [self stringIndexForPoint:[self localPointForEvent:event]];
+	return [self characterIndexForPoint:[self localPointForEvent:event]];
 }
 
 - (id<ABActiveTextRange>)rangeInRanges:(NSArray *)ranges forStringIndex:(CFIndex)index
@@ -194,17 +191,8 @@
 		self.hitRange = nil;
 		
 		NSRange r = [hitActiveRange rangeValue];
-		NSString *s = [[attributedString string] substringWithRange:r];
-		
-		// bit of a hack
-		if(hitActiveRange.rangeFlavor == ABActiveTextRangeFlavorURL) {
-			if([hitActiveRange respondsToSelector:@selector(url)]) {
-				NSString *urlString = [[hitActiveRange performSelector:@selector(url)] absoluteString];
-				if(urlString)
-					s = urlString;
-			}
-		}
-		
+		NSString *s = [[self.attributedString string] substringWithRange:r];
+				
 		if(![self beginWaitForDragInRange:r string:s])
 			goto normal;
 	} else if(NSLocationInRange(eventIndex, [self selectedRange])) {
@@ -349,7 +337,7 @@ normal:
 - (void)selectAll:(id)sender
 {
 	_selectionStart = 0;
-	_selectionEnd = [[attributedString string] length];
+	_selectionEnd = [[self.attributedString string] length];
 	_selectionAffinity = TUITextSelectionAffinityCharacter;
 	[self.eventDelegateContextView setNeedsDisplay];
 }
@@ -419,7 +407,7 @@ normal:
     
     if (!target.length) return;
     
-    NSRect rect = [self firstRectForCharacterRange:ABCFRangeFromNSRange(range)];
+    NSRect rect = [self firstSelectionRectForCharacterRange:range];
     NSPoint point = rect.origin;
     
     CGFloat descent, leading;

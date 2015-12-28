@@ -43,4 +43,6 @@
 - (void)insertText:(id)aString replacementRange:(NSRange)replacementRange;
 - (void)deleteCharactersInRange:(NSRange)range;
 
+- (void)reset;
+
 @end

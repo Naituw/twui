@@ -22,12 +22,12 @@
 
 @interface TUITextRenderer (Event)
 
-- (CFIndex)stringIndexForPoint:(CGPoint)p;
-- (CFIndex)stringIndexForEvent:(NSEvent *)event;
 - (void)resetSelection;
 - (CGRect)rectForCurrentSelection;
 
 - (void)copy:(id)sender;
+
+- (CFIndex)stringIndexForEvent:(NSEvent *)event;
 
 @property (nonatomic, weak) id<TUITextRendererEventDelegate> eventDelegate;
 

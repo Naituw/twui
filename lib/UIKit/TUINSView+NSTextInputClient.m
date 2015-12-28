@@ -18,6 +18,7 @@
 #import "TUINSView+Private.h"
 #import "TUINSWindow.h"
 #import "TUITextRenderer.h"
+#import "TUITextRenderer+LayoutResult.h"
 
 @implementation TUINSView (NSTextInputClient)
 
@@ -76,7 +77,7 @@
 		CGRect trFrame = _tempTextRendererForTextInputClient.frame;
 		vp.x -= trFrame.origin.x;
 		vp.y -= trFrame.origin.y;
-		CFIndex index = [_tempTextRendererForTextInputClient stringIndexForPoint:vp];
+		CFIndex index = [_tempTextRendererForTextInputClient characterIndexForPoint:vp];
         //		NSLog(@"index = %d", index);
 		return (NSUInteger)index;
 	}
@@ -94,7 +95,7 @@
 		NSRange r = NSIntersectionRange(aRange, NSMakeRange(0, [_tempTextRendererForTextInputClient.attributedString length]));
 		*actualRange = r;
         //		NSLog(@"getting first rect for range: %@", NSStringFromRange(r));
-		CGRect f = [_tempTextRendererForTextInputClient firstRectForCharacterRange:CFRangeMake(r.location, r.length)];
+		CGRect f = [_tempTextRendererForTextInputClient firstSelectionRectForCharacterRange:NSMakeRange(r.location, r.length)];
         //		NSLog(@"f = %@", NSStringFromRect(f));
 		NSRect vf = [_tempTextRendererForTextInputClient.eventDelegateContextView convertRect:f toView:nil];
         //		NSLog(@"vf = %@", NSStringFromRect(vf));

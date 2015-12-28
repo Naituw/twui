@@ -28,6 +28,7 @@
     if (self = [super init]) {
         _flags.needsLayout = YES;
         _baselineFontMetrics = TUIFontMetricsNull;
+        _fixedFontMetrics = TUIFontMetricsNull;
     }
     return self;
 }
@@ -80,6 +81,14 @@
 {
     if (!TUIFontMetricsEqual(_baselineFontMetrics, baselineFontMetrics)) {
         _baselineFontMetrics = baselineFontMetrics;
+        _flags.needsLayout = YES;
+    }
+}
+
+- (void)setFixedFontMetrics:(TUIFontMetrics)fixedFontMetrics
+{
+    if (!TUIFontMetricsEqual(_fixedFontMetrics, fixedFontMetrics)) {
+        _fixedFontMetrics = fixedFontMetrics;
         _flags.needsLayout = YES;
     }
 }

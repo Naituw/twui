@@ -37,11 +37,23 @@
 - (void)setupWithCTFrame:(CTFrameRef)frameRef
 {
     const NSUInteger maximumNumberOfLines = _layout.maximumNumberOfLines;
+    const TUIFontMetrics fixedFontMetrics = _layout.fixedFontMetrics;
     
     NSArray * lines = (NSArray *)CTFrameGetLines(frameRef);
     NSUInteger lineCount = lines.count;
     CGPoint lineOrigins[lineCount];
-    CTFrameGetLineOrigins(frameRef, CFRangeMake(0, lineCount), lineOrigins);
+    
+    if (TUIFontMetricsEqual(fixedFontMetrics, TUIFontMetricsNull)) {
+        CTFrameGetLineOrigins(frameRef, CFRangeMake(0, lineCount), lineOrigins);
+    } else {
+        CGFloat y = _layout.size.height;
+        for (NSUInteger i = 0; i < lineCount; i++) {
+            y -= fixedFontMetrics.ascent;
+            lineOrigins[i] = CGPointMake(0, y);
+            y -= fixedFontMetrics.descent;
+            y -= fixedFontMetrics.leading;
+        }
+    }
     
     NSMutableArray * lineFragments = [NSMutableArray array];
     

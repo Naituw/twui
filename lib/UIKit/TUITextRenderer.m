@@ -451,8 +451,13 @@
 - (void)drawAttachmentsWithAttributedString:(NSAttributedString *)attributedString layoutFrame:(TUITextLayoutFrame *)layoutFrame context:(CGContextRef)ctx
 {
     [attributedString tui_enumerateTextAttachments:^(TUITextAttachment * value, NSRange range, BOOL *stop) {
-        [layoutFrame enumerateSelectionRectsForCharacterRange:range usingBlock:^(CGRect rect, NSRange characterRange, BOOL *stop) {
-            value.derivedFrame = ABIntegralRectWithSizeCenteredInRect(value.contentSize, rect);
+        NSUInteger lineIndex = [layoutFrame lineFragmentIndexForCharacterAtIndex:range.location];
+        TUIFontMetrics lineMetrics = [self.textLayout lineFragmentMetricsForLineAtIndex:lineIndex effectiveRange:NULL];
+        [layoutFrame enumerateEnclosingRectsForCharacterRange:range usingBlock:^(CGRect rect, NSRange characterRange, BOOL *stop) {
+            rect = [self convertRectFromLayout:rect];
+            rect.origin.y = CGRectGetMinY(rect) + lineMetrics.descent + lineMetrics.leading - value.descentForLayout;
+            rect.size = value.contentSize;
+            value.derivedFrame = rect;
             [self renderAttachment:value highlighted:(value == hitAttachment) inContext:ctx];
             *stop = YES;
         }];

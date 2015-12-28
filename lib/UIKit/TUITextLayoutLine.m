@@ -62,26 +62,32 @@
 {
     const CTLineRef lineRef = _lineRef;
     const TUIFontMetrics baselineFontMetrics = _layout.baselineFontMetrics;
+    const TUIFontMetrics fixedFontMetrics = _layout.fixedFontMetrics;
     
     CGFloat a, d, l;
     _width = CTLineGetTypographicBounds(lineRef, &a, &d, &l);
     _baselineOrigin = _originalBaselineOrigin;
     _originalLineMetrics = TUIFontMetricsMake(ABS(a), ABS(d), ABS(l));
-    _lineMetrics = _originalLineMetrics;
     
-    double baselineOriginY = _baselineOrigin.y; // 强制使用 double 进行下列计算，否则在 32 位运行时可能丢失精度
-    
-    if (baselineFontMetrics.descent != NSNotFound) {
-        baselineOriginY -= (_lineMetrics.descent - baselineFontMetrics.descent);
+    if (TUIFontMetricsEqual(fixedFontMetrics, TUIFontMetricsNull)) {
+        _lineMetrics = _originalLineMetrics;
+
+        double baselineOriginY = _baselineOrigin.y; // 强制使用 double 进行下列计算，否则在 32 位运行时可能丢失精度
+        
+        if (baselineFontMetrics.descent != NSNotFound) {
+            baselineOriginY -= (_lineMetrics.descent - baselineFontMetrics.descent);
+        }
+        
+        if (baselineFontMetrics.leading != NSNotFound && baselineFontMetrics.leading) {
+            // FIXME: 我们应该从当前的 paragraphStyle 决定最大 leading 是多少，而不是写死基准的 3 倍
+            _lineMetrics.leading = MIN(_lineMetrics.leading, baselineFontMetrics.leading * 3);
+            baselineOriginY -= (_lineMetrics.leading - baselineFontMetrics.leading);
+        }
+        
+        _baselineOrigin.y = floor(baselineOriginY);
+    } else {
+        _lineMetrics = fixedFontMetrics;
     }
-    
-    if (baselineFontMetrics.leading != NSNotFound && baselineFontMetrics.leading) {
-        // FIXME: 我们应该从当前的 paragraphStyle 决定最大 leading 是多少，而不是写死基准的 3 倍
-        _lineMetrics.leading = MIN(_lineMetrics.leading, baselineFontMetrics.leading * 3);
-        baselineOriginY -= (_lineMetrics.leading - baselineFontMetrics.leading);
-    }
-    
-    _baselineOrigin.y = floor(baselineOriginY);
     
     // we store values in UIKit coordinates
     _baselineOrigin = [_layout convertPointFromCoreText:_baselineOrigin];

@@ -24,6 +24,7 @@
 @property (nonatomic, strong) NSAttributedString *truncationString;
 
 @property (nonatomic, assign) TUIFontMetrics baselineFontMetrics;
+@property (nonatomic, assign) TUIFontMetrics fixedFontMetrics;
 
 - (void)setNeedsLayout;
 

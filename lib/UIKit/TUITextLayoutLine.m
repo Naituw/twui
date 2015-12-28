@@ -109,7 +109,7 @@
 
 static CGRect TUITextGetLineFragmentRect(CGPoint baselineOrigin, TUIFontMetrics lineMetrics, CGFloat width)
 {
-    return CGRectIntegral(CGRectMake(baselineOrigin.x, baselineOrigin.y - lineMetrics.ascent, width, TUIFontMetricsGetLineHeight(lineMetrics)));
+    return CGRectIntegral(CGRectMake(baselineOrigin.x, baselineOrigin.y - lineMetrics.descent - lineMetrics.leading, width, TUIFontMetricsGetLineHeight(lineMetrics)));
 }
 
 @end

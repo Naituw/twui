@@ -26,10 +26,7 @@
 #import "TUIView.h"
 
 @interface TUITextRenderer()
-- (CTFramesetterRef)ctFramesetter;
-- (CTFrameRef)ctFrame;
-- (CGPathRef)ctPath;
-- (CFRange)_selectedRange;
+- (NSRange)_selectedRange;
 @end
 
 @implementation TUITextRenderer (Event)
@@ -66,11 +63,7 @@
 
 - (CGPoint)localPointForEvent:(NSEvent *)event
 {
-	CGPoint p = [self.eventDelegateContextView localPointForEvent:event];
-    CGPoint origin = self.drawingOrigin;
-	p.x -= origin.x;
-	p.y -= origin.y;
-	return p;
+	return [self.eventDelegateContextView localPointForEvent:event];
 }
 
 - (CFIndex)stringIndexForEvent:(NSEvent *)event
@@ -233,7 +226,7 @@ normal:
 	
 	// fixup selection based on selection affinity
 	BOOL flip = _selectionEnd < _selectionStart;
-	CFRange trueRange = [self _selectedRange];
+	NSRange trueRange = [self _selectedRange];
 	_selectionStart = trueRange.location;
 	_selectionEnd = _selectionStart + trueRange.length;
 	if(flip) {
@@ -297,30 +290,7 @@ normal:
 }
 
 - (CGRect)rectForCurrentSelection {
-	return [self rectForRange:[self _selectedRange]];
-}
-
-- (CGRect)rectForRange:(CFRange)range {
-	CTFrameRef textFrame = [self ctFrame];
-	CGRect totalRect = CGRectNull;
-	if(range.length > 0) {
-		CFIndex rectCount = 100;
-		CGRect rects[rectCount];
-		AB_CTFrameGetRectsForRangeWithAggregationType(textFrame, range, AB_CTLineRectAggregationTypeBlock, rects, &rectCount);
-		
-		for(CFIndex i = 0; i < rectCount; ++i) {
-			CGRect rect = rects[i];
-			rect = CGRectIntegral(rect);
-			
-			if(CGRectEqualToRect(totalRect, CGRectNull)) {
-				totalRect = rect;
-			} else {
-				totalRect = CGRectUnion(rect, totalRect);
-			}
-		}
-	}
-	
-	return totalRect;
+    return [self boundingRectForCharacterRange:[self _selectedRange]];
 }
 
 - (void)resetSelection
@@ -410,11 +380,20 @@ normal:
     NSRect rect = [self firstSelectionRectForCharacterRange:range];
     NSPoint point = rect.origin;
     
-    CGFloat descent, leading;
+    NSUInteger characterIndex = [self characterIndexForPoint:[self localPointForEvent:event]];
     
-    AB_CTFrameGetTypographicBoundsForLineAtPosition(self.ctFrame, [self localPointForEvent:event], NULL, &descent, &leading);
+    if (characterIndex == NSNotFound) {
+        return;
+    }
     
-    point.y += descent;
+    NSUInteger lineFragmentIndex = [self lineFragmentIndexForCharacterAtIndex:characterIndex];
+    if (lineFragmentIndex == NSNotFound) {
+        return;
+    }
+    
+    TUIFontMetrics lineMetrics = [self.textLayout lineFragmentMetricsForLineAtIndex:lineFragmentIndex effectiveRange:NULL];
+    
+    point.y += lineMetrics.descent;
     //point.y += leading;
     
     point = [self.eventDelegateContextView convertPoint:point toView:self.eventDelegateContextView.nsView.rootView];

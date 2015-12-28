@@ -330,15 +330,15 @@ static CGPathRef CGPathCreateWithFrameAndExclusionPaths(CGRect textFrame, NSArra
         TUITextLayoutLine * line = lines[i];
         CGRect fragmentRect = line.fragmentRect;
         
-        if (i == 0 && point.y < CGRectGetMinY(fragmentRect)) {
+        if (i == 0 && point.y > CGRectGetMaxY(fragmentRect)) {
             return 0; // 在第一行之上
         }
         
-        if (i == lineCount - 1 && point.y > CGRectGetMaxY(fragmentRect)) {
+        if (i == lineCount - 1 && point.y < CGRectGetMinY(fragmentRect)) {
             return stringLength; // 在最后一行之下
         }
         
-        if (point.y > previousLineY && point.y <= CGRectGetMaxY(fragmentRect)) {
+        if (point.y < previousLineY && point.y >= CGRectGetMinY(fragmentRect)) {
             // 命中！
             point.x -= line.baselineOrigin.x;
             point.y -= line.baselineOrigin.y;
@@ -355,7 +355,7 @@ static CGPathRef CGPathCreateWithFrameAndExclusionPaths(CGRect textFrame, NSArra
             return index;
         }
         
-        previousLineY = CGRectGetMaxY(fragmentRect);
+        previousLineY = CGRectGetMinY(fragmentRect);
     }
     
     return 0;
@@ -367,28 +367,28 @@ static CGPathRef CGPathCreateWithFrameAndExclusionPaths(CGRect textFrame, NSArra
 
 - (CGPoint)convertPointFromCoreText:(CGPoint)point
 {
-    point.y = _size.height - point.y;
+//    point.y = _size.height - point.y;
     return point;
 }
 
 - (CGPoint)convertPointToCoreText:(CGPoint)point
 {
     // yes, this is the same with -convertPointFromCoreText:, just for readability
-    point.y = _size.height - point.y;
+//    point.y = _size.height - point.y;
     return point;
 }
 
 - (CGRect)convertRectFromCoreText:(CGRect)rect
 {
-    rect.origin = [self convertPointFromCoreText:rect.origin];
-    rect.origin.y -= rect.size.height;
+//    rect.origin = [self convertPointFromCoreText:rect.origin];
+//    rect.origin.y -= rect.size.height;
     return rect;
 }
 
 - (CGRect)convertRectToCoreText:(CGRect)rect
 {
-    rect.origin = [self convertPointToCoreText:rect.origin];
-    rect.origin.y -= rect.size.height;
+//    rect.origin = [self convertPointToCoreText:rect.origin];
+//    rect.origin.y -= rect.size.height;
     return rect;
 }
 

@@ -36,7 +36,6 @@
 
 @implementation TUITextRenderer
 
-@synthesize frame;
 @synthesize hitRange;
 @synthesize hitAttachment;
 @synthesize shadowColor;
@@ -67,7 +66,7 @@
 	return [[self.attributedString string] paragraphRangeForRange:NSMakeRange(index, 0)];
 }
 
-- (CFRange)_selectedRange
+- (NSRange)_selectedRange
 {
 	CFIndex first, last;
 	if(_selectionStart <= _selectionEnd) {
@@ -104,12 +103,12 @@
 		last = lr.location + lr.length;
 	}
 
-	return CFRangeMake(first, last - first);
+	return NSMakeRange(first, last - first);
 }
 
 - (NSRange)selectedRange
 {
-	return ABNSRangeFromCFRange([self _selectedRange]);
+	return [self _selectedRange];
 }
 
 - (void)setSelection:(NSRange)selection
@@ -203,17 +202,14 @@
 
     for (TUITextLayoutLine * line in layoutFrame.lineFragments) {
         
-        CGRect fragmentRect = line.fragmentRect;
-        fragmentRect = [self convertRectFromLayout:fragmentRect];
-        
         CTLineRef lineRef = line.lineRef;
         CGPoint lineOrigin = line.baselineOrigin;
         lineOrigin = [layout convertPointToCoreText:lineOrigin]; // since the context ctm is filpped, we should also convert origin here
-        lineOrigin.y -= _drawingOrigin.y;
+        lineOrigin.y += _drawingOrigin.y;
         lineOrigin.x += _drawingOrigin.x;
         
         lineOrigin.x += drawingOffset.x;
-        lineOrigin.y -= drawingOffset.y;
+        lineOrigin.y += drawingOffset.y;
         
         CGContextSetTextPosition(context, lineOrigin.x, lineOrigin.y);
         
@@ -367,7 +363,7 @@
 {
 	if(self.attributedString) {
 		CGRect oldFrame = self.frame;
-		self.frame = CGRectMake(0.0f, 0.0f, width, 1000000.0f);
+		self.frame = CGRectMake(0.0f, 0.0f, width, 100000.0f);
 
 		CGSize size = self.textLayout.layoutSize;
 		

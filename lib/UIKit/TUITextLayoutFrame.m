@@ -75,7 +75,7 @@
 
 - (void)updateLayoutSize
 {
-    CGFloat __block height = 0.0, __block width = 0.0;
+    CGFloat __block minY = 0.0, __block width = 0.0;
     
     NSUInteger fragmentCount = _lineFragments.count;
     
@@ -84,14 +84,14 @@
         CGRect fragmentRect = line.fragmentRect;
         
         if (idx == fragmentCount - 1) {
-            height = CGRectGetMaxY(fragmentRect);
+            minY = CGRectGetMinY(fragmentRect);
         }
         
         width = MAX(width, CGRectGetMaxX(fragmentRect));
         
     }];
     
-    _layoutSize = CGSizeMake(ceil(width), ceil(height + 1));
+    _layoutSize = CGSizeMake(ceil(width), ceil(_layout.size.height - minY + 1));
 }
 
 #pragma mark - Line Truncating

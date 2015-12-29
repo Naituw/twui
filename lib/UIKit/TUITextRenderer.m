@@ -181,7 +181,7 @@
         [self debugModeDrawLineFramesWithLayoutFrame:layoutFrame context:context offset:drawingOffset];
     }
     
-    if (self.hitRange) {
+    if (self.hitRange && !_flags.drawMaskDragSelection) {
         CGContextSaveGState(context);
         
         [layoutFrame enumerateEnclosingRectsForCharacterRange:self.hitRange.rangeValue usingBlock:^(CGRect rect, NSRange characterRange, BOOL *stop) {
@@ -192,6 +192,36 @@
         }];
         
         CGContextRestoreGState(context);
+    }
+    
+    NSRange selectedRange = [self _selectedRange];
+    
+    if (selectedRange.length > 0) {
+        [[self selectedTextBackgroundColor] set];
+        // draw (or mask) selection
+        
+        if (_flags.drawMaskDragSelection) {
+            NSMutableArray * rectValues = [NSMutableArray array];
+            [layoutFrame enumerateSelectionRectsForCharacterRange:selectedRange usingBlock:^(CGRect rect, NSRange characterRange, BOOL *stop) {
+                [rectValues addObject:[NSValue valueWithRect:(NSRect)[self convertRectFromLayout:rect]]];
+            }];
+            NSUInteger rectCount = rectValues.count;
+            CGRect rects[rectCount];
+            for (NSUInteger idx = 0; idx < rectCount; idx++) {
+                NSValue * value = rectValues[idx];
+                CGRect rect = (CGRect)[value rectValue];
+                rects[idx] = rect;
+            }
+            CGContextClipToRects(context, rects, rectCount);
+        } else {
+            [layoutFrame enumerateSelectionRectsForCharacterRange:selectedRange usingBlock:^(CGRect rect, NSRange characterRange, BOOL *stop) {
+                rect = [self convertRectFromLayout:rect];
+                rect = CGRectIntegral(rect);
+                if (rect.size.width > 1) {
+                    CGContextFillRect(context, rect);
+                }
+            }];
+        }
     }
     
     if (self.shadowColor) {
@@ -283,7 +313,7 @@
 //                    }
 //                }
 //            }
-//            
+//
 //            CGContextSetTextMatrix(context, CGAffineTransformIdentity);
 //            
 //            if(shadowColor)

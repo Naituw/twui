@@ -359,8 +359,7 @@
         }
         if (block) {
             if (!CGRectIsNull(boundingRect)) {
-                CGFloat deltaHeight = rect.origin.y - CGRectGetMaxY(boundingRect);
-                rect.origin.y -= deltaHeight;
+                CGFloat deltaHeight = CGRectGetMinY(boundingRect) - CGRectGetMaxY(rect);
                 rect.size.height += deltaHeight;
             }
             block(rect, characterRange, stop);

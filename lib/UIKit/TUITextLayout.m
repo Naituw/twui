@@ -333,7 +333,7 @@ static CGPathRef CGPathCreateWithFrameAndExclusionPaths(CGRect textFrame, NSArra
     const NSArray * lines = self.layoutFrame.lineFragments;
     const NSUInteger lineCount = lines.count;
     
-    CGFloat previousLineY = 0;
+    CGFloat previousLineY = self.size.height;
     
     for (NSInteger i = 0; i < lineCount; i++) {
         TUITextLayoutLine * line = lines[i];

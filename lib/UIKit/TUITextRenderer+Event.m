@@ -53,6 +53,7 @@
     _eventDelegateHas.contextView = [eventDelegate respondsToSelector:@selector(contextViewForTextRenderer:)];
     _eventDelegateHas.didPressActiveRange = [eventDelegate respondsToSelector:@selector(textRenderer:didClickActiveRange:)];
     _eventDelegateHas.activeRanges = [eventDelegate respondsToSelector:@selector(activeRangesForTextRenderer:)];
+    _eventDelegateHas.contextMenuForActiveRange = [eventDelegate respondsToSelector:@selector(textRenderer:contextMenuForActiveRange:event:)];
     _eventDelegateHas.didPressAttachment = [eventDelegate respondsToSelector:@selector(textRenderer:didClickTextAttachment:)];
     _eventDelegateHas.contextMenuForAttachment = [eventDelegate respondsToSelector:@selector(textRenderer:contextMenuForTextAttachment:event:)];
     _eventDelegateHas.willBecomeFirstResponder = [eventDelegate respondsToSelector:@selector(textRendererWillBecomeFirstResponder:)];
@@ -268,6 +269,20 @@ normal:
 
 - (NSMenu *)menuForEvent:(NSEvent *)event
 {
+    if (_eventDelegateHas.contextMenuForActiveRange) {
+        CFIndex eventIndex = [self stringIndexForEvent:event];
+        NSArray * ranges = [self eventDelegateActiveRanges];
+        if (ranges) {
+            id<ABActiveTextRange> range = [self rangeInRanges:ranges forStringIndex:eventIndex];
+            if (range) {
+                NSMenu * menu = [_eventDelegate textRenderer:self contextMenuForActiveRange:range event:event];
+                if (menu) {
+                    return menu;
+                }
+            }
+        }
+    }
+    
     if (_eventDelegateHas.contextMenuForAttachment) {
         CGPoint eventLocation = [self.eventDelegateContextView localPointForEvent:event];
         TUITextAttachment * __block hitTextAttachment = nil;
@@ -286,6 +301,7 @@ normal:
             }
         }
     }
+    
     return [super menuForEvent:event];
 }
 

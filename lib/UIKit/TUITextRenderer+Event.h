@@ -43,6 +43,7 @@
 @optional
 - (NSArray *)activeRangesForTextRenderer:(TUITextRenderer *)textRenderer;
 - (void)textRenderer:(TUITextRenderer *)textRenderer didClickActiveRange:(id<ABActiveTextRange>)textRange;
+- (NSMenu *)textRenderer:(TUITextRenderer *)textRenderer contextMenuForActiveRange:(id<ABActiveTextRange>)textRange event:(NSEvent *)event;
 
 - (void)textRenderer:(TUITextRenderer *)textRenderer didClickTextAttachment:(TUITextAttachment *)attachment;
 - (NSMenu *)textRenderer:(TUITextRenderer *)textRenderer contextMenuForTextAttachment:(TUITextAttachment *)attachment event:(NSEvent *)event;

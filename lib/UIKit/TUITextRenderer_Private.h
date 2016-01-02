@@ -21,6 +21,7 @@
         unsigned int contextView: 1;
         unsigned int activeRanges: 1;
         unsigned int didPressActiveRange: 1;
+        unsigned int contextMenuForActiveRange: 1;
         unsigned int didPressAttachment: 1;
         unsigned int contextMenuForAttachment: 1;
         unsigned int shouldInteractWithActiveRange: 1;

@@ -49,13 +49,19 @@
 	return [self ab_sizeConstrainedToSize:CGSizeMake(2000, 2000)]; // big enough
 }
 
+- (CGSize)ab_drawInRect:(CGRect)rect context:(CGContextRef)ctx verticalAlignment:(TUITextVerticalAlignment)verticalAlignment
+{
+    TUITextRenderer *t = [self ab_sharedTextRenderer];
+    t.attributedString = self;
+    t.frame = rect;
+    t.verticalAlignment = verticalAlignment;
+    [t drawInContext:ctx];
+    return t.textLayout.layoutSize;
+}
+
 - (CGSize)ab_drawInRect:(CGRect)rect context:(CGContextRef)ctx
 {
-	TUITextRenderer *t = [self ab_sharedTextRenderer];
-	t.attributedString = self;
-	t.frame = rect;
-	[t drawInContext:ctx];
-	return t.textLayout.layoutSize;
+    return [self ab_drawInRect:rect context:ctx verticalAlignment:TUITextVerticalAlignmentTop];
 }
 
 - (CGSize)ab_drawInRect:(CGRect)rect
@@ -100,13 +106,18 @@
 
 - (CGSize)ab_drawInRect:(CGRect)rect withFont:(TUIFont *)font lineBreakMode:(TUILineBreakMode)lineBreakMode alignment:(TUITextAlignment)alignment
 {
-	TUIAttributedString *s = [TUIAttributedString stringWithString:self];
-	[s addAttribute:(NSString *)kCTForegroundColorFromContextAttributeName
-			  value:(id)[NSNumber numberWithBool:YES]
-			  range:NSMakeRange(0, [self length])];
-	[s setAlignment:alignment lineBreakMode:lineBreakMode];
-	s.font = font;
-	return [s ab_drawInRect:rect];
+    return [self ab_drawInRect:rect withFont:font lineBreakMode:lineBreakMode alignment:alignment verticalAlignment:TUITextVerticalAlignmentTop];
+}
+
+- (CGSize)ab_drawInRect:(CGRect)rect withFont:(TUIFont *)font lineBreakMode:(TUILineBreakMode)lineBreakMode alignment:(TUITextAlignment)alignment verticalAlignment:(TUITextVerticalAlignment)verticalAlignment
+{
+    TUIAttributedString *s = [TUIAttributedString stringWithString:self];
+    [s addAttribute:(NSString *)kCTForegroundColorFromContextAttributeName
+              value:(id)[NSNumber numberWithBool:YES]
+              range:NSMakeRange(0, [self length])];
+    [s setAlignment:alignment lineBreakMode:lineBreakMode];
+    s.font = font;
+    return [s ab_drawInRect:rect context:TUIGraphicsGetCurrentContext() verticalAlignment:verticalAlignment];
 }
 
 @end

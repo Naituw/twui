@@ -28,6 +28,7 @@
 
 - (CGSize)ab_drawInRect:(CGRect)rect;
 - (CGSize)ab_drawInRect:(CGRect)rect context:(CGContextRef)ctx;
+- (CGSize)ab_drawInRect:(CGRect)rect context:(CGContextRef)ctx verticalAlignment:(TUITextVerticalAlignment)verticalAlignment;
 
 @end
 
@@ -43,5 +44,6 @@
 
 - (CGSize)ab_drawInRect:(CGRect)rect color:(TUIColor *)color font:(TUIFont *)font;
 - (CGSize)ab_drawInRect:(CGRect)rect withFont:(TUIFont *)font lineBreakMode:(TUILineBreakMode)lineBreakMode alignment:(TUITextAlignment)alignment;
+- (CGSize)ab_drawInRect:(CGRect)rect withFont:(TUIFont *)font lineBreakMode:(TUILineBreakMode)lineBreakMode alignment:(TUITextAlignment)alignment verticalAlignment:(TUITextVerticalAlignment)verticalAlignment;
 
 @end

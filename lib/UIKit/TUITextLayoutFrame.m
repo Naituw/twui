@@ -296,7 +296,7 @@
         NSUInteger characterStartIndex = characterRange.location;
         NSUInteger characterEndIndex = NSMaxRange(characterRange);
         
-        if (characterStartIndex >= lineEndIndex) {
+        if (characterStartIndex >= lineEndIndex && !(characterStartIndex == lineEndIndex && characterRange.length == 0)) {
             return; // 如果请求的 range 在当前行之后，直接结束
         }
         
@@ -310,15 +310,15 @@
         
         if (containsStartIndex && containsEndIndex) {
             // 一共只有一行
-            if (characterStartIndex != characterEndIndex) {
-                CGFloat startOffset = [line baselineOriginForCharacterAtIndex:characterStartIndex].x;
-                CGFloat endOffset = [line baselineOriginForCharacterAtIndex:characterEndIndex].x;
-                CGRect rect = lineFragmentRect;
-                rect.origin.x += startOffset;
-                rect.size.width = endOffset - startOffset;
-                
-                block(rect, NSMakeRange(characterStartIndex, characterEndIndex - characterStartIndex), stop);
-            }
+            
+            CGFloat startOffset = [line baselineOriginForCharacterAtIndex:characterStartIndex].x;
+            CGFloat endOffset = [line baselineOriginForCharacterAtIndex:characterEndIndex].x;
+            CGRect rect = lineFragmentRect;
+            rect.origin.x += startOffset;
+            rect.size.width = endOffset - startOffset;
+            
+            block(rect, NSMakeRange(characterStartIndex, characterEndIndex - characterStartIndex), stop);
+
             *stop = YES;
         } else if (containsStartIndex) {
             // 多行时的第一行

@@ -177,6 +177,7 @@
     }
 
     CGPoint drawingOffset = CGPointZero;
+    
     BOOL debugMode = NO;
     
     if (debugMode) {
@@ -237,8 +238,7 @@
         CTLineRef lineRef = line.lineRef;
         CGPoint lineOrigin = line.baselineOrigin;
         lineOrigin = [layout convertPointToCoreText:lineOrigin]; // since the context ctm is filpped, we should also convert origin here
-        lineOrigin.y += _drawingOrigin.y;
-        lineOrigin.x += _drawingOrigin.x;
+        lineOrigin = [self convertPointFromLayout:lineOrigin];
         
         lineOrigin.x += drawingOffset.x;
         lineOrigin.y += drawingOffset.y;
@@ -525,6 +525,17 @@
 {
     point.x += _drawingOrigin.x;
     point.y += _drawingOrigin.y;
+    
+    if (verticalAlignment != TUITextVerticalAlignmentTop) {
+        TUITextLayout * layout = self.textLayout;
+        CGFloat heightDelta = layout.size.height - layout.layoutSize.height;
+        if (verticalAlignment == TUITextVerticalAlignmentMiddle) {
+            point.y -= heightDelta / 2;
+        } else {
+            point.y -= heightDelta;
+        }
+    }
+    
     return point;
 }
 
@@ -532,6 +543,17 @@
 {
     point.x -= _drawingOrigin.x;
     point.y -= _drawingOrigin.y;
+    
+    if (verticalAlignment != TUITextVerticalAlignmentTop) {
+        TUITextLayout * layout = self.textLayout;
+        CGFloat heightDelta = layout.size.height - layout.layoutSize.height;
+        if (verticalAlignment == TUITextVerticalAlignmentMiddle) {
+            point.y += heightDelta / 2;
+        } else {
+            point.y += heightDelta;
+        }
+    }
+    
     return point;
 }
 

@@ -386,4 +386,17 @@
 	return NO;
 }
 
+- (NSRect)firstRectForCharacterRange:(NSRange)aRange actualRange:(NSRangePointer)actualRange
+{
+    NSRect __block result = NSZeroRect;
+    [self enumerateSelectionRectsForCharacterRange:aRange usingBlock:^(CGRect rect, NSRange characterRange, BOOL *stop) {
+        result = (NSRect)rect;
+        if (actualRange) {
+            *actualRange = characterRange;
+        }
+        *stop = YES;
+    }];
+    return [self.eventDelegateContextView convertToWindowRect:result];
+}
+
 @end

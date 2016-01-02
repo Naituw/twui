@@ -396,7 +396,12 @@
         }
         *stop = YES;
     }];
-    return [self.eventDelegateContextView convertToWindowRect:result];
+    NSRect windowRect = [self.eventDelegateContextView convertToWindowRect:result];
+    NSWindow * window = self.eventDelegateContextView.nsWindow;
+    
+    result = [window convertRectToScreen:windowRect];
+
+    return result;
 }
 
 @end

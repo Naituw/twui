@@ -27,6 +27,7 @@
 #import "TUITextLayout_Private.h"
 #import "TUITextRenderer+Debug.h"
 #import "TUITextLayoutLine_Private.h"
+#import "TUITextComposedSequence.h"
 
 @interface TUITextRenderer ()
 
@@ -103,7 +104,13 @@
 		last = lr.location + lr.length;
 	}
 
-	return NSMakeRange(first, last - first);
+	NSRange range = NSMakeRange(first, last - first);
+    
+    if (self.attributedString.length) {
+        range = [self.attributedString tui_effectiveRangeByRoundingToComposedSequencesForRange:range];
+    }
+    
+    return range;
 }
 
 - (NSRange)selectedRange
@@ -122,13 +129,8 @@
 - (NSString *)selectedString
 {
     NSAttributedString * attributedSubstring = [self.attributedString attributedSubstringFromRange:[self selectedRange]];
-    NSMutableString * result = [attributedSubstring.string mutableCopy];
-    
-    [attributedSubstring tui_enumerateTextAttachments:^(TUITextAttachment *attachment, NSRange range, BOOL *stop) {
-        [result replaceCharactersInRange:range withString:attachment.contents];
-    } options:NSAttributedStringEnumerationReverse];
-    
-	return result;
+
+    return [attributedSubstring tui_stringByReplaceTextComposedSequencesForCopy];    
 }
 
 - (void)setRenderDelegate:(id<TUITextRendererDelegate>)renderDelegate

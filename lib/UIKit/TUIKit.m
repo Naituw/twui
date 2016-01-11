@@ -17,6 +17,7 @@
 #import "TUIKit.h"
 
 BOOL AtLeastLion = NO;
+BOOL AtLeastElCapitan = NO;
 NSInteger OSXMajorVersion = 10;
 NSInteger OSXMinorVersion = 0;
 NSInteger OSXBugfixVersion = 0;

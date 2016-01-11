@@ -60,6 +60,7 @@
 #import "TUIViewNSViewContainer.h"
 
 extern BOOL AtLeastLion; // set at launch
+extern BOOL AtLeastElCapitan; // set at launch
 extern NSInteger OSXMajorVersion;
 extern NSInteger OSXMinorVersion;
 extern NSInteger OSXBugfixVersion;

@@ -155,6 +155,10 @@
 		C67A65D61C30EBB40064D36F /* TUITextRenderer_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = C67A65D51C30EBB40064D36F /* TUITextRenderer_Private.h */; };
 		C6AC73ED1C37E6C000067BC1 /* TUITextComposedSequence.h in Headers */ = {isa = PBXBuildFile; fileRef = C6AC73EB1C37E6C000067BC1 /* TUITextComposedSequence.h */; };
 		C6AC73EE1C37E6C000067BC1 /* TUITextComposedSequence.m in Sources */ = {isa = PBXBuildFile; fileRef = C6AC73EC1C37E6C000067BC1 /* TUITextComposedSequence.m */; };
+		C6AC73F51C42798200067BC1 /* TUIViewControllerPreviewing.h in Headers */ = {isa = PBXBuildFile; fileRef = C6AC73F41C42798200067BC1 /* TUIViewControllerPreviewing.h */; };
+		C6AC73F81C4279CB00067BC1 /* TUIViewControllerPreviewingContext.h in Headers */ = {isa = PBXBuildFile; fileRef = C6AC73F61C4279CB00067BC1 /* TUIViewControllerPreviewingContext.h */; };
+		C6AC73F91C4279CB00067BC1 /* TUIViewControllerPreviewingContext.m in Sources */ = {isa = PBXBuildFile; fileRef = C6AC73F71C4279CB00067BC1 /* TUIViewControllerPreviewingContext.m */; };
+		C6AC73FB1C4279F300067BC1 /* TUIViewControllerPreviewingContext_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = C6AC73FA1C4279F300067BC1 /* TUIViewControllerPreviewingContext_Private.h */; };
 		CB5B265A13BE6DA200579B1E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = CB5B265813BE6DA200579B1E /* InfoPlist.strings */; };
 		CB5B266313BE6DA300579B1E /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB5B266213BE6DA300579B1E /* SenTestingKit.framework */; };
 		CB5B266413BE6DA300579B1E /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB5B264F13BE6DA200579B1E /* Cocoa.framework */; };
@@ -510,6 +514,10 @@
 		C67A65D51C30EBB40064D36F /* TUITextRenderer_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TUITextRenderer_Private.h; sourceTree = "<group>"; };
 		C6AC73EB1C37E6C000067BC1 /* TUITextComposedSequence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TUITextComposedSequence.h; sourceTree = "<group>"; };
 		C6AC73EC1C37E6C000067BC1 /* TUITextComposedSequence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TUITextComposedSequence.m; sourceTree = "<group>"; };
+		C6AC73F41C42798200067BC1 /* TUIViewControllerPreviewing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TUIViewControllerPreviewing.h; sourceTree = "<group>"; };
+		C6AC73F61C4279CB00067BC1 /* TUIViewControllerPreviewingContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TUIViewControllerPreviewingContext.h; sourceTree = "<group>"; };
+		C6AC73F71C4279CB00067BC1 /* TUIViewControllerPreviewingContext.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TUIViewControllerPreviewingContext.m; sourceTree = "<group>"; };
+		C6AC73FA1C4279F300067BC1 /* TUIViewControllerPreviewingContext_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TUIViewControllerPreviewingContext_Private.h; sourceTree = "<group>"; };
 		CB5B264C13BE6DA200579B1E /* TwUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = TwUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB5B264F13BE6DA200579B1E /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		CB5B265213BE6DA200579B1E /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -960,6 +968,10 @@
 				C67A65C81C30E57F0064D36F /* TUITextStorage.m */,
 				C6AC73EB1C37E6C000067BC1 /* TUITextComposedSequence.h */,
 				C6AC73EC1C37E6C000067BC1 /* TUITextComposedSequence.m */,
+				C6AC73F41C42798200067BC1 /* TUIViewControllerPreviewing.h */,
+				C6AC73F61C4279CB00067BC1 /* TUIViewControllerPreviewingContext.h */,
+				C6AC73F71C4279CB00067BC1 /* TUIViewControllerPreviewingContext.m */,
+				C6AC73FA1C4279F300067BC1 /* TUIViewControllerPreviewingContext_Private.h */,
 			);
 			name = UIKit;
 			path = lib/UIKit;
@@ -1038,6 +1050,7 @@
 				CBB74CA313BE6E1900C85CB5 /* TUIControl.h in Headers */,
 				CBB74CA513BE6E1900C85CB5 /* TUIFastIndexPath.h in Headers */,
 				C605B970198E5354002BD5C0 /* TUIAppearance.h in Headers */,
+				C6AC73FB1C4279F300067BC1 /* TUIViewControllerPreviewingContext_Private.h in Headers */,
 				CBB74CA713BE6E1900C85CB5 /* TUIFont.h in Headers */,
 				C67A65CC1C30E91D0064D36F /* TUITextLayoutLine_Private.h in Headers */,
 				CBB74CA913BE6E1900C85CB5 /* TUIGeometry.h in Headers */,
@@ -1061,6 +1074,7 @@
 				CBB74CC813BE6E1900C85CB5 /* TUITableView.h in Headers */,
 				CBB74CCA13BE6E1900C85CB5 /* TUITableViewCell.h in Headers */,
 				CBB74CCC13BE6E1900C85CB5 /* TUITextEditor.h in Headers */,
+				C6AC73F51C42798200067BC1 /* TUIViewControllerPreviewing.h in Headers */,
 				CBB74CCE13BE6E1900C85CB5 /* TUITextField.h in Headers */,
 				CBB74CD013BE6E1900C85CB5 /* TUITextRenderer+Event.h in Headers */,
 				CBB74CD313BE6E1900C85CB5 /* TUITextRenderer.h in Headers */,
@@ -1072,6 +1086,7 @@
 				CBB74CDA13BE6E1900C85CB5 /* TUIView+Event.h in Headers */,
 				CBB74CDC13BE6E1900C85CB5 /* TUIView+NSTextInputClient.h in Headers */,
 				CBB74CDE13BE6E1900C85CB5 /* TUIView+PasteboardDragging.h in Headers */,
+				C6AC73F81C4279CB00067BC1 /* TUIViewControllerPreviewingContext.h in Headers */,
 				C6AC73ED1C37E6C000067BC1 /* TUITextComposedSequence.h in Headers */,
 				CBB74CE013BE6E1900C85CB5 /* TUIView+Private.h in Headers */,
 				CBB74CE213BE6E1900C85CB5 /* TUIView.h in Headers */,
@@ -1477,6 +1492,7 @@
 				CBB74CE513BE6E1900C85CB5 /* TUIViewController.m in Sources */,
 				C67A65BE1C30E5270064D36F /* TUITextLayoutFrame.m in Sources */,
 				CBB74CE713BE6E1900C85CB5 /* TUIViewNSViewContainer.m in Sources */,
+				C6AC73F91C4279CB00067BC1 /* TUIViewControllerPreviewingContext.m in Sources */,
 				886EBA8213D64393006DE018 /* TUIControl+Private.m in Sources */,
 				8819794713E26E0200AA39EB /* TUIView+Accessibility.m in Sources */,
 				8819794F13E26E5800AA39EB /* TUINSView+Accessibility.m in Sources */,

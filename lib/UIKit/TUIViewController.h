@@ -44,4 +44,6 @@
 
 - (TUIView *)setupStandardView; // don't use this
 
+@property (nonatomic, assign) CGSize preferredContentSize;
+
 @end

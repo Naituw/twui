@@ -71,6 +71,9 @@
 
 @end
 
+#import <QuartzCore/QuartzCore.h>
+@class TUIViewController;
+
 @protocol TUINSViewDelegate <NSObject>
 
 @optional
@@ -82,6 +85,8 @@
 - (void)nsView:(TUINSView *)nsView rightMouseUp:(NSEvent *)event;
 - (NSMenu *)nsView:(TUINSView *)nsView menuForEvent:(NSEvent *)event;
 - (void)nsView:(TUINSView *)nsView scrollWheel:(NSEvent *)event;
+
+- (void)nsView:(TUINSView *)nsView previewViewController:(TUIViewController *)controller sourceRect:(CGRect)sourceRect contentSize:(CGSize)contentSize;
 
 @end
 

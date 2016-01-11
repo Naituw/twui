@@ -29,6 +29,8 @@
 #import "TUIView+Private.h"
 #import "TUITextRenderer+Event.h"
 #import "TUITooltipWindow.h"
+#import "TUIViewControllerPreviewing.h"
+#import "TUIViewControllerPreviewingContext_Private.h"
 #import <CoreFoundation/CoreFoundation.h>
 
 // If enabled, NSViews contained within TUIViewNSViewContainers will be clipped
@@ -90,6 +92,8 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
         unsigned int delegateRightMouseUp:1;
         unsigned int delegateMouseUp:1;
         unsigned int delegateScrollWheel:1;
+        
+        unsigned int previewEventFired: 1;
     } _viewFlags;
 }
 
@@ -480,7 +484,11 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 
 	_trackingView = nil;
 
-	[lastTrackingView mouseUp:event]; // after _trackingView set to nil, will call mouseUp:fromSubview:
+    if (!_viewFlags.previewEventFired) {
+        [lastTrackingView mouseUp:event]; // after _trackingView set to nil, will call mouseUp:fromSubview:
+    } else {
+        [lastTrackingView mouseExited:event];
+    }
 	
 	[self _updateHoverViewWithEvent:event];
 }
@@ -629,11 +637,13 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 
 - (void)touchesCancelledWithEvent:(NSEvent *)event
 {
+    _viewFlags.previewEventFired = NO;
     [self endGesturePerformingWithEvent:event];
 }
 
 - (void)touchesEndedWithEvent:(NSEvent *)event
 {
+    _viewFlags.previewEventFired = NO;
     [self endGesturePerformingWithEvent:event];
 }
 
@@ -778,6 +788,26 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
     [super quickLookWithEvent:event];
 }
 
+- (void)pressureChangeWithEvent:(NSEvent *)event
+{
+    if (!_viewFlags.previewEventFired && event.stage == 2) {
+        _viewFlags.previewEventFired = YES;
+        
+        TUIView * view = [self viewForEvent:event];
+        Protocol * protocol = @protocol(TUIViewControllerPreviewing);
+        while (view) {
+            if ([view conformsToProtocol:protocol]) {
+                break;
+            }
+            view = view.superview;
+        }
+        
+        if ([view conformsToProtocol:protocol]) {
+            [self beginPreviewingWithView:(id)view event:event];
+        }
+    }
+}
+
 - (void)setUp {
     
     self.acceptsTouchEvents = YES;
@@ -823,11 +853,16 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 - (NSView *)hitTest:(NSPoint)point {
 	// convert point into our coordinate system, so it's ready to go for all
 	// subviews (which expect it in their superview's coordinate system)
-	point = [self convertPoint:point fromView:self.superview];
-
+    point = [self convertPoint:point fromView:self.superview];
+    
 	if (!CGRectContainsPoint(self.bounds, point))
 		return nil;
 
+    TUIView * view = [self.rootView hitTest:point withEvent:nil];
+    if (view.moveWindowByDragging && self.mouseDownCanMoveWindow) {
+        return nil;
+    }
+    
 	__block NSView *result = self;
 
 	// we need to avoid hitting any NSViews that are clipped by their
@@ -1005,6 +1040,47 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 	// message onto all subviews and our rootView, doing so could result in
 	// crazy behavior, since the TUINSView of those views is and will remain
 	// 'self' by definition
+}
+
+#pragma mark - Previewing
+
+- (void)beginPreviewingWithView:(TUIView<TUIViewControllerPreviewing> *)view event:(NSEvent *)event
+{
+    if (!view || !event) {
+        return;
+    }
+    
+    TUIViewControllerPreviewingContext * context = [[TUIViewControllerPreviewingContext alloc] initWithSourceView:view];
+    CGPoint location = [view localPointForEvent:event];
+    TUIViewController * controller = [view previewingContext:context viewControllerForLocation:location];
+    
+    if (!controller) {
+        return;
+    }
+    
+    CGRect sourceRect = context.sourceRect;
+    if (context.sourceSubview) {
+        sourceRect = [view convertRect:context.sourceSubview.bounds fromView:context.sourceSubview];
+    } else if (context.sourcePath) {
+        sourceRect = (CGRect)context.sourcePath.bounds;
+    }
+    if (CGRectIsNull(sourceRect)) {
+        sourceRect = view.bounds;
+    }
+    
+    sourceRect = [view convertRect:sourceRect toView:view.nsView.rootView];
+    
+    CGSize contentSize = context.preferredContentSize;
+    if (CGSizeEqualToSize(contentSize, CGSizeZero)) {
+        contentSize = controller.preferredContentSize;
+    }
+    if (CGSizeEqualToSize(contentSize, CGSizeZero)) {
+        contentSize = self.bounds.size;
+    }
+    
+    if ([self.viewDelegate respondsToSelector:@selector(nsView:previewViewController:sourceRect:contentSize:)]) {
+        [self.viewDelegate nsView:self previewViewController:controller sourceRect:sourceRect contentSize:contentSize];
+    }
 }
 
 @end

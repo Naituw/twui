@@ -777,6 +777,10 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 {
     TUIView * view = [self viewForEvent:event];
     
+    if ([self firePreviewEventIfNeeded:event]) {
+        return;
+    }
+    
     TUITextRenderer * renderer = [view textRendererAtPoint:[view localPointForEvent:event]];
     
     if (renderer)
@@ -790,7 +794,14 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 
 - (void)pressureChangeWithEvent:(NSEvent *)event
 {
-    if (!_viewFlags.previewEventFired && event.stage == 2) {
+    if (event.stage == 2) {
+        [self firePreviewEventIfNeeded:event];
+    }
+}
+
+- (BOOL)firePreviewEventIfNeeded:(NSEvent *)event
+{
+    if (!_viewFlags.previewEventFired) {
         _viewFlags.previewEventFired = YES;
         
         TUIView * view = [self viewForEvent:event];
@@ -804,8 +815,10 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
         
         if ([view conformsToProtocol:protocol]) {
             [self beginPreviewingWithView:(id)view event:event];
+            return YES;
         }
     }
+    return NO;
 }
 
 - (void)setUp {

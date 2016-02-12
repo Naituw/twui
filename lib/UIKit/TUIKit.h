@@ -58,6 +58,7 @@
 #import "TUIView+TUIBridgedView.h"
 #import "TUIViewController.h"
 #import "TUIViewNSViewContainer.h"
+#import "TUIVisualEffectView.h"
 
 extern BOOL AtLeastLion; // set at launch
 extern BOOL AtLeastElCapitan; // set at launch

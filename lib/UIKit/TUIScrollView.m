@@ -300,7 +300,7 @@ static CVReturn scrollCallback(CVDisplayLinkRef displayLink, const CVTimeStamp *
 	CGRect b = self.bounds;
 	CGSize s = _contentSize;
 	
-	s.height += _contentInset.top;
+//	s.height += _contentInset.top;
 	
 	CGFloat mx = offset.x + s.width;
 	if(s.width > b.size.width) {
@@ -416,12 +416,19 @@ static CVReturn scrollCallback(CVDisplayLinkRef displayLink, const CVTimeStamp *
 	float bounceX = pullX * 1.2;
 	float bounceY = pullY * 1.2;
 	
-	_verticalScrollKnob.frame = CGRectMake(
-    round(-offset.x + bounds.size.width - knobSize - pullX), // x
-    round(-offset.y + (hVisible ? knobSize : 0) + resizeKnobSize.height + bounceY + _scrollIndicatorSlotInsets.bottom), // y
-    knobSize, // width
-    bounds.size.height - (hVisible ? knobSize : 0) - resizeKnobSize.height - _scrollIndicatorSlotInsets.bottom // height
-  );
+	CGRect verticalKnobFrame = CGRectMake(
+        round(-offset.x + bounds.size.width - knobSize - pullX), // x
+        round(-offset.y + (hVisible ? knobSize : 0) + resizeKnobSize.height + bounceY), // y
+        knobSize, // width
+        bounds.size.height - (hVisible ? knobSize : 0) - resizeKnobSize.height // height
+    );
+    
+    if (_scrollIndicatorSlotInsets.top || _scrollIndicatorSlotInsets.bottom) {
+        verticalKnobFrame.size.height -= (_scrollIndicatorSlotInsets.top + _scrollIndicatorSlotInsets.bottom);
+        verticalKnobFrame.origin.y += _scrollIndicatorSlotInsets.bottom;
+    }
+    
+    _verticalScrollKnob.frame = verticalKnobFrame;
   
 	_horizontalScrollKnob.frame = CGRectMake(
     round(-offset.x - bounceX), // x
@@ -858,7 +865,7 @@ static float clampBounce(float x) {
 		[self setContentOffset:CGPointMake(0, -rect.origin.y) animated:animated];
 	} else if(rect.origin.y + rect.size.height > visible.origin.y + visible.size.height) {
 		// scroll up, rect to be flush with top of view
-		[self setContentOffset:CGPointMake(0, -rect.origin.y + visible.size.height - rect.size.height) animated:animated];
+		[self setContentOffset:CGPointMake(0, -rect.origin.y + visible.size.height - rect.size.height + _contentInset.top) animated:animated];
 	}
 	[self.nsView invalidateHoverForView:self];
 }

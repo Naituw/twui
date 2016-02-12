@@ -280,7 +280,7 @@ typedef struct {
 	
 	NSMutableArray *sections = [[NSMutableArray alloc] initWithCapacity:numberOfSections];
 	
-	CGFloat offset = [_headerView bounds].size.height - self.contentInset.top*2;
+	CGFloat offset = [_headerView bounds].size.height - self.contentInset.top;
 	for(int s = 0; s < numberOfSections; ++s) {
 		TUITableViewSection *section = [[TUITableViewSection alloc] initWithNumberOfRows:[_dataSource tableView:self numberOfRowsInSection:s] sectionIndex:s tableView:self];
 		[section _setupRowHeights];
@@ -881,7 +881,7 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
   
 	if(_headerView) {
 		CGSize s = self.contentSize;
-		CGRect headerViewRect = CGRectMake(0, s.height - _headerView.frame.size.height, visible.size.width, _headerView.frame.size.height);
+		CGRect headerViewRect = CGRectMake(0, s.height - _headerView.frame.size.height + _contentInset.top, visible.size.width, _headerView.frame.size.height);
 		if(CGRectIntersectsRect(headerViewRect, visible)) {
 			_headerView.frame = headerViewRect;			
 			[_headerView setNeedsLayout];

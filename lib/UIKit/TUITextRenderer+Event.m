@@ -267,6 +267,19 @@ normal:
     self.hitAttachment = nil;
 }
 
+- (id<ABActiveTextRange>)activeRangeForLocation:(CGPoint)point
+{
+    CFIndex index = [self characterIndexForPoint:point];
+    NSArray * ranges = [self eventDelegateActiveRanges];
+
+    if (ranges) {
+        id<ABActiveTextRange> range = [self rangeInRanges:ranges forStringIndex:index];
+        return range;
+    }
+    
+    return nil;
+}
+
 - (NSMenu *)menuForEvent:(NSEvent *)event
 {
     if (_eventDelegateHas.contextMenuForActiveRange) {

@@ -33,6 +33,8 @@
 
 @property (nonatomic, assign, readonly) TUIView * eventDelegateContextView;
 
+- (id<ABActiveTextRange>)activeRangeForLocation:(CGPoint)point;
+
 @end
 
 @protocol TUITextRendererEventDelegate <NSObject>

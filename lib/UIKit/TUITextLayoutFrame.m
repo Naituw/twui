@@ -87,7 +87,7 @@
 
 - (void)updateLayoutSize
 {
-    CGFloat __block minY = 0.0, __block width = 0.0;
+    CGFloat __block minY = _layout.size.height, __block width = 0.0;
     
     NSUInteger fragmentCount = _lineFragments.count;
     

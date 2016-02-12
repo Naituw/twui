@@ -138,6 +138,8 @@
 		C653472F18DE762E0069C8B5 /* TUITextAttachment.m in Sources */ = {isa = PBXBuildFile; fileRef = C653472B18DE762E0069C8B5 /* TUITextAttachment.m */; };
 		C653473018DE762E0069C8B5 /* TUITextAttachment.m in Sources */ = {isa = PBXBuildFile; fileRef = C653472B18DE762E0069C8B5 /* TUITextAttachment.m */; };
 		C653473118DE762E0069C8B5 /* TUITextAttachment.m in Sources */ = {isa = PBXBuildFile; fileRef = C653472B18DE762E0069C8B5 /* TUITextAttachment.m */; };
+		C66EF6591C6D630F00B41B90 /* TUIVisualEffectView.h in Headers */ = {isa = PBXBuildFile; fileRef = C66EF6571C6D630F00B41B90 /* TUIVisualEffectView.h */; };
+		C66EF65A1C6D630F00B41B90 /* TUIVisualEffectView.m in Sources */ = {isa = PBXBuildFile; fileRef = C66EF6581C6D630F00B41B90 /* TUIVisualEffectView.m */; };
 		C67A65B71C30E4F60064D36F /* TUITextLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = C67A65B51C30E4F60064D36F /* TUITextLayout.h */; };
 		C67A65B81C30E4F60064D36F /* TUITextLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = C67A65B61C30E4F60064D36F /* TUITextLayout.m */; };
 		C67A65BA1C30E51B0064D36F /* TUITextLayout_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = C67A65B91C30E51B0064D36F /* TUITextLayout_Private.h */; };
@@ -497,6 +499,8 @@
 		C605B96F198E5354002BD5C0 /* TUIAppearance.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TUIAppearance.m; sourceTree = "<group>"; };
 		C653472A18DE762E0069C8B5 /* TUITextAttachment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TUITextAttachment.h; sourceTree = "<group>"; };
 		C653472B18DE762E0069C8B5 /* TUITextAttachment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TUITextAttachment.m; sourceTree = "<group>"; };
+		C66EF6571C6D630F00B41B90 /* TUIVisualEffectView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TUIVisualEffectView.h; sourceTree = "<group>"; };
+		C66EF6581C6D630F00B41B90 /* TUIVisualEffectView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TUIVisualEffectView.m; sourceTree = "<group>"; };
 		C67A65B51C30E4F60064D36F /* TUITextLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TUITextLayout.h; sourceTree = "<group>"; };
 		C67A65B61C30E4F60064D36F /* TUITextLayout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TUITextLayout.m; sourceTree = "<group>"; };
 		C67A65B91C30E51B0064D36F /* TUITextLayout_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TUITextLayout_Private.h; sourceTree = "<group>"; };
@@ -956,6 +960,8 @@
 				D0C7656D15B6322A00E7AC2C /* TUIViewNSViewContainer+Private.h */,
 				C605B96E198E5354002BD5C0 /* TUIAppearance.h */,
 				C605B96F198E5354002BD5C0 /* TUIAppearance.m */,
+				C66EF6571C6D630F00B41B90 /* TUIVisualEffectView.h */,
+				C66EF6581C6D630F00B41B90 /* TUIVisualEffectView.m */,
 				C67A65B51C30E4F60064D36F /* TUITextLayout.h */,
 				C67A65B61C30E4F60064D36F /* TUITextLayout.m */,
 				C67A65B91C30E51B0064D36F /* TUITextLayout_Private.h */,
@@ -1090,6 +1096,7 @@
 				C6AC73ED1C37E6C000067BC1 /* TUITextComposedSequence.h in Headers */,
 				CBB74CE013BE6E1900C85CB5 /* TUIView+Private.h in Headers */,
 				CBB74CE213BE6E1900C85CB5 /* TUIView.h in Headers */,
+				C66EF6591C6D630F00B41B90 /* TUIVisualEffectView.h in Headers */,
 				C67A65C11C30E5320064D36F /* TUITextLayoutLine.h in Headers */,
 				C653472C18DE762E0069C8B5 /* TUITextAttachment.h in Headers */,
 				CBB74CE413BE6E1900C85CB5 /* TUIViewController.h in Headers */,
@@ -1460,6 +1467,7 @@
 				CBB74CAA13BE6E1900C85CB5 /* TUIGeometry.m in Sources */,
 				C67A65D01C30E9A60064D36F /* TUITextRenderer+LayoutResult.m in Sources */,
 				CBB74CAC13BE6E1900C85CB5 /* TUIImage+Drawing.m in Sources */,
+				C66EF65A1C6D630F00B41B90 /* TUIVisualEffectView.m in Sources */,
 				CBB74CAE13BE6E1900C85CB5 /* TUIImage.m in Sources */,
 				C67A65D41C30EA0F0064D36F /* TUITextRenderer+Debug.m in Sources */,
 				CBB74CB013BE6E1900C85CB5 /* TUIImageView.m in Sources */,

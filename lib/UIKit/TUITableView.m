@@ -919,7 +919,7 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
 	if(_pullDownView) {
 		CGSize s = self.contentSize;
 		CGRect visible = [self visibleRect];
-		CGRect pullDownRect = CGRectMake(0, s.height, visible.size.width, _pullDownView.frame.size.height);
+		CGRect pullDownRect = CGRectMake(0, s.height + _contentInset.top, visible.size.width, _pullDownView.frame.size.height);
 		return CGRectIntersectsRect(pullDownRect, visible);
 	}
 	return NO;

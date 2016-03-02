@@ -235,6 +235,7 @@ enum {
 	offset.x = -offset.x;
 	offset.y = -offset.y;
 	b.origin = offset;
+    b = TUIEdgeInsetsInsetRect(b, TUIEdgeInsetsInvert(self.contentInset));
 	return b;
 }
 
@@ -865,7 +866,7 @@ static float clampBounce(float x) {
 		[self setContentOffset:CGPointMake(0, -rect.origin.y) animated:animated];
 	} else if(rect.origin.y + rect.size.height > visible.origin.y + visible.size.height) {
 		// scroll up, rect to be flush with top of view
-		[self setContentOffset:CGPointMake(0, -rect.origin.y + visible.size.height - rect.size.height + _contentInset.top) animated:animated];
+		[self setContentOffset:CGPointMake(0, -rect.origin.y + visible.size.height - rect.size.height) animated:animated];
 	}
 	[self.nsView invalidateHoverForView:self];
 }

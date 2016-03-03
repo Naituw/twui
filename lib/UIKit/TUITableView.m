@@ -809,6 +809,7 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
 	}
 	
 	CGRect visible = [self visibleRect];
+    visible = TUIEdgeInsetsInsetRect(visible, self.contentInset);
 	
 	// Example:
 	// old:            0 1 2 3 4 5 6 7

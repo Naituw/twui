@@ -587,7 +587,7 @@ static CGPoint PointLerp(CGPoint a, CGPoint b, CGFloat t)
 - (CGFloat)topDestinationOffset
 {
 	CGRect visible = self.visibleRect;
-	return -self.contentSize.height + visible.size.height;
+	return -self.contentSize.height + visible.size.height - self.contentInset.top;
 }
 
 /**

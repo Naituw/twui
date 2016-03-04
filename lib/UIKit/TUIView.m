@@ -165,7 +165,7 @@ static pthread_key_t TUICurrentContextScaleFactorTLSKey;
         
         if (AtLeastLion) {
             _layer.shouldRasterize = NO;
-            _layer.contentsScale = [[NSScreen mainScreen] backingScaleFactor];
+//            _layer.contentsScale = [[NSScreen mainScreen] backingScaleFactor];
         }
 	}
 	return _layer;

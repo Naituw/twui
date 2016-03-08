@@ -225,7 +225,9 @@
                 }
             }];
         }
-    } else {
+    }
+    
+    {
         id<ABActiveTextRange> highlighter = self.highlightedRange;
         if (highlighter) {
             CGFloat scale = self.eventDelegateContextView.layer.contentsScale;

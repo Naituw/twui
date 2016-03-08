@@ -86,6 +86,9 @@
 - (NSMenu *)nsView:(TUINSView *)nsView menuForEvent:(NSEvent *)event;
 - (void)nsView:(TUINSView *)nsView scrollWheel:(NSEvent *)event;
 
+- (void)nsView:(TUINSView *)nsView beginGestureWithEvent:(NSEvent *)event;
+- (void)nsView:(TUINSView *)nsView endGestureWithEvent:(NSEvent *)event;
+
 - (void)nsView:(TUINSView *)nsView previewViewController:(TUIViewController *)controller sourceRect:(CGRect)sourceRect contentSize:(CGSize)contentSize;
 
 @end

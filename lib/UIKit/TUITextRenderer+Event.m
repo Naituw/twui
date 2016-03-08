@@ -218,26 +218,29 @@ normal:
 
 - (void)mouseUp:(NSEvent *)event
 {
-	CGRect previousSelectionRect = [self rectForCurrentSelection];
-	
-	if(([event modifierFlags] & NSShiftKeyMask) == 0) {
-		CFIndex i = [self stringIndexForEvent:event];
-		_selectionEnd = i;
-	}
-	
-	// fixup selection based on selection affinity
-	BOOL flip = _selectionEnd < _selectionStart;
-	NSRange trueRange = [self _selectedRange];
-	_selectionStart = trueRange.location;
-	_selectionEnd = _selectionStart + trueRange.length;
-	if(flip) {
-		// maintain anchor point, if we select with mouse, then start using keyboard to tweak
-		CFIndex x = _selectionStart;
-		_selectionStart = _selectionEnd;
-		_selectionEnd = x;
-	}
-	
-	_selectionAffinity = TUITextSelectionAffinityCharacter; // reset affinity
+    CGRect previousSelectionRect = [self rectForCurrentSelection];
+
+    if (_flags.isFirstResponder) {
+        
+        if(([event modifierFlags] & NSShiftKeyMask) == 0) {
+            CFIndex i = [self stringIndexForEvent:event];
+            _selectionEnd = i;
+        }
+        
+        // fixup selection based on selection affinity
+        BOOL flip = _selectionEnd < _selectionStart;
+        NSRange trueRange = [self _selectedRange];
+        _selectionStart = trueRange.location;
+        _selectionEnd = _selectionStart + trueRange.length;
+        if(flip) {
+            // maintain anchor point, if we select with mouse, then start using keyboard to tweak
+            CFIndex x = _selectionStart;
+            _selectionStart = _selectionEnd;
+            _selectionEnd = x;
+        }
+        
+        _selectionAffinity = TUITextSelectionAffinityCharacter; // reset affinity
+    }
 	
 	CGRect totalRect = CGRectUnion(previousSelectionRect, [self rectForCurrentSelection]);
 	[self.eventDelegateContextView setNeedsDisplayInRect:totalRect];
@@ -257,8 +260,10 @@ normal:
 {
 	CGRect previousSelectionRect = [self rectForCurrentSelection];
 	
-	CFIndex i = [self stringIndexForEvent:event];
-	_selectionEnd = i;
+    if (_flags.isFirstResponder) {
+        CFIndex i = [self stringIndexForEvent:event];
+        _selectionEnd = i;
+    }
 	
 	CGRect totalRect = CGRectUnion(previousSelectionRect, [self rectForCurrentSelection]);
 	[self.eventDelegateContextView setNeedsDisplayInRect:totalRect];
@@ -362,16 +367,19 @@ normal:
 	// TODO: obviously these shouldn't be called at exactly the same time...
 	if(_eventDelegateHas.willBecomeFirstResponder) [_eventDelegate textRendererWillBecomeFirstResponder:self];
 	if(_eventDelegateHas.didBecomeFirstResponder) [_eventDelegate textRendererDidBecomeFirstResponder:self];
-	
+    _flags.isFirstResponder = YES;
+    
 	return YES;
 }
 
 - (BOOL)resignFirstResponder
 {
+    _flags.isFirstResponder = NO;
 	// TODO: obviously these shouldn't be called at exactly the same time...
 	if(_eventDelegateHas.willResignFirstResponder) [_eventDelegate textRendererWillResignFirstResponder:self];
 	[self resetSelection];
 	if(_eventDelegateHas.didResignFirstResponder) [_eventDelegate textRendererDidResignFirstResponder:self];
+    
 	return YES;
 }
 
@@ -448,6 +456,9 @@ normal:
 
 - (void)eventDelegateDidClickActiveRange:(id<ABActiveTextRange>)activeRange
 {
+    if (self.disablesActionSending || self.eventDelegateContextView.disablesActionSending) {
+        return;
+    }
     if (_eventDelegateHas.didPressActiveRange) {
         [_eventDelegate textRenderer:self didClickActiveRange:activeRange];
     }
@@ -455,6 +466,9 @@ normal:
 
 - (void)eventDelegateDidClickAttachment:(TUITextAttachment *)attachment
 {
+    if (self.disablesActionSending || self.eventDelegateContextView.disablesActionSending) {
+        return;
+    }
     if (_eventDelegateHas.didPressAttachment) {
         [_eventDelegate textRenderer:self didClickTextAttachment:attachment];
     }

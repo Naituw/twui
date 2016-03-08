@@ -225,6 +225,24 @@
                 }
             }];
         }
+    } else {
+        id<ABActiveTextRange> highlighter = self.highlightedRange;
+        if (highlighter) {
+            CGFloat scale = self.eventDelegateContextView.layer.contentsScale;
+            [layoutFrame enumerateSelectionRectsForCharacterRange:highlighter.rangeValue usingBlock:^(CGRect rect, NSRange characterRange, BOOL *stop) {
+                rect = [self convertRectFromLayout:rect];
+                rect = CGRectIntegral(rect);
+                if (rect.size.width > 1) {
+                    CGContextSaveGState(context);
+                    [[TUIColor colorWithWhite:0.0 alpha:0.16] set];
+                    CGContextFillRect(context, CGRectInset(rect, -1.0/scale, -1.0/scale));
+                    CGContextSetShadowWithColor(context, CGSizeMake(0, -2), 7, [TUIColor colorWithWhite:0.0 alpha:0.2].CGColor);
+                    [[NSColor colorWithCalibratedRed:254.0/255 green:249.0/255 blue:0 alpha:1.0] setFill];
+                    CGContextFillRect(context, rect);
+                    CGContextRestoreGState(context);
+                }
+            }];
+        }
     }
     
     if (self.shadowColor) {

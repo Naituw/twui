@@ -92,6 +92,8 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
         unsigned int delegateRightMouseUp:1;
         unsigned int delegateMouseUp:1;
         unsigned int delegateScrollWheel:1;
+        unsigned int delegateBeginGesture:1;
+        unsigned int delegateEndGesture:1;
         
         unsigned int previewEventFired: 1;
     } _viewFlags;
@@ -487,7 +489,10 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
     if (!_viewFlags.previewEventFired) {
         [lastTrackingView mouseUp:event]; // after _trackingView set to nil, will call mouseUp:fromSubview:
     } else {
-        [lastTrackingView mouseExited:event];
+        [lastTrackingView setDisablesActionSending:YES];
+        [lastTrackingView mouseUp:event];
+        [lastTrackingView setDisablesActionSending:NO];
+        _viewFlags.previewEventFired = NO;
     }
 	
 	[self _updateHoverViewWithEvent:event];
@@ -610,6 +615,10 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
     if ([event touchesMatchingPhase:NSTouchPhaseTouching inView:self].count > 1) {
         _gesturePerformingView = [self viewForEvent:event];
         [_gesturePerformingView beginGestureWithEvent:event];
+        
+        if (_viewFlags.delegateBeginGesture) {
+            [_viewDelegate nsView:self beginGestureWithEvent:event];
+        }
     }
 }
 
@@ -622,6 +631,10 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
         
         [_gesturePerformingView endGestureWithEvent:event];
         _gesturePerformingView = nil;
+        
+        if (_viewFlags.delegateEndGesture) {
+            [_viewDelegate nsView:self endGestureWithEvent:event];
+        }
     });
 }
 
@@ -676,6 +689,8 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
     _viewFlags.delegateRightMouseUp = [_viewDelegate respondsToSelector:@selector(nsView:rightMouseUp:)];
     _viewFlags.delegateMouseUp = [_viewDelegate respondsToSelector:@selector(nsView:mouseUp:)];
     _viewFlags.delegateScrollWheel = [_viewDelegate respondsToSelector:@selector(nsView:scrollWheel:)];
+    _viewFlags.delegateBeginGesture = [_viewDelegate respondsToSelector:@selector(nsView:beginGestureWithEvent:)];
+    _viewFlags.delegateEndGesture = [_viewDelegate respondsToSelector:@selector(nsView:endGestureWithEvent:)];
 }
 
 - (void)setEverythingNeedsDisplay
@@ -781,14 +796,6 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
         return;
     }
     
-    TUITextRenderer * renderer = [view textRendererAtPoint:[view localPointForEvent:event]];
-    
-    if (renderer)
-    {
-        [renderer quickLookWithEvent:event];
-        return;
-    }
-    
     [super quickLookWithEvent:event];
 }
 
@@ -814,9 +821,18 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
         }
         
         if ([view conformsToProtocol:protocol]) {
-            [self beginPreviewingWithView:(id)view event:event];
+            if ([self beginPreviewingWithView:(id)view event:event]) {
+                return YES;
+            }
+        }
+        
+        TUITextRenderer * renderer = [view textRendererAtPoint:[view localPointForEvent:event]];
+        
+        if (renderer) {
+            [renderer quickLookWithEvent:event];
             return YES;
         }
+        _viewFlags.previewEventFired = NO;
     }
     return NO;
 }
@@ -1057,10 +1073,10 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 
 #pragma mark - Previewing
 
-- (void)beginPreviewingWithView:(TUIView<TUIViewControllerPreviewing> *)view event:(NSEvent *)event
+- (BOOL)beginPreviewingWithView:(TUIView<TUIViewControllerPreviewing> *)view event:(NSEvent *)event
 {
     if (!view || !event) {
-        return;
+        return NO;
     }
     
     TUIViewControllerPreviewingContext * context = [[TUIViewControllerPreviewingContext alloc] initWithSourceView:view];
@@ -1068,7 +1084,7 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
     TUIViewController * controller = [view previewingContext:context viewControllerForLocation:location];
     
     if (!controller) {
-        return;
+        return NO;
     }
     
     CGRect sourceRect = context.sourceRect;
@@ -1094,6 +1110,8 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
     if ([self.viewDelegate respondsToSelector:@selector(nsView:previewViewController:sourceRect:contentSize:)]) {
         [self.viewDelegate nsView:self previewViewController:controller sourceRect:sourceRect contentSize:contentSize];
     }
+    
+    return YES;
 }
 
 @end

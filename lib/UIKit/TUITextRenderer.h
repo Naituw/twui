@@ -63,7 +63,8 @@ typedef enum {
 	struct {
 		unsigned int drawMaskDragSelection:1;
 		unsigned int backgroundDrawingEnabled:1;
-		unsigned int preDrawBlocksEnabled:1;		
+		unsigned int preDrawBlocksEnabled:1;
+        unsigned int isFirstResponder: 1;
 	} _flags;
 }
 
@@ -107,6 +108,7 @@ typedef enum {
 - (void)drawSelectionWithRects:(CGRect *)rects count:(CFIndex)count;
 
 @property (nonatomic, strong) id<ABActiveTextRange> hitRange;
+@property (nonatomic, strong) id<ABActiveTextRange> highlightedRange; // yellow background
 @property (nonatomic, strong) TUITextAttachment * hitAttachment;
 
 @property (nonatomic, assign) CGFloat baselineAscent;

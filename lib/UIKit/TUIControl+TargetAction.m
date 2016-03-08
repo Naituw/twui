@@ -135,6 +135,10 @@
 
 - (void)sendActionsForControlEvents:(TUIControlEvents)controlEvents                        // send all actions associated with events
 {
+    if (self.disablesActionSending) {
+        return;
+    }
+    
 	for(TUIControlTargetAction *t in [self _targetActions]) {
 		if(t.controlEvents == controlEvents) {
 			if(t.target && t.action) {

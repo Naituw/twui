@@ -22,6 +22,7 @@
         self.backgroundColor = [TUIColor clearColor];
         self.opaque = NO;
         self.userInteractionEnabled = NO;
+        self.clipsToBounds = YES;
         
         // TODO: fallback for old systems
         
@@ -43,7 +44,7 @@
 {
     [super layoutSubviews];
     
-    _backingView.frame = self.bounds;
+    _backingView.frame = CGRectInset(self.bounds, -6, 0);
 }
 
 - (void)setBlendingMode:(TUIVisualEffectBlendingMode)blendingMode

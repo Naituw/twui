@@ -408,6 +408,8 @@ normal:
     NSInteger idx = [self stringIndexForEvent:event];
     NSAttributedString * string = [self attributedString];
     
+    idx = MIN(string.length - 1, idx);
+    
     NSRange range = [string doubleClickAtIndex:idx];
     
     NSAttributedString * target = [string attributedSubstringFromRange:range];

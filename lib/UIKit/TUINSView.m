@@ -808,6 +808,10 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 
 - (BOOL)firePreviewEventIfNeeded:(NSEvent *)event
 {
+    if (!self.window.canBecomeMainWindow) {
+        return NO;
+    }
+    
     if (!_viewFlags.previewEventFired) {
         _viewFlags.previewEventFired = YES;
         

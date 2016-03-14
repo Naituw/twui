@@ -231,7 +231,7 @@
         id<ABActiveTextRange> highlighter = self.highlightedRange;
         if (highlighter) {
             CGFloat scale = self.eventDelegateContextView.layer.contentsScale;
-            [layoutFrame enumerateSelectionRectsForCharacterRange:highlighter.rangeValue usingBlock:^(CGRect rect, NSRange characterRange, BOOL *stop) {
+            [layoutFrame enumerateEnclosingRectsForCharacterRange:highlighter.rangeValue usingBlock:^(CGRect rect, NSRange characterRange, BOOL *stop) {
                 rect = [self convertRectFromLayout:rect];
                 rect = CGRectIntegral(rect);
                 if (rect.size.width > 1) {

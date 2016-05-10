@@ -152,6 +152,9 @@
 
 - (void)frameChanged:(NSNotification *)notification {
 	TUIView *view = [notification object];
+    if (!view.supportsConstraints) {
+        return;
+    }
 	[self beginProcessingView:view];
 }
 

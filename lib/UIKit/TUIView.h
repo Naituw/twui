@@ -230,6 +230,8 @@ extern CGRect(^TUIViewCenteredLayout)(TUIView*);
 - (void)appearanceDidUpdate;
 - (void)setAppearanceForViewHierarchy:(TUIAppearance *)appearance;
 
+@property (nonatomic, assign) BOOL supportsConstraints;
+
 @end
 
 @interface TUIView (TUIViewGeometry)

@@ -69,9 +69,9 @@
 {
     //	NSLog(@"-anims %d", --animcount);
 	if(animationCompletionBlock != nil) {
+        // happends when committing an animation context without any modification of layer's property
 		animationCompletionBlock(NO);
         animationCompletionBlock = nil;
-		NSLog(@"Error: completion block didn't complete! %@", self);
 		
 		NSAssert(animationCompletionBlock == nil, @"animationCompletionBlock should be nil after executing from dealloc");
 	}
@@ -169,8 +169,8 @@ static NSMutableArray *AnimationStack = nil;
 
 + (void)commitAnimations
 {
+    TUIViewAnimation * __autoreleasing animation = [self _currentAnimation]; // release in end of runloop
 	[[self _animationStack] removeLastObject];
-	
     //	NSLog(@"--- %d", [[self _animationStack] count]);
 }
 

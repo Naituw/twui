@@ -412,6 +412,10 @@ extern CGRect(^TUIViewCenteredLayout)(TUIView*);
 
 @end
 
+typedef NS_OPTIONS(NSUInteger, TUIViewAnimationOptions) {
+    TUIViewAnimationOptionCurveEaseInOut = 0 << 16,
+};
+
 @interface TUIView (TUIViewAnimation)
 
 /**
@@ -474,6 +478,7 @@ extern CGRect(^TUIViewCenteredLayout)(TUIView*);
 + (void)animateWithDuration:(NSTimeInterval)duration animations:(void (^)(void))animations completion:(void (^)(BOOL finished))completion;
 + (void)animateWithDuration:(NSTimeInterval)duration delay:(NSTimeInterval)delay animations:(void (^)(void))animations completion:(void (^)(BOOL finished))completion;
 + (void)animateWithDuration:(NSTimeInterval)duration delay:(NSTimeInterval)delay curve:(TUIViewAnimationCurve)curve animations:(void (^)(void))animations completion:(void (^)(BOOL finished))completion;
++ (void)animateWithDuration:(NSTimeInterval)duration delay:(NSTimeInterval)delay usingSpringWithDamping:(CGFloat)dampingRatio initialSpringVelocity:(CGFloat)velocity options:(TUIViewAnimationOptions)options animations:(void (^)(void))animations completion:(void (^)(BOOL finished))completion;
 
 /**
  from receiver and all subviews

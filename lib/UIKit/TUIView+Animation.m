@@ -57,9 +57,14 @@
 
 - (id)init
 {
+    return [self initWithBasicAnimation:[CABasicAnimation animation]];
+}
+
+- (instancetype)initWithBasicAnimation:(CABasicAnimation *)animation
+{
 	if((self = [super init]))
 	{
-		basicAnimation = [CABasicAnimation animation];
+        basicAnimation = animation ? : [CABasicAnimation animation];
         //		NSLog(@"+anims %d", ++animcount);
 	}
 	return self;
@@ -153,9 +158,37 @@ static NSMutableArray *AnimationStack = nil;
 	[self commitAnimations];
 }
 
++ (void)animateWithDuration:(NSTimeInterval)duration delay:(NSTimeInterval)delay usingSpringWithDamping:(CGFloat)dampingRatio initialSpringVelocity:(CGFloat)velocity options:(TUIViewAnimationOptions)options animations:(void (^)(void))animations completion:(void (^)(BOOL finished))completion
+{
+    dampingRatio = MAX(dampingRatio, 0.01);
+    dampingRatio = MIN(dampingRatio, 1);
+    duration = MAX(duration, 0.3);
+    duration = MIN(duration, 50);
+    
+    CGFloat damping = dampingRatio * 19.05;
+    
+    CASpringAnimation * animation = [CASpringAnimation animation];
+    animation.damping = dampingRatio * 19.05; // same behavior as UIKit
+    animation.initialVelocity = velocity;
+    
+    CGFloat factor = 13.815;
+    animation.mass = duration / (factor / damping + pow(damping / 100, factor));
+    
+    [self _beginAnimations:nil animation:[[TUIViewAnimation alloc] initWithBasicAnimation:animation] context:NULL];
+    [self setAnimationDuration:animation.settlingDuration];
+    [self setAnimationDelay:delay];
+    [[self _currentAnimation] setAnimationCompletionBlock:completion];
+    animations();
+    [self commitAnimations];
+}
+
 + (void)beginAnimations:(NSString *)animationID context:(void *)context
 {
-	TUIViewAnimation *animation = [[TUIViewAnimation alloc] init];
+    [self _beginAnimations:animationID animation:[[TUIViewAnimation alloc] init] context:context];
+}
+
++ (void)_beginAnimations:(NSString *)animationID animation:(TUIViewAnimation *)animation context:(void *)context
+{
 	animation.context = context;
 	animation.animationID = animationID;
 	[[self _animationStack] addObject:animation];

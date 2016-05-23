@@ -170,9 +170,10 @@ static NSMutableArray *AnimationStack = nil;
     CASpringAnimation * animation = [CASpringAnimation animation];
     animation.damping = dampingRatio * 19.05; // same behavior as UIKit
     animation.initialVelocity = velocity;
+    animation.stiffness = 150;
     
     CGFloat factor = 13.815;
-    animation.mass = duration / (factor / damping + pow(damping / 100, factor));
+    animation.mass = duration / (factor / damping + pow(damping / 100, factor / 10));
     
     [self _beginAnimations:nil animation:[[TUIViewAnimation alloc] initWithBasicAnimation:animation] context:NULL];
     [self setAnimationDuration:animation.settlingDuration];

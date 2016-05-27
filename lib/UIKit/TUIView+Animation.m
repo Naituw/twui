@@ -38,6 +38,7 @@
 @property (nonatomic, copy) void (^animationCompletionBlock)(BOOL finished);
 
 @property (nonatomic, strong, readonly) CABasicAnimation *basicAnimation;
+@property (nonatomic, assign) BOOL beginFromCurrentState;
 
 @end
 
@@ -84,8 +85,13 @@
 
 - (void)runActionForKey:(NSString *)event object:(id)anObject arguments:(NSDictionary *)dict
 {
-	CAAnimation *animation = [basicAnimation copyWithZone:nil];
+	CABasicAnimation *animation = [basicAnimation copyWithZone:nil];
 	animation.delegate = self;
+    
+    if (_beginFromCurrentState && [anObject isKindOfClass:[CALayer class]]) {
+//        animation.fromValue = [[anObject presentationLayer] valueForKey:event];
+    }
+    
 	[animation runActionForKey:event object:anObject arguments:dict];
 }
 
@@ -284,7 +290,7 @@ static CGFloat SlomoTime()
 
 + (void)setAnimationBeginsFromCurrentState:(BOOL)fromCurrentState  // default = NO. If YES, the current view position is always used for new animations -- allowing animations to "pile up" on each other. Otherwise, the last end state is used for the animation (the default).
 {
-	NSLog(@"%@ %@ unimplemented", self, NSStringFromSelector(_cmd));
+    [self _currentAnimation].beginFromCurrentState = YES;
 }
 
 + (void)setAnimationTransition:(TUIViewAnimationTransition)transition forView:(TUIView *)view cache:(BOOL)cache  // current limitation - only one per begin/commit block

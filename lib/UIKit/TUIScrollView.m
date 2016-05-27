@@ -986,7 +986,9 @@ static float clampBounce(float x) {
 		
 		CFAbsoluteTime t = CFAbsoluteTimeGetCurrent();
 		CFTimeInterval dt = t - _lastScroll.t;
-		if(dt < 1 / 60.0) dt = 1 / 60.0;
+        if(dt < 1 / 120.0) {
+            dt = 1 / 120.0;
+        }
 		
 		_throw.vx = _lastScroll.dx / dt;
 		_throw.vy = _lastScroll.dy / dt;

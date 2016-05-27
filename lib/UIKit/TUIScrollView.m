@@ -584,8 +584,6 @@ static CGPoint PointLerp(CGPoint a, CGPoint b, CGFloat t)
 	if(_scrollViewFlags.delegateScrollViewDidScroll){
 		[_delegate scrollViewDidScroll:self];
 	}
-    p.y += (_contentSize.height - self.bounds.size.height);
-    NSLog(@"%@", NSStringFromPoint(p));
 }
 
 - (void)setContentOffset:(CGPoint)p

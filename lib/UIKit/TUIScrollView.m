@@ -253,7 +253,7 @@ enum {
  * 
  * @return scroll indicator insets
  */
--(TUIEdgeInsets)scrollIndicatorInsets {
+-(TUIEdgeInsets)visibleRectScrollIndicatorInsets {
   return TUIEdgeInsetsMake(0, 0, (_scrollViewFlags.horizontalScrollIndicatorShowing) ? _horizontalScrollKnob.frame.size.height : 0, (_scrollViewFlags.verticalScrollIndicatorShowing) ? _verticalScrollKnob.frame.size.width : 0);
 }
 
@@ -429,9 +429,9 @@ static CVReturn scrollCallback(CVDisplayLinkRef displayLink, const CVTimeStamp *
         bounds.size.height - (hVisible ? knobSize : 0) - resizeKnobSize.height // height
     );
     
-    if (_scrollIndicatorSlotInsets.top || _scrollIndicatorSlotInsets.bottom) {
-        verticalKnobFrame.size.height -= (_scrollIndicatorSlotInsets.top + _scrollIndicatorSlotInsets.bottom);
-        verticalKnobFrame.origin.y += _scrollIndicatorSlotInsets.bottom;
+    if (_scrollIndicatorInsets.top || _scrollIndicatorInsets.bottom) {
+        verticalKnobFrame.size.height -= (_scrollIndicatorInsets.top + _scrollIndicatorInsets.bottom);
+        verticalKnobFrame.origin.y += _scrollIndicatorInsets.bottom;
     }
     
     _verticalScrollKnob.frame = verticalKnobFrame;
@@ -439,7 +439,7 @@ static CVReturn scrollCallback(CVDisplayLinkRef displayLink, const CVTimeStamp *
 	_horizontalScrollKnob.frame = CGRectMake(
     round(-offset.x - bounceX), // x
     round(-offset.y + pullY), // y
-    bounds.size.width - (vVisible ? knobSize : 0) - resizeKnobSize.width - _scrollIndicatorSlotInsets.right, // width
+    bounds.size.width - (vVisible ? knobSize : 0) - resizeKnobSize.width - _scrollIndicatorInsets.right, // width
     knobSize // height
   );
   
@@ -497,6 +497,10 @@ static CVReturn scrollCallback(CVDisplayLinkRef displayLink, const CVTimeStamp *
 
 - (void)layoutSubviews
 {
+    CGPoint offset = [self _fixProposedContentOffset:_unroundedContentOffset];
+    if (!CGPointEqualToPoint(offset, _unroundedContentOffset)) {
+        [self _setContentOffset:offset];
+    }
 	[self _updateScrollKnobs];
 }
 

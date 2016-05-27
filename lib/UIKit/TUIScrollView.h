@@ -162,7 +162,7 @@ typedef enum {
 @property (readonly, nonatomic) BOOL verticalScrollIndicatorShowing;
 @property (readonly, nonatomic) BOOL horizontalScrollIndicatorShowing;
 @property (nonatomic) TUIScrollViewIndicatorStyle scrollIndicatorStyle;
-@property (nonatomic) TUIEdgeInsets scrollIndicatorSlotInsets; // only bottom and right available currently
+@property (nonatomic) TUIEdgeInsets scrollIndicatorInsets; // only bottom and right available currently
 @property (nonatomic) float decelerationRate;
 
 - (void)setContentOffset:(CGPoint)contentOffset animated:(BOOL)animated;
@@ -174,7 +174,7 @@ typedef enum {
 - (void)endContinuousScrollAnimated:(BOOL)animated;
 
 @property (nonatomic, readonly) CGRect visibleRect;
-@property (nonatomic, readonly) TUIEdgeInsets scrollIndicatorInsets;
+@property (nonatomic, readonly) TUIEdgeInsets visibleRectScrollIndicatorInsets;
 
 - (void)flashScrollIndicators;
 

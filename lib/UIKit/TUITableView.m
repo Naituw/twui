@@ -280,7 +280,7 @@ typedef struct {
 	
 	NSMutableArray *sections = [[NSMutableArray alloc] initWithCapacity:numberOfSections];
 	
-	CGFloat offset = [_headerView bounds].size.height - self.contentInset.top;
+	CGFloat offset = [_headerView bounds].size.height;
 	for(int s = 0; s < numberOfSections; ++s) {
 		TUITableViewSection *section = [[TUITableViewSection alloc] initWithNumberOfRows:[_dataSource tableView:self numberOfRowsInSection:s] sectionIndex:s tableView:self];
 		[section _setupRowHeights];
@@ -289,7 +289,7 @@ typedef struct {
 		[sections addObject:section];
 	}
 	
-	_contentHeight = offset - self.contentInset.bottom;
+	_contentHeight = offset;
 	_sectionInfo = sections;
 	
 }
@@ -809,7 +809,6 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
 	}
 	
 	CGRect visible = [self visibleRect];
-    visible = TUIEdgeInsetsInsetRect(visible, self.contentInset);
 	
 	// Example:
 	// old:            0 1 2 3 4 5 6 7
@@ -920,7 +919,7 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
 	if(_pullDownView) {
 		CGSize s = self.contentSize;
 		CGRect visible = [self visibleRect];
-		CGRect pullDownRect = CGRectMake(0, s.height + _contentInset.top, visible.size.width, _pullDownView.frame.size.height);
+		CGRect pullDownRect = CGRectMake(0, s.height, visible.size.width, _pullDownView.frame.size.height);
 		return CGRectIntersectsRect(pullDownRect, visible);
 	}
 	return NO;

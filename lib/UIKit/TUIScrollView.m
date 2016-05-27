@@ -216,15 +216,21 @@ enum {
 	return _contentInset;
 }
 
-- (void)setContentInset:(TUIEdgeInsets)i
+- (void)setContentInset:(TUIEdgeInsets)contentInset
 {
-	if(!TUIEdgeInsetsEqualToEdgeInsets(i, _contentInset)) {
-		_contentInset = i;
-		if(self._pulling){
-			_scrollViewFlags.didChangeContentInset = 1;
-		}else if(!self.dragging) {
-      self.contentOffset = self.contentOffset;
-		}
+	if(!TUIEdgeInsetsEqualToEdgeInsets(contentInset, _contentInset)) {
+        const CGFloat x = contentInset.left - _contentInset.left;
+        const CGFloat y = contentInset.top - _contentInset.top;
+        
+        _contentInset = contentInset;
+        _unroundedContentOffset.x -= x;
+        _unroundedContentOffset.y -= y;
+        
+        [self _updateBounds];
+
+        if (self._pulling){
+            _scrollViewFlags.didChangeContentInset = 1;
+        }
 	}
 }
 
@@ -235,7 +241,6 @@ enum {
 	offset.x = -offset.x;
 	offset.y = -offset.y;
 	b.origin = offset;
-    b = TUIEdgeInsetsInsetRect(b, TUIEdgeInsetsInvert(self.contentInset));
 	return b;
 }
 
@@ -301,7 +306,7 @@ static CVReturn scrollCallback(CVDisplayLinkRef displayLink, const CVTimeStamp *
 	CGRect b = self.bounds;
 	CGSize s = _contentSize;
 	
-//	s.height += _contentInset.top;
+	s.height += _contentInset.top;
 	
 	CGFloat mx = offset.x + s.width;
 	if(s.width > b.size.width) {
@@ -492,7 +497,6 @@ static CVReturn scrollCallback(CVDisplayLinkRef displayLink, const CVTimeStamp *
 
 - (void)layoutSubviews
 {
-	self.contentOffset = _unroundedContentOffset;
 	[self _updateScrollKnobs];
 }
 
@@ -558,15 +562,30 @@ static CGPoint PointLerp(CGPoint a, CGPoint b, CGFloat t)
 	}
 }
 
+- (void)_updateBounds
+{
+    CGRect bounds = self.bounds;
+    CGPoint p = CGPointZero;
+    p.x = _unroundedContentOffset.x - _contentInset.left;
+    p.y = _unroundedContentOffset.y - _contentInset.bottom;
+    
+    bounds.origin.x = round(-p.x - self.bounceOffset.x - self.pullOffset.x);
+    bounds.origin.y = round(-p.y - self.bounceOffset.y - self.pullOffset.y);
+    
+    [(CAScrollLayer *)self.layer scrollToPoint:bounds.origin];
+    
+    [self setNeedsLayout];
+}
+
 - (void)_setContentOffset:(CGPoint)p
 {
 	_unroundedContentOffset = p;
-	p.x = round(-p.x - self.bounceOffset.x - self.pullOffset.x);
-	p.y = round(-p.y - self.bounceOffset.y - self.pullOffset.y);
-	[((CAScrollLayer *)self.layer) scrollToPoint:p];
+    [self _updateBounds];
 	if(_scrollViewFlags.delegateScrollViewDidScroll){
 		[_delegate scrollViewDidScroll:self];
 	}
+    p.y += (_contentSize.height - self.bounds.size.height);
+    NSLog(@"%@", NSStringFromPoint(p));
 }
 
 - (void)setContentOffset:(CGPoint)p
@@ -1055,98 +1074,98 @@ static float clampBounce(float x) {
 		
 		switch(phase) {
 			case ScrollPhaseNormal: {
-				if(_scrollViewFlags.ignoreNextScrollPhaseNormal_10_7) {
-					_scrollViewFlags.ignoreNextScrollPhaseNormal_10_7 = 0;
-					return;
-				}
-				
-				// in case we are in background, didn't get a beginGesture
-				_throw.throwing = 0;
-				_scrollViewFlags.didChangeContentInset = 0;
-				
-				[self _stopDisplayLink];
-				CGEventRef cgEvent = [event CGEvent];
-				const int64_t isContinuous = CGEventGetIntegerValueField(cgEvent, kCGScrollWheelEventIsContinuous);
-
-				double dx = 0.0;
-				double dy = 0.0;
-				
-				if(isContinuous) {
-				  if(_scrollViewFlags.alwaysBounceHorizontal || [self _horizontalScrollKnobNeededForContentSize:self.contentSize])
-            dx = CGEventGetDoubleValueField(cgEvent, kCGScrollWheelEventPointDeltaAxis2);
-				  if(_scrollViewFlags.alwaysBounceVertical || [self _verticalScrollKnobNeededForContentSize:self.contentSize])
-				    dy = CGEventGetDoubleValueField(cgEvent, kCGScrollWheelEventPointDeltaAxis1);
-				} else {
-					CGEventSourceRef source = CGEventCreateSourceFromEvent(cgEvent);
-					if(source) {
-						const double pixelsPerLine = CGEventSourceGetPixelsPerLine(source);
-						if(_scrollViewFlags.alwaysBounceHorizontal || [self _horizontalScrollKnobNeededForContentSize:self.contentSize])
-              dx = CGEventGetDoubleValueField(cgEvent, kCGScrollWheelEventFixedPtDeltaAxis2) * pixelsPerLine;
-            if(_scrollViewFlags.alwaysBounceVertical || [self _verticalScrollKnobNeededForContentSize:self.contentSize])
-              dy = CGEventGetDoubleValueField(cgEvent, kCGScrollWheelEventFixedPtDeltaAxis1) * pixelsPerLine;
-						CFRelease(source);
-					} else {
-						NSLog(@"Critical: NULL source from CGEventCreateSourceFromEvent");
-					}
-				}
-				
-				if(MAX(fabsf(dx), fabsf(dy)) > 0.00001) { // ignore 0.0, 0.0
-					_lastScroll.dx = dx;
-					_lastScroll.dy = dy;
-					_lastScroll.t = CFAbsoluteTimeGetCurrent();
-				}
-				
-				CGPoint o = _unroundedContentOffset;
-				
-				if(!_pull.xPulling) o.x = o.x + dx;
-				if(!_pull.yPulling) o.y = o.y - dy;
-				
-				BOOL xPulling = FALSE;
-				BOOL yPulling = FALSE;
-				{
-					CGPoint pull = o;
-					pull.x += ((_pull.xPulling) ? _pull.x : 0);
-					pull.y += ((_pull.yPulling) ? _pull.y : 0);
-					CGPoint fixedOffset = [self _fixProposedContentOffset:pull];
-					o.x = fixedOffset.x;
-					o.y = fixedOffset.y;
-					xPulling = fixedOffset.x != pull.x;
-					yPulling = fixedOffset.y != pull.y;
-				}
-				
-				if(_scrollViewFlags.gestureBegan){
-          float maxManualPull = 30.0;
-          
-					if(_pull.xPulling){
-						CGFloat xCounter = pow(M_E, -1.0 / maxManualPull * fabsf(_pull.x));
-						// don't counter on un-pull
-						if(signbit(_pull.x) != signbit(dx))
-							xCounter = 1;
-						// update x-axis pulling
-						if(xPulling)
-							_pull.x += dx * xCounter;
-					}else if(xPulling){
-            _pull.x = dx;
-					}
-					
-					if(_pull.yPulling){
-						CGFloat yCounter = pow(M_E, -1.0 / maxManualPull * fabsf(_pull.y));
-						// don't counter on un-pull
-						if(signbit(_pull.y) == signbit(dy))
-							yCounter = 1; // don't counter
-						// update y-axis pulling
-						if(yPulling)
-							_pull.y -= dy * yCounter;
-					}else if(yPulling){
-            _pull.y = -dy;
-					}
-					
-          _pull.xPulling = xPulling;
-          _pull.yPulling = yPulling;
-				}
-				
-				[self setContentOffset:o];
-				break;
+                if(_scrollViewFlags.ignoreNextScrollPhaseNormal_10_7) {
+                    _scrollViewFlags.ignoreNextScrollPhaseNormal_10_7 = 0;
+                    return;
+                }
+                
+                // in case we are in background, didn't get a beginGesture
+                _throw.throwing = 0;
+                _scrollViewFlags.didChangeContentInset = 0;
+                
+                [self _stopDisplayLink];
+                CGEventRef cgEvent = [event CGEvent];
+                const int64_t isContinuous = CGEventGetIntegerValueField(cgEvent, kCGScrollWheelEventIsContinuous);
+                
+                double dx = 0.0;
+                double dy = 0.0;
+                
+                if(isContinuous) {
+                    if(_scrollViewFlags.alwaysBounceHorizontal || [self _horizontalScrollKnobNeededForContentSize:self.contentSize])
+                        dx = CGEventGetDoubleValueField(cgEvent, kCGScrollWheelEventPointDeltaAxis2);
+                    if(_scrollViewFlags.alwaysBounceVertical || [self _verticalScrollKnobNeededForContentSize:self.contentSize])
+                        dy = CGEventGetDoubleValueField(cgEvent, kCGScrollWheelEventPointDeltaAxis1);
+                } else {
+                    CGEventSourceRef source = CGEventCreateSourceFromEvent(cgEvent);
+                    if(source) {
+                        const double pixelsPerLine = CGEventSourceGetPixelsPerLine(source);
+                        if(_scrollViewFlags.alwaysBounceHorizontal || [self _horizontalScrollKnobNeededForContentSize:self.contentSize])
+                            dx = CGEventGetDoubleValueField(cgEvent, kCGScrollWheelEventFixedPtDeltaAxis2) * pixelsPerLine;
+                        if(_scrollViewFlags.alwaysBounceVertical || [self _verticalScrollKnobNeededForContentSize:self.contentSize])
+                            dy = CGEventGetDoubleValueField(cgEvent, kCGScrollWheelEventFixedPtDeltaAxis1) * pixelsPerLine;
+                        CFRelease(source);
+                    } else {
+                        NSLog(@"Critical: NULL source from CGEventCreateSourceFromEvent");
+                    }
+                }
+                
+                if(MAX(fabsf(dx), fabsf(dy)) > 0.00001) { // ignore 0.0, 0.0
+                    _lastScroll.dx = dx;
+                    _lastScroll.dy = dy;
+                    _lastScroll.t = CFAbsoluteTimeGetCurrent();
+                }
+                
+                CGPoint o = _unroundedContentOffset;
+                
+                if(!_pull.xPulling) o.x = o.x + dx;
+                if(!_pull.yPulling) o.y = o.y - dy;
+                
+                BOOL xPulling = FALSE;
+                BOOL yPulling = FALSE;
+                {
+                    CGPoint pull = o;
+                    pull.x += ((_pull.xPulling) ? _pull.x : 0);
+                    pull.y += ((_pull.yPulling) ? _pull.y : 0);
+                    CGPoint fixedOffset = [self _fixProposedContentOffset:pull];
+                    o.x = fixedOffset.x;
+                    o.y = fixedOffset.y;
+                    xPulling = fixedOffset.x != pull.x;
+                    yPulling = fixedOffset.y != pull.y;
+                }
+                
+                if(_scrollViewFlags.gestureBegan){
+                    float maxManualPull = 30.0;
+                    
+                    if(_pull.xPulling){
+                        CGFloat xCounter = pow(M_E, -1.0 / maxManualPull * fabsf(_pull.x));
+                        // don't counter on un-pull
+                        if(signbit(_pull.x) != signbit(dx))
+                            xCounter = 1;
+                        // update x-axis pulling
+                        if(xPulling)
+                            _pull.x += dx * xCounter;
+                    }else if(xPulling){
+                        _pull.x = dx;
+                    }
+                    
+                    if(_pull.yPulling){
+                        CGFloat yCounter = pow(M_E, -1.0 / maxManualPull * fabsf(_pull.y));
+                        // don't counter on un-pull
+                        if(signbit(_pull.y) == signbit(dy))
+                            yCounter = 1; // don't counter
+                        // update y-axis pulling
+                        if(yPulling)
+                            _pull.y -= dy * yCounter;
+                    }else if(yPulling){
+                        _pull.y = -dy;
+                    }
+                    
+                    _pull.xPulling = xPulling;
+                    _pull.yPulling = yPulling;
+                }
+                
+                [self setContentOffset:o];
+                break;
 			}
 			case ScrollPhaseThrowingBegan: {
 				[self _startThrow];

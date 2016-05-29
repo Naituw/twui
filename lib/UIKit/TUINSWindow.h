@@ -68,6 +68,8 @@
 
 - (CGFloat)toolbarHeight;
 
+@property (nonatomic, assign) CGSize fixedContentSize;
+
 @property (nonatomic, readonly) TUINSView *nsView;
 @property (nonatomic, readonly) NSMutableArray *altUINSViews; // add to this to participate in setEverythingNeedsDisplay
 

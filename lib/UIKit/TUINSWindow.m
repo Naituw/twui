@@ -116,6 +116,14 @@ NSInteger makeFirstResponderCount = 0;
 
 @end
 
+@interface TUINSWindow ()
+{
+    struct {
+        unsigned int fixedContentSize: 1;
+    } _flags;
+}
+
+@end
 
 @implementation TUINSWindow
 
@@ -170,6 +178,53 @@ NSInteger makeFirstResponderCount = 0;
         
 	}
 	return self;
+}
+
+- (void)setFrame:(NSRect)frameRect display:(BOOL)flag
+{
+    BOOL needsUpdateTransform = !CGSizeEqualToSize(frameRect.size, self.frame.size);
+    [super setFrame:frameRect display:flag];
+    
+    if (needsUpdateTransform && _flags.fixedContentSize) {
+        [self updateContentTransform];
+    }
+}
+
+- (void)setFixedContentSize:(CGSize)fixedContentSize
+{
+    _fixedContentSize = fixedContentSize;
+    _flags.fixedContentSize = (_fixedContentSize.width && _fixedContentSize.height);
+    if (_flags.fixedContentSize) {
+        [self updateContentTransform];
+    }
+}
+
+- (void)updateContentTransform
+{
+    if (!_flags.fixedContentSize) {
+        return;
+    }
+    
+    CGSize windowSize = self.frame.size;
+    CGFloat windowRatio = windowSize.width / windowSize.height;
+    CGSize contentSize = _fixedContentSize;
+    CGFloat contentRatio = contentSize.width / contentSize.height;
+    
+    CGFloat scale = 1;
+    CGSize targetSize = windowSize;
+    if (contentRatio > windowRatio) {
+        scale = windowSize.height / contentSize.height;
+        targetSize = CGSizeMake(windowSize.height * contentRatio, windowSize.height);
+    } else {
+        scale = windowSize.width / contentSize.width;
+        targetSize = CGSizeMake(windowSize.width, windowSize.width / contentRatio);
+    }
+    
+    nsView.rootView.transform = CGAffineTransformScale(CGAffineTransformIdentity, scale, scale);
+    
+    CGRect targetFrame = ABRectCenteredInRect(CGRectMake(0, 0, targetSize.width, targetSize.height), nsView.bounds);
+    targetFrame.origin.y = windowSize.height - targetSize.height;
+    nsView.rootView.frame = CGRectIntegral(targetFrame);
 }
 
 - (void)drawBackground:(CGRect)rect

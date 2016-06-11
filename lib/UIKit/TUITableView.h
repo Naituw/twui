@@ -49,6 +49,7 @@ typedef enum {
 @optional
 
 - (void)tableView:(TUITableView *)tableView willDisplayCell:(TUITableViewCell *)cell forRowAtIndexPath:(TUIFastIndexPath *)indexPath; // called after the cell's frame has been set but before it's added as a subview
+- (void)tableView:(TUITableView *)tableView didEndDisplayingCell:(TUITableViewCell *)cell forRowAtIndexPath:(TUIFastIndexPath *)indexPath;
 - (void)tableView:(TUITableView *)tableView didSelectRowAtIndexPath:(TUIFastIndexPath *)indexPath; // happens on left/right mouse down, key up/down
 - (void)tableView:(TUITableView *)tableView didDeselectRowAtIndexPath:(TUIFastIndexPath *)indexPath;
 - (void)tableView:(TUITableView *)tableView didClickRowAtIndexPath:(TUIFastIndexPath *)indexPath withEvent:(NSEvent *)event; // happens on left/right mouse up (can look at clickCount)
@@ -104,6 +105,7 @@ typedef enum {
 		unsigned int didFirstLayout:1;
 		unsigned int dataSourceNumberOfSectionsInTableView:1;
 		unsigned int delegateTableViewWillDisplayCellForRowAtIndexPath:1;
+        unsigned int delegateTableViewDidEndDisplayingCellForRowAtIndexPath:1;
 		unsigned int maintainContentOffsetAfterReload:1;
 	} _tableFlags;
 	

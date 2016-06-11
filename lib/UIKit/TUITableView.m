@@ -179,6 +179,7 @@ typedef struct {
 - (void)setDelegate:(id<TUITableViewDelegate>)d
 {
 	_tableFlags.delegateTableViewWillDisplayCellForRowAtIndexPath = [d respondsToSelector:@selector(tableView:willDisplayCell:forRowAtIndexPath:)];
+    _tableFlags.delegateTableViewDidEndDisplayingCellForRowAtIndexPath = [d respondsToSelector:@selector(tableView:didEndDisplayingCell:forRowAtIndexPath:)];
 	[super setDelegate:d]; // must call super
 }
 
@@ -826,15 +827,19 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
 	[indexPathsToAdd removeObjectsInArray:oldVisibleIndexPaths];
 	
 	// remove offscreen cells
-	for(TUIFastIndexPath *i in indexPathsToRemove) {
-		TUITableViewCell *cell = [self cellForRowAtIndexPath:i];
-		// don't reuse the dragged cell
-		if(_dragToReorderCell == nil || ![cell isEqual:_dragToReorderCell]){
-      [self _enqueueReusableCell:cell];
-      [cell removeFromSuperview];
-      [_visibleItems removeObjectForKey:i];
+    for(TUIFastIndexPath *i in indexPathsToRemove) {
+        TUITableViewCell *cell = [self cellForRowAtIndexPath:i];
+        // don't reuse the dragged cell
+        if(_dragToReorderCell == nil || ![cell isEqual:_dragToReorderCell]){
+            [self _enqueueReusableCell:cell];
+            [cell removeFromSuperview];
+            [_visibleItems removeObjectForKey:i];
+            
+            if (_tableFlags.delegateTableViewDidEndDisplayingCellForRowAtIndexPath) {
+                [_delegate tableView:self didEndDisplayingCell:cell forRowAtIndexPath:i];
+            }
+        }
     }
-	}
 	
 	// add new cells
 	for(TUIFastIndexPath *i in indexPathsToAdd) {

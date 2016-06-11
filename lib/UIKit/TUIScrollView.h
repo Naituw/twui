@@ -145,6 +145,7 @@ typedef enum {
 		unsigned int delegateScrollViewWillHideScrollIndicator:1;
 		unsigned int delegateScrollViewDidHideScrollIndicator:1;
         unsigned int delegateScrollViewDidEndScroll:1;
+        unsigned int delegateScrollViewDidEndDecelerating:1;
 	} _scrollViewFlags;
 }
 
@@ -196,6 +197,7 @@ typedef enum {
 - (void)scrollViewWillBeginDragging:(TUIScrollView *)scrollView;
 - (void)scrollViewDidEndDragging:(TUIScrollView *)scrollView;
 - (void)scrollViewDidEndScroll:(TUIScrollView *)scrollView;
+- (void)scrollViewDidEndDecelerating:(TUIScrollView *)scrollView;
 
 - (void)scrollView:(TUIScrollView *)scrollView willShowScrollIndicator:(TUIScrollViewIndicator)indicator;
 - (void)scrollView:(TUIScrollView *)scrollView didShowScrollIndicator:(TUIScrollViewIndicator)indicator;

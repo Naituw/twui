@@ -168,7 +168,7 @@ static NSMutableArray *AnimationStack = nil;
 {
     dampingRatio = MAX(dampingRatio, 0.01);
     dampingRatio = MIN(dampingRatio, 1);
-    duration = MAX(duration, 0.3);
+    duration = MAX(duration, 0.1);
     duration = MIN(duration, 50);
     
     CGFloat damping = dampingRatio * 19.05;

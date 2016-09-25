@@ -13,4 +13,6 @@
 
 @property (nonatomic, assign) CTLineRef lineRef;
 
+- (void)_offsetBaselineOriginWithDelta:(CGPoint)delta;
+
 @end

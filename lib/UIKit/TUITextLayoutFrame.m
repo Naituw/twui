@@ -79,6 +79,18 @@
         [lineFragments addObject:lineFragment];
     }
     
+    if (lineFragments.count) {
+        TUITextLayoutLine * firstLine = lineFragments.firstObject;
+        CGFloat maxY = CGRectGetMaxY(firstLine.fragmentRect);
+        CGFloat layoutMaxY = _layout.size.height;
+        if (maxY > layoutMaxY) {
+            CGPoint delta = CGPointMake(0, layoutMaxY - maxY);
+            [lineFragments enumerateObjectsUsingBlock:^(TUITextLayoutLine * line, NSUInteger idx, BOOL * _Nonnull stop) {
+                [line _offsetBaselineOriginWithDelta:delta];
+            }];
+        }
+    }
+    
     self.baselineMetrics = _layout.baselineFontMetrics;
     self.lineFragments = lineFragments;
     
@@ -88,6 +100,7 @@
 - (void)updateLayoutSize
 {
     CGFloat __block minY = _layout.size.height, __block width = 0.0;
+    CGFloat __block maxY = minY;
     
     NSUInteger fragmentCount = _lineFragments.count;
     
@@ -95,6 +108,9 @@
         
         CGRect fragmentRect = line.fragmentRect;
         
+        if (idx == 0) {
+            maxY = CGRectGetMaxY(fragmentRect);
+        }
         if (idx == fragmentCount - 1) {
             minY = CGRectGetMinY(fragmentRect);
         }
@@ -103,7 +119,7 @@
         
     }];
     
-    _layoutSize = CGSizeMake(ceil(width), ceil(_layout.size.height - minY + 1));
+    _layoutSize = CGSizeMake(ceil(width), ceil(maxY - minY + 1));
 }
 
 #pragma mark - Line Truncating

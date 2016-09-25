@@ -113,6 +113,12 @@
     return _lineRef;
 }
 
+- (void)_offsetBaselineOriginWithDelta:(CGPoint)delta
+{
+    _baselineOrigin.x += delta.x;
+    _baselineOrigin.y += delta.y;
+}
+
 static CGRect TUITextGetLineFragmentRect(CGPoint baselineOrigin, TUIFontMetrics lineMetrics, CGFloat width)
 {
     return CGRectIntegral(CGRectMake(baselineOrigin.x, baselineOrigin.y - lineMetrics.descent - lineMetrics.leading, width, TUIFontMetricsGetLineHeight(lineMetrics)));

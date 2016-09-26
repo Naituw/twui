@@ -38,10 +38,19 @@
 
 - (CGSize)ab_sizeConstrainedToSize:(CGSize)size
 {
-	TUITextRenderer *t = [self ab_sharedTextRenderer];
-	t.attributedString = self;
-	t.frame = CGRectMake(0, 0, size.width, size.height);
-	return t.textLayout.layoutSize;
+    TUIFontMetrics metrics = TUIFontMetricsNull;
+    if (self.length) {
+        CTFontRef font = (__bridge CTFontRef)[self attribute:(NSString *)kCTFontAttributeName atIndex:0 effectiveRange:NULL];
+        if (font) {
+            metrics = TUIFontMetricsGetDefault(CTFontGetSize(font));
+        }
+    }
+    
+    TUITextRenderer *t = [self ab_sharedTextRenderer];
+    t.attributedString = self;
+    t.frame = CGRectMake(0, 0, size.width, size.height);
+    t.textLayout.baselineFontMetrics = metrics;
+    return t.textLayout.layoutSize;
 }
 
 - (CGSize)ab_size
@@ -51,8 +60,17 @@
 
 - (CGSize)ab_drawInRect:(CGRect)rect context:(CGContextRef)ctx verticalAlignment:(TUITextVerticalAlignment)verticalAlignment
 {
+    TUIFontMetrics metrics = TUIFontMetricsNull;
+    if (self.length) {
+        CTFontRef font = (__bridge CTFontRef)[self attribute:(NSString *)kCTFontAttributeName atIndex:0 effectiveRange:NULL];
+        if (font) {
+            metrics = TUIFontMetricsGetDefault(CTFontGetSize(font));
+        }
+    }
+
     TUITextRenderer *t = [self ab_sharedTextRenderer];
     t.attributedString = self;
+    t.textLayout.baselineFontMetrics = metrics;
     t.frame = rect;
     t.verticalAlignment = verticalAlignment;
     [t drawInContext:ctx];

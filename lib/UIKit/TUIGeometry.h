@@ -85,7 +85,7 @@ static inline TUIFontMetrics TUIFontMetricsMakeFromNSFont(NSFont * font)
     TUIFontMetrics metrics;
     metrics.ascent = ABS(font.ascender);
     metrics.descent = ABS(font.descender);
-    metrics.leading = ABS(font.leading) - metrics.ascent - metrics.descent;
+    metrics.leading = ABS(font.leading);
     return metrics;
 }
 static inline TUIFontMetrics TUIFontMetricsMakeFromCTFont(CTFontRef font)

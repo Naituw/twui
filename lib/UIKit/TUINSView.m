@@ -412,9 +412,11 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 	}
 	
 	if(_newHoverView != _hoverView) {
-		[_hoverView mouseExited:event];
+        TUIView * oldHoverView = _hoverView;
+        _hoverView = _newHoverView;
+
+		[oldHoverView mouseExited:event];
 		[_newHoverView mouseEntered:event];
-		_hoverView = _newHoverView;
 		
 		if([[self window] isKeyWindow]) {
 			[TUITooltipWindow updateTooltip:_hoverView.toolTip delay:_hoverView.toolTipDelay];

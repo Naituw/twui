@@ -376,7 +376,7 @@ CGImageRef TUICreateImageRefForNameAndScaleFactor(NSString *name, CGFloat scaleF
 
 - (id)debugQuickLookObject
 {
-    return (id)self.CGImage;
+    return (id)self.nsImage;
 }
 
 @end

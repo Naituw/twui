@@ -32,6 +32,10 @@ typedef NSUInteger TUICGRoundedRectCorner;
 @class TUIImage;
 @class TUIView;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern CGContextRef TUICreateOpaqueGraphicsContext(CGSize size);
 extern CGContextRef TUICreateGraphicsContext(CGSize size);
 extern CGContextRef TUICreateGraphicsContextWithOptions(CGSize size, BOOL opaque);
@@ -39,6 +43,7 @@ extern CGImageRef TUICreateCGImageFromBitmapContext(CGContextRef ctx);
 
 extern CGPathRef TUICGPathCreateRoundedRect(CGRect rect, CGFloat radius);
 extern CGPathRef TUICGPathCreateRoundedRectWithCorners(CGRect rect, CGFloat radius, TUICGRoundedRectCorner corners);
+extern CGPathRef TUICGPathCreateWithBezierPath(NSBezierPath * bezierPath);
 extern void CGContextAddRoundRect(CGContextRef context, CGRect rect, CGFloat radius);
 extern void CGContextClipToRoundRect(CGContextRef context, CGRect rect, CGFloat radius);
 
@@ -72,3 +77,7 @@ extern TUIImage *TUIGraphicsDrawAsImage(CGSize size, void(^draw)(void));
  @returns NSData encapsulating the PDF drawing, suitable for writing to a file or the pasteboard
  */
 extern NSData *TUIGraphicsDrawAsPDF(CGRect *optionalMediaBox, void(^draw)(CGContextRef));
+
+#ifdef __cplusplus
+}
+#endif

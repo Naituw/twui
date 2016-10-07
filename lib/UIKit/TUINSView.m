@@ -442,6 +442,13 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 	[self _updateHoverView:_newHoverView withEvent:event];
 }
 
+- (void)updateHoverView
+{
+    NSPoint point = [self.window convertRectFromScreen:(NSRect){.origin = [NSEvent mouseLocation], .size = NSZeroSize}].origin;
+    NSEvent * event = [NSEvent mouseEventWithType:NSEventTypeMouseMoved location:point modifierFlags:0 timestamp:0 windowNumber:self.window.windowNumber context:nil eventNumber:0 clickCount:0 pressure:0];
+    [self _updateHoverViewWithEvent:event];
+}
+
 - (void)invalidateHover
 {
 	[self _updateHoverView:nil withEvent:nil];
@@ -530,7 +537,7 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
     if (_viewFlags.delegateMouseExited)
     {
         [_viewDelegate nsView:self mouseExited:event];
-    }
+    }    
 }
 
 - (void)rightMouseDown:(NSEvent *)event

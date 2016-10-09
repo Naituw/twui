@@ -317,9 +317,9 @@ typedef struct {
 	
 	NSMutableArray *array = [_reusableTableCells objectForKey:identifier];
 	if(array) {
-		TUITableViewCell *c = [array firstObject];
+		TUITableViewCell *c = [array lastObject];
 		if(c) {
-			[array removeObjectAtIndex:0]; // fifo
+			[array removeLastObject];
 			[c prepareForReuse];
 			return c;
 		}
@@ -822,12 +822,19 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
 	
 	NSMutableArray *indexPathsToRemove = [oldVisibleIndexPaths mutableCopy];
 	[indexPathsToRemove removeObjectsInArray:newVisibleIndexPaths];
+    
+    BOOL enqueueReversly = NO;
+    if (indexPathsToRemove.lastObject == oldVisibleIndexPaths.lastObject) {
+        enqueueReversly = YES;
+    }
 	
 	NSMutableArray *indexPathsToAdd = [newVisibleIndexPaths mutableCopy];
 	[indexPathsToAdd removeObjectsInArray:oldVisibleIndexPaths];
 	
+    NSEnumerator * removeEnumerator = enqueueReversly ? [indexPathsToRemove reverseObjectEnumerator] : [indexPathsToRemove objectEnumerator];
+    
 	// remove offscreen cells
-    for(TUIFastIndexPath *i in indexPathsToRemove) {
+    for(TUIFastIndexPath *i in removeEnumerator) {
         TUITableViewCell *cell = [self cellForRowAtIndexPath:i];
         // don't reuse the dragged cell
         if(_dragToReorderCell == nil || ![cell isEqual:_dragToReorderCell]){
@@ -949,7 +956,12 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
   
 	// need to recycle all visible cells, have them be regenerated on layoutSubviews
 	// because the same cells might have different content
-	for(TUIFastIndexPath *i in _visibleItems) {
+    NSArray * visibleItems = [[_visibleItems allKeys] sortedArrayUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
+        return [obj1 compare:obj2];
+    }];
+    
+    // enqueue reversly, so the order will be remained when dequeu (FILO).
+	for(TUIFastIndexPath *i in [visibleItems reverseObjectEnumerator]) {
 		TUITableViewCell *cell = [_visibleItems objectForKey:i];
 		[self _enqueueReusableCell:cell];
 		[cell removeFromSuperview];

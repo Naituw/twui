@@ -317,9 +317,9 @@ typedef struct {
 	
 	NSMutableArray *array = [_reusableTableCells objectForKey:identifier];
 	if(array) {
-		TUITableViewCell *c = [array lastObject];
+		TUITableViewCell *c = [array firstObject];
 		if(c) {
-			[array removeLastObject];
+			[array removeObjectAtIndex:0]; // fifo
 			[c prepareForReuse];
 			return c;
 		}

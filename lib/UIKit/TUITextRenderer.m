@@ -272,6 +272,8 @@
 
     [self drawAttachmentsWithAttributedString:attributedString layoutFrame:layoutFrame context:context];
     
+    [self updateActiveRangeFrameMapWithAttributedString:attributedString layoutFrame:layoutFrame];
+    
 //    if (_attributedString)
 //    {
 //        CTFrameRef f = NULL;
@@ -535,6 +537,21 @@
     [color set];
     CGContextSetShadowWithColor(context, CGSizeMake(0, 0), 8, color.CGColor);
     CGContextFillRoundRect(context, rect, 10);
+}
+
+- (void)updateActiveRangeFrameMapWithAttributedString:(TUIAttributedString *)attributedString layoutFrame:(TUITextLayoutFrame *)layoutFrame
+{
+    NSMutableDictionary * dictionary = [NSMutableDictionary dictionary];
+    for (id<ABActiveTextRange>activeRange in [[self activeRanges] reverseObjectEnumerator]) {
+        NSRange rangeValue = activeRange.rangeValue;
+        id key = activeRange;
+        NSMutableArray * value = [NSMutableArray array];
+        [layoutFrame enumerateEnclosingRectsForCharacterRange:rangeValue usingBlock:^(CGRect rect, NSRange characterRange, BOOL *stop) {
+            [value addObject:[NSValue valueWithRect:(NSRect)rect]];
+        }];
+        dictionary[key] = value;
+    }
+    self.activeRangeToRectsMap = dictionary;
 }
 
 @end

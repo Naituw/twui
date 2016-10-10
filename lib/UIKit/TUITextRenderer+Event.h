@@ -34,6 +34,9 @@
 @property (nonatomic, assign, readonly) TUIView * eventDelegateContextView;
 
 - (id<ABActiveTextRange>)activeRangeForLocation:(CGPoint)point;
+- (NSArray *)activeRanges;
+
+- (void)invalidateHover;
 
 @end
 
@@ -54,5 +57,9 @@
 - (void)textRendererDidBecomeFirstResponder:(TUITextRenderer *)textRenderer;
 - (void)textRendererWillResignFirstResponder:(TUITextRenderer *)textRenderer;
 - (void)textRendererDidResignFirstResponder:(TUITextRenderer *)textRenderer;
+
+- (void)textRenderer:(TUITextRenderer *)textRenderer mouseEnteredActiveRange:(id<ABActiveTextRange>)textRange;
+- (void)textRenderer:(TUITextRenderer *)textRenderer mouseMovedInActiveRange:(id<ABActiveTextRange>)textRange;
+- (void)textRenderer:(TUITextRenderer *)textRenderer mouseExitedFromActiveRange:(id<ABActiveTextRange>)textRange;
 
 @end

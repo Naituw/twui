@@ -29,6 +29,10 @@
         unsigned int didBecomeFirstResponder: 1;
         unsigned int willResignFirstResponder: 1;
         unsigned int didResignFirstResponder: 1;
+        
+        unsigned int mouseEnteredActiveRange: 1;
+        unsigned int mouseMovedActiveRange: 1;
+        unsigned int mouseExitedActiveRange: 1;
     } _eventDelegateHas;
     
     CGPoint _touchesBeginPoint;
@@ -36,6 +40,8 @@
 
 @property (nonatomic, strong) id<ABActiveTextRange> pressingActiveRange;
 @property (nonatomic, strong) id<ABActiveTextRange> savedPressingActiveRange;
+@property (nonatomic, strong) id<ABActiveTextRange> hoveringActiveRange;
+@property (atomic, copy) NSDictionary * activeRangeToRectsMap;
 
 #pragma mark - Rendering Overrides
 

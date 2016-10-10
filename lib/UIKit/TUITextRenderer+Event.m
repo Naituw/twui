@@ -60,6 +60,10 @@
     _eventDelegateHas.didBecomeFirstResponder = [eventDelegate respondsToSelector:@selector(textRendererDidBecomeFirstResponder:)];
     _eventDelegateHas.willResignFirstResponder = [eventDelegate respondsToSelector:@selector(textRendererWillResignFirstResponder:)];
     _eventDelegateHas.didResignFirstResponder = [eventDelegate respondsToSelector:@selector(textRendererDidResignFirstResponder:)];
+    
+    _eventDelegateHas.mouseEnteredActiveRange = [eventDelegate respondsToSelector:@selector(textRenderer:mouseEnteredActiveRange:)];
+    _eventDelegateHas.mouseMovedActiveRange = [eventDelegate respondsToSelector:@selector(textRenderer:mouseMovedInActiveRange:)];
+    _eventDelegateHas.mouseExitedActiveRange = [eventDelegate respondsToSelector:@selector(textRenderer:mouseExitedFromActiveRange:)];
 }
 
 - (CGPoint)localPointForEvent:(NSEvent *)event
@@ -80,6 +84,28 @@
 			return rangeValue;
 	}
 	return nil;
+}
+
+- (id<ABActiveTextRange>)fast_rangeAtLocalPoint:(CGPoint)location
+{
+    location = [self convertPointToLayout:location];
+    NSDictionary * map = self.activeRangeToRectsMap;
+    for (id<ABActiveTextRange>key in map) {
+        NSArray * rects = map[key];
+        for (NSValue * value in rects) {
+            CGRect rect = [value rectValue];
+            if (CGRectContainsPoint(rect, location)) {
+                return key;
+            }
+        }
+    }
+    return nil;
+}
+
+- (id<ABActiveTextRange>)fast_rangeForEvent:(NSEvent *)event
+{
+    CGPoint localPoint = [self localPointForEvent:event];
+    return [self fast_rangeAtLocalPoint:localPoint];
 }
 
 - (TUIImage *)dragImageForSelection:(NSRange)selection
@@ -272,6 +298,67 @@ normal:
     self.hitAttachment = nil;
 }
 
+- (void)_updateHoveringActiveRangeWithEvent:(NSEvent *)event
+{
+    id<ABActiveTextRange>range = [self fast_rangeForEvent:event];
+    
+    id<ABActiveTextRange>currentRange = self.hoveringActiveRange;
+    if (range == currentRange) {
+        if (range && _eventDelegateHas.mouseMovedActiveRange) {
+            [_eventDelegate textRenderer:self mouseMovedInActiveRange:range];
+        }
+        return;
+    }
+ 
+    self.hoveringActiveRange = range;
+    
+    if (currentRange) {
+        if (_eventDelegateHas.mouseExitedActiveRange) {
+            [_eventDelegate textRenderer:self mouseExitedFromActiveRange:currentRange];
+        }
+    }
+    if (range) {
+        if (_eventDelegateHas.mouseEnteredActiveRange) {
+            [_eventDelegate textRenderer:self mouseEnteredActiveRange:range];
+        }
+    }
+}
+
+- (void)mouseEntered:(NSEvent *)event
+{
+    if (!_eventDelegateHas.mouseEnteredActiveRange) {
+        return;
+    }
+    [self _updateHoveringActiveRangeWithEvent:event];
+}
+
+- (void)mouseExited:(NSEvent *)event
+{
+    if (!_eventDelegateHas.mouseEnteredActiveRange) {
+        return;
+    }
+    [self _updateHoveringActiveRangeWithEvent:event];
+}
+
+- (void)mouseMoved:(NSEvent *)event
+{
+    if (!_eventDelegateHas.mouseEnteredActiveRange) {
+        return;
+    }
+    [self _updateHoveringActiveRangeWithEvent:event];
+}
+
+- (void)invalidateHover
+{
+    id<ABActiveTextRange> range = self.hoveringActiveRange;
+    if (range) {
+        self.hoveringActiveRange = nil;
+        if (_eventDelegateHas.mouseExitedActiveRange) {
+            [_eventDelegate textRenderer:self mouseExitedFromActiveRange:range];
+        }
+    }
+}
+
 - (id<ABActiveTextRange>)activeRangeForLocation:(CGPoint)point
 {
     CFIndex index = [self characterIndexForPoint:point];
@@ -454,6 +541,11 @@ normal:
         return [_eventDelegate activeRangesForTextRenderer:self];
     }
     return nil;
+}
+
+- (NSArray *)activeRanges
+{
+    return [self eventDelegateActiveRanges];
 }
 
 - (void)eventDelegateDidClickActiveRange:(id<ABActiveTextRange>)activeRange

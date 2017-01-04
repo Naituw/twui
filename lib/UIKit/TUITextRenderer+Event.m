@@ -329,6 +329,9 @@ normal:
     if (!_eventDelegateHas.mouseEnteredActiveRange) {
         return;
     }
+    if (!event.window.isKeyWindow) {
+        return;
+    }
     [self _updateHoveringActiveRangeWithEvent:event];
 }
 
@@ -337,12 +340,18 @@ normal:
     if (!_eventDelegateHas.mouseEnteredActiveRange) {
         return;
     }
+    if (!event.window.isKeyWindow) {
+        return;
+    }
     [self _updateHoveringActiveRangeWithEvent:event];
 }
 
 - (void)mouseMoved:(NSEvent *)event
 {
     if (!_eventDelegateHas.mouseEnteredActiveRange) {
+        return;
+    }
+    if (!event.window.isKeyWindow) {
         return;
     }
     [self _updateHoveringActiveRangeWithEvent:event];

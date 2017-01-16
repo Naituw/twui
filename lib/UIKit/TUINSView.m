@@ -569,12 +569,22 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 
 - (void)scrollWheel:(NSEvent *)event
 {
-	[[self viewForEvent:event] scrollWheel:event];
-	[self _updateHoverView:nil withEvent:event]; // don't pop in while scrolling
+    if (event.phase == NSEventPhaseBegan) {
+        [self beginGesturePerformingIfNeededWithEvent:event];
+    }
     
-    if (_viewFlags.delegateScrollWheel)
     {
-        [_viewDelegate nsView:self scrollWheel:event];
+        [[self viewForEvent:event] scrollWheel:event];
+        [self _updateHoverView:nil withEvent:event]; // don't pop in while scrolling
+        
+        if (_viewFlags.delegateScrollWheel)
+        {
+            [_viewDelegate nsView:self scrollWheel:event];
+        }
+    }
+    
+    if (event.phase == NSEventPhaseEnded) {
+        [self endGesturePerformingWithEvent:event];
     }
 }
 
@@ -621,7 +631,7 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
         return;
     }
     
-    if ([event touchesMatchingPhase:NSTouchPhaseTouching inView:self].count > 1) {
+    if ((event.phase == NSEventPhaseBegan) || [event touchesMatchingPhase:NSTouchPhaseTouching inView:self].count > 1) {
         _gesturePerformingView = [self viewForEvent:event];
         [_gesturePerformingView beginGestureWithEvent:event];
         
@@ -633,6 +643,10 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 
 - (void)endGesturePerformingWithEvent:(NSEvent *)event
 {
+    if (!_gesturePerformingView) {
+        return;
+    }
+
     dispatch_async(dispatch_get_main_queue(), ^{
         if (!_gesturePerformingView) {
             return;

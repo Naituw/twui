@@ -777,7 +777,7 @@ void TUISetCurrentContextScaleFactor(CGFloat s)
 - (void)_cleanupResponderChain // called when a view is about to be removed from the heirarchy
 {
 	[self.subviews makeObjectsPerformSelector:@selector(_cleanupResponderChain)]; // call this first because subviews may pass first responder responsibility up to the superview
-	
+    
 	NSWindow *window = [self nsWindow];
 	if([window firstResponder] == self) {
 		[window tui_makeFirstResponder:self.superview];
@@ -789,6 +789,7 @@ void TUISetCurrentContextScaleFactor(CGFloat s)
 - (void)removeFromSuperview // everything should go through this
 {
 	[self _cleanupResponderChain];
+    [self setNextResponder:nil];
 	
 	TUIView *superview = [self superview];
 	if(superview) {

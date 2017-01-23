@@ -140,6 +140,12 @@ static pthread_key_t TUICurrentContextScaleFactorTLSKey;
 		CGContextRelease(_context.context);
 		_context.context = NULL;
 	}
+    
+    for (TUIView * view in _subviews) {
+        if (view.nextResponder == self) {
+            [view _superSetNextResponder:nil];
+        }
+    }
 }
 
 - (id)initWithFrame:(CGRect)frame
@@ -861,6 +867,11 @@ void TUISetCurrentContextScaleFactor(CGFloat s)
 	} else {
 		[super setNextResponder:r];
 	}
+}
+
+- (void)_superSetNextResponder:(NSResponder *)responder
+{
+    [super setNextResponder:responder];
 }
 
 - (void)addSubview:(TUIView *)view

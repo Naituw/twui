@@ -24,6 +24,7 @@
 - (TUITextRenderer *)textRendererAtPoint:(CGPoint)point;
 
 - (void)_updateLayerScaleFactor;
+- (void)_superSetNextResponder:(NSResponder *)responder;
 
 @end
 

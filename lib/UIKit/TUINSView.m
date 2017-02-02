@@ -352,7 +352,7 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 
 - (TUIView *)viewForLocalPoint:(NSPoint)p
 {
-	return [_rootView hitTest:[self.layer convertPoint:p toLayer:_rootView.layer] withEvent:nil];
+	return [_rootView hitTest:p withEvent:nil];
 }
 
 - (NSPoint)localPointForLocationInWindow:(NSPoint)locationInWindow

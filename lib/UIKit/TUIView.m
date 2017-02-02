@@ -1217,7 +1217,8 @@ void TUISetCurrentContextScaleFactor(CGFloat s)
 - (CGPoint)localPointForLocationInWindow:(NSPoint)locationInWindow
 {
 	NSPoint p = [self.nsView convertPoint:locationInWindow fromView:nil];
-    return [self.nsView.layer convertPoint:p toLayer:self.layer];
+	CGRect r = [self globalFrame];
+	return CGPointMake(p.x - r.origin.x, p.y - r.origin.y);
 }
 
 - (CGPoint)localPointForEvent:(NSEvent *)event

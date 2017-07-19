@@ -43,6 +43,8 @@
 
 @property (nonatomic, readonly) CTFontRef ctFont;
 
+- (id)initWithCTFont:(CTFontRef)f;
+
 + (NSString *)defaultFontName;
 + (NSString *)lightDefaultFontName;
 + (NSString *)mediumDefaultFontName;

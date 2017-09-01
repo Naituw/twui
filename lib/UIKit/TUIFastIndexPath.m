@@ -21,12 +21,13 @@
  This pre-allocated hunk of instances is all we ever really need to touch.  Was a measurable win for us.
  */
 #define CACHE_COMMON_INDEX_PATHS 1024
+#define CACHE_COMMON_INDEX_PATHS_SECTIONS 2
 
 static struct TUIFastIndexPath_staticStruct {
 	Class isa;
 	NSInteger section;
 	NSInteger row;
-} CommonIndexPaths[CACHE_COMMON_INDEX_PATHS];
+} CommonIndexPaths[CACHE_COMMON_INDEX_PATHS_SECTIONS][CACHE_COMMON_INDEX_PATHS];
 
 @interface TUIFastIndexPath_staticClass : TUIFastIndexPath
 @end
@@ -40,20 +41,22 @@ static struct TUIFastIndexPath_staticStruct {
 {
 	if(self == [TUIFastIndexPath class]) {
 		Class staticCls = [TUIFastIndexPath_staticClass class];
-		for(int i = 0; i < CACHE_COMMON_INDEX_PATHS; ++i) {
-			struct TUIFastIndexPath_staticStruct *f = &CommonIndexPaths[i];
-			f->isa = staticCls;
-			f->section = 0;
-			f->row = i;
-		}
+        for (int section = 0; section < CACHE_COMMON_INDEX_PATHS_SECTIONS; ++section) {
+            for(int i = 0; i < CACHE_COMMON_INDEX_PATHS; ++i) {
+                struct TUIFastIndexPath_staticStruct *f = &CommonIndexPaths[section][i];
+                f->isa = staticCls;
+                f->section = section;
+                f->row = i;
+            }
+        }
 	}
 }
 
 + (TUIFastIndexPath *)indexPathForRow:(NSUInteger)row inSection:(NSUInteger)section
 {
-	if(section == 0) {
+	if(section < CACHE_COMMON_INDEX_PATHS_SECTIONS) {
 		if(row < CACHE_COMMON_INDEX_PATHS) {
-			return (__bridge TUIFastIndexPath *)&CommonIndexPaths[row];
+			return (__bridge TUIFastIndexPath *)&CommonIndexPaths[section][row];
 		}
 	}
 	

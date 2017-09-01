@@ -886,6 +886,7 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 	_appKitHostView.autoresizesSubviews = NO;
 	_appKitHostView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
 	_appKitHostView.wantsLayer = YES;
+    _appKitHostView.layer = [CALayer layer];
 	_appKitHostView.layerContentsRedrawPolicy = NSViewLayerContentsRedrawNever;
 	[self addSubview:_appKitHostView];
 

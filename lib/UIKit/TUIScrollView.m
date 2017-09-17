@@ -220,18 +220,38 @@ enum {
 - (void)setContentInset:(TUIEdgeInsets)contentInset
 {
 	if(!TUIEdgeInsetsEqualToEdgeInsets(contentInset, _contentInset)) {
-        const CGFloat x = contentInset.left - _contentInset.left;
-        const CGFloat y = contentInset.top - _contentInset.top;
+        const CGFloat leftDelta = contentInset.left - _contentInset.left;
+        const CGFloat rightDelta = contentInset.right - _contentInset.right;
+        const CGFloat topDelta = contentInset.top - _contentInset.top;
+        const CGFloat bottomDelta = contentInset.bottom - _contentInset.bottom;
         
         _contentInset = contentInset;
-        _unroundedContentOffset.x -= x;
-        _unroundedContentOffset.y -= y;
+        _unroundedContentOffset.x -= leftDelta;
+        _unroundedContentOffset.y -= bottomDelta;
+        
+        if (_scrollViewFlags.bounceEnabled) {
+            if (_pull.yPulling) {
+                if (_pull.y < 0) {
+                    _pull.y += topDelta;
+                    _unroundedContentOffset.y -= topDelta;
+                } else if (_pull.y > 0) {
+                    _pull.y -= bottomDelta;
+                }
+            }
+            
+            if (_pull.xPulling) {
+                if (_pull.x > 0) {
+                    _pull.x -= leftDelta;
+                } else if (_pull.x < 0) {
+                    _pull.x += rightDelta;
+                    _unroundedContentOffset.x -= rightDelta;
+                }
+            }
+        }
+        
+        _unroundedContentOffset = [self _fixProposedContentOffset:_unroundedContentOffset];
         
         [self _updateBounds];
-
-        if (self._pulling){
-            _scrollViewFlags.didChangeContentInset = 1;
-        }
 	}
 }
 
@@ -242,6 +262,7 @@ enum {
 	offset.x = -offset.x;
 	offset.y = -offset.y;
 	b.origin = offset;
+    b = TUIEdgeInsetsInsetRect(b, self.contentInset);
 	return b;
 }
 
@@ -593,6 +614,10 @@ static CGPoint PointLerp(CGPoint a, CGPoint b, CGFloat t)
 
 - (void)setContentOffset:(CGPoint)p
 {
+    NSLog(@"!!! setContentOffset: %@", NSStringFromPoint((NSPoint)p));
+    if (p.y > 1000) {
+        NSLog(@"!!! adfadf");
+    }
 	[self _setContentOffset:[self _fixProposedContentOffset:p]];
 }
 
@@ -609,7 +634,7 @@ static CGPoint PointLerp(CGPoint a, CGPoint b, CGFloat t)
 - (CGFloat)topDestinationOffset
 {
 	CGRect visible = self.visibleRect;
-	return -self.contentSize.height + visible.size.height - self.contentInset.top;
+	return -self.contentSize.height + visible.size.height;
 }
 
 /**
@@ -766,7 +791,7 @@ static float clampBounce(float x) {
 {
 	if(_bounce.bouncing) {
 		CFAbsoluteTime t = CFAbsoluteTimeGetCurrent();
-		double dt = t - _bounce.t;
+        double dt = t - _bounce.t;
 		
 		CGPoint F = CGPointZero;
 		
@@ -822,7 +847,7 @@ static float clampBounce(float x) {
 			
 			CGPoint o = _unroundedContentOffset;
 			CFAbsoluteTime t = CFAbsoluteTimeGetCurrent();
-			double dt = t - _throw.t;
+            double dt = t - _throw.t;
 			o.x = o.x + _throw.vx * dt;
 			o.y = o.y - _throw.vy * dt;
 			
@@ -1018,28 +1043,20 @@ static float clampBounce(float x) {
 			[self _startBounce];
 			_bounce.y = _pull.y;
 		}
-		
-    if(self._pulling && _scrollViewFlags.didChangeContentInset){
-      _scrollViewFlags.didChangeContentInset = 0;
-      _bounce.x += _contentInset.left;
-      _bounce.y += _contentInset.top;
-      _unroundedContentOffset.x -= _contentInset.left;
-      _unroundedContentOffset.y -= _contentInset.top;
-    }
-    
+		    
 	}
 	
 }
 
 - (void)endGestureWithEvent:(NSEvent *)event
 {
-  
+    _scrollViewFlags.gestureBegan = 0;
+    
 	if(_scrollViewFlags.delegateScrollViewDidEndDragging){
 		[_delegate scrollViewDidEndDragging:self];
 	}
 	
 	if(_scrollViewFlags.bounceEnabled) {
-		_scrollViewFlags.gestureBegan = 0;
 		[self _startThrow];
 		if(AtLeastLion) {
 			_scrollViewFlags.ignoreNextScrollPhaseNormal_10_7 = 1;
@@ -1094,7 +1111,6 @@ static float clampBounce(float x) {
                 
                 // in case we are in background, didn't get a beginGesture
                 _throw.throwing = 0;
-                _scrollViewFlags.didChangeContentInset = 0;
                 
                 [self _stopDisplayLink];
                 CGEventRef cgEvent = [event CGEvent];

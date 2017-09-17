@@ -122,7 +122,6 @@ typedef enum {
 	BOOL x;
 	
 	struct {
-		unsigned int didChangeContentInset:1;
 		unsigned int bounceEnabled:1;
 		unsigned int alwaysBounceVertical:1;
 		unsigned int alwaysBounceHorizontal:1;

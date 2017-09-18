@@ -53,6 +53,12 @@ enum {
 
 @end
 
+@interface TUIScrollView ()
+
+@property (nonatomic, assign) TUIEdgeInsets combinedContentInsets;
+
+@end
+
 @implementation TUIScrollView
 
 @synthesize decelerationRate;
@@ -217,15 +223,15 @@ enum {
 	return _contentInset;
 }
 
-- (void)setContentInset:(TUIEdgeInsets)contentInset
+- (void)setCombinedContentInsets:(TUIEdgeInsets)combinedContentInsets
 {
-	if(!TUIEdgeInsetsEqualToEdgeInsets(contentInset, _contentInset)) {
-        const CGFloat leftDelta = contentInset.left - _contentInset.left;
-        const CGFloat rightDelta = contentInset.right - _contentInset.right;
-        const CGFloat topDelta = contentInset.top - _contentInset.top;
-        const CGFloat bottomDelta = contentInset.bottom - _contentInset.bottom;
+    if(!TUIEdgeInsetsEqualToEdgeInsets(combinedContentInsets, _combinedContentInsets)) {
+        const CGFloat leftDelta = combinedContentInsets.left - _combinedContentInsets.left;
+        const CGFloat rightDelta = combinedContentInsets.right - _combinedContentInsets.right;
+        const CGFloat topDelta = combinedContentInsets.top - _combinedContentInsets.top;
+        const CGFloat bottomDelta = combinedContentInsets.bottom - _combinedContentInsets.bottom;
         
-        _contentInset = contentInset;
+        _combinedContentInsets = combinedContentInsets;
         _unroundedContentOffset.x -= leftDelta;
         _unroundedContentOffset.y -= bottomDelta;
         
@@ -252,7 +258,33 @@ enum {
         _unroundedContentOffset = [self _fixProposedContentOffset:_unroundedContentOffset];
         
         [self _updateBounds];
-	}
+    }
+}
+
+- (void)_updateCombinedContentInsets
+{
+    self.combinedContentInsets = TUIEdgeInsetsMake(_contentInset.top + _safeAreaInsets.top,
+                                                   _contentInset.left + _safeAreaInsets.left,
+                                                   _contentInset.bottom + _safeAreaInsets.bottom,
+                                                   _contentInset.right + _safeAreaInsets.bottom);
+}
+
+- (void)setContentInset:(TUIEdgeInsets)contentInset
+{
+	if (!TUIEdgeInsetsEqualToEdgeInsets(contentInset, _contentInset)) {
+        _contentInset = contentInset;
+        
+        [self _updateCombinedContentInsets];
+    }
+}
+
+- (void)setSafeAreaInsets:(TUIEdgeInsets)safeAreaInsets
+{
+    if (!TUIEdgeInsetsEqualToEdgeInsets(safeAreaInsets, _safeAreaInsets)) {
+        _safeAreaInsets = safeAreaInsets;
+        
+        [self _updateCombinedContentInsets];
+    }
 }
 
 - (CGRect)visibleRect
@@ -262,7 +294,7 @@ enum {
 	offset.x = -offset.x;
 	offset.y = -offset.y;
 	b.origin = offset;
-    b = TUIEdgeInsetsInsetRect(b, self.contentInset);
+    b = TUIEdgeInsetsInsetRect(b, self.safeAreaInsets);
 	return b;
 }
 
@@ -328,7 +360,7 @@ static CVReturn scrollCallback(CVDisplayLinkRef displayLink, const CVTimeStamp *
 	CGRect b = self.bounds;
 	CGSize s = _contentSize;
 	
-	s.height += _contentInset.top;
+	s.height += _combinedContentInsets.top;
 	
 	CGFloat mx = offset.x + s.width;
 	if(s.width > b.size.width) {
@@ -592,8 +624,8 @@ static CGPoint PointLerp(CGPoint a, CGPoint b, CGFloat t)
 {
     CGRect bounds = self.bounds;
     CGPoint p = CGPointZero;
-    p.x = _unroundedContentOffset.x - _contentInset.left;
-    p.y = _unroundedContentOffset.y - _contentInset.bottom;
+    p.x = _unroundedContentOffset.x - _combinedContentInsets.left;
+    p.y = _unroundedContentOffset.y - _combinedContentInsets.bottom;
     
     bounds.origin.x = round(-p.x - self.bounceOffset.x - self.pullOffset.x);
     bounds.origin.y = round(-p.y - self.bounceOffset.y - self.pullOffset.y);

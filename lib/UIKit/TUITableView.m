@@ -810,7 +810,7 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
 	}
 	
 	CGRect visible = [self visibleRect];
-    visible = TUIEdgeInsetsInsetRect(visible, TUIEdgeInsetsInvert(self.contentInset));
+    visible = TUIEdgeInsetsInsetRect(visible, TUIEdgeInsetsInvert(self.safeAreaInsets));
 	
 	// Example:
 	// old:            0 1 2 3 4 5 6 7
@@ -932,7 +932,7 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
 	if(_pullDownView) {
 		CGSize s = self.contentSize;
 		CGRect visible = [self visibleRect];
-        visible = TUIEdgeInsetsInsetRect(visible, TUIEdgeInsetsInvert(self.contentInset));
+        visible = TUIEdgeInsetsInsetRect(visible, TUIEdgeInsetsInvert(self.safeAreaInsets));
 		CGRect pullDownRect = CGRectMake(0, s.height, visible.size.width, _pullDownView.frame.size.height);
 		return CGRectIntersectsRect(pullDownRect, visible);
 	}

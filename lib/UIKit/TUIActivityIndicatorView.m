@@ -77,6 +77,20 @@
     }
 }
 
+- (void)didMoveToWindow
+{
+    [super didMoveToWindow];
+    
+    if (self.superview && _animating) {
+        CALayer * layer = spinner.layer;
+        if (![layer animationForKey:@"transform"] || ![layer animationForKey:@"opacity"]) {
+            // restore animations
+            [self stopAnimating];
+            [self startAnimating];
+        }
+    }
+}
+
 - (BOOL)isAnimating
 {
     return _animating;

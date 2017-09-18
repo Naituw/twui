@@ -646,10 +646,6 @@ static CGPoint PointLerp(CGPoint a, CGPoint b, CGFloat t)
 
 - (void)setContentOffset:(CGPoint)p
 {
-    NSLog(@"!!! setContentOffset: %@", NSStringFromPoint((NSPoint)p));
-    if (p.y > 1000) {
-        NSLog(@"!!! adfadf");
-    }
 	[self _setContentOffset:[self _fixProposedContentOffset:p]];
 }
 

@@ -49,6 +49,9 @@
         @synchronized(self) {
             _attributedString = attributedString;
         }
+        if (self.retriveFontMetricsAutomatically) {
+            self.baselineFontMetrics = TUIFontMetricsNull;
+        }
         _flags.needsLayout = YES;
     }
 }

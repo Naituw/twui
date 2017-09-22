@@ -11,6 +11,7 @@
 typedef NS_ENUM(NSInteger, TUIVisualEffectMaterial) {
     TUIVisualEffectMaterialLight = 0,
     TUIVisualEffectMaterialDark,
+    TUIVisualEffectMaterialUltraDark,
     TUIVisualEffectMaterialTitleBar
 };
 

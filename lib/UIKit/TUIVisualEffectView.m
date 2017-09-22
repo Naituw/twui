@@ -68,6 +68,12 @@
             _backingView.material = NSVisualEffectMaterialDark;
         } else if (material == TUIVisualEffectMaterialTitleBar) {
             _backingView.material = NSVisualEffectMaterialTitlebar;
+        } else if (material == TUIVisualEffectMaterialUltraDark) {
+            if (AtLeastElCapitan) {
+                _backingView.material = NSVisualEffectMaterialUltraDark;
+            } else {
+                _backingView.material = NSVisualEffectMaterialDark;
+            }
         }
     }
 }

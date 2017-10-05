@@ -29,7 +29,10 @@ typedef NS_ENUM(NSInteger, TUIVisualEffectState) {
 @interface TUIVisualEffectView : TUIView
 
 @property (nonatomic) TUIVisualEffectMaterial material;
-@property (nonatomic) TUIVisualEffectBlendingMode blendingMode;
+@property (nonatomic) TUIVisualEffectBlendingMode materialBlendingMode;
 @property (nonatomic) TUIVisualEffectState state;
+
+@property (nonatomic, strong) TUIColor * tintColor;
+@property (nonatomic) TUIViewBlendingMode tintBlendingMode;
 
 @end

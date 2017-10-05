@@ -62,6 +62,22 @@ typedef enum {
     TUIViewContentModeScaleAspectFill,
 } TUIViewContentMode;
 
+typedef NS_ENUM(NSInteger, TUIViewBlendingMode) {
+    TUIViewBlendingModeNormal = 0,
+    TUIViewBlendingModeDarken,
+    TUIViewBlendingModeMultiply,
+    TUIViewBlendingModeColorBurn,
+    TUIViewBlendingModeLighten,
+    TUIViewBlendingModeScreen,
+    TUIViewBlendingModeColorDodge,
+    TUIViewBlendingModeOverlay,
+    TUIViewBlendingModeSoftLight,
+    TUIViewBlendingModeHardLight,
+    TUIViewBlendingModeDifference,
+    TUIViewBlendingModeExclusion,
+    TUIViewBlendingModeCount,
+};
+
 @class TUIColor;
 @class TUINSView;
 @class TUINSWindow;
@@ -409,6 +425,8 @@ extern CGRect(^TUIViewCenteredLayout)(TUIView*);
  default is YES. if set to NO, the view must fill its entire bounds, otherwise the view may contain graphical garbage.
  */
 @property (nonatomic) BOOL clearsContextBeforeDrawing;
+
+@property (nonatomic) TUIViewBlendingMode blendingMode;
 
 @end
 

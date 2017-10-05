@@ -27,6 +27,21 @@
 #import "TUIView+TUIBridgedView.h"
 #import "TUIViewController.h"
 
+static NSString * TUIViewBlendingModeToString[TUIViewBlendingModeCount] = {
+    [TUIViewBlendingModeNormal] = @"normalBlendMode",
+    [TUIViewBlendingModeDarken] = @"darkenBlendMode",
+    [TUIViewBlendingModeMultiply] = @"multiplyBlendMode",
+    [TUIViewBlendingModeColorBurn] = @"colorBurnBlendMode",
+    [TUIViewBlendingModeLighten] = @"lightenBlendMode",
+    [TUIViewBlendingModeScreen] = @"screenBlendMode",
+    [TUIViewBlendingModeColorDodge] = @"colorDodgeBlendMode",
+    [TUIViewBlendingModeOverlay] = @"overlayBlendMode",
+    [TUIViewBlendingModeSoftLight] = @"softLightBlendMode",
+    [TUIViewBlendingModeHardLight] = @"hardLightBlendMode",
+    [TUIViewBlendingModeDifference] = @"differenceBlendMode",
+    [TUIViewBlendingModeExclusion] = @"exclusionBlendMode",
+};
+
 /*
  * Enable this to debug blending.
  *
@@ -1157,6 +1172,40 @@ void TUISetCurrentContextScaleFactor(CGFloat s)
 - (void)setClearsContextBeforeDrawing:(BOOL)newValue
 {
 	_viewFlags.clearsContextBeforeDrawing = newValue;
+}
+
+- (void)setBlendingMode:(TUIViewBlendingMode)blendingMode
+{
+    if (blendingMode <= 0 || blendingMode >= TUIViewBlendingModeCount) {
+        self.layer.compositingFilter = nil;
+    } else {
+        self.layer.compositingFilter = TUIViewBlendingModeToString[blendingMode];
+    }
+}
+
+- (TUIViewBlendingMode)blendingMode
+{
+    static NSDictionary * MapCache = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSMutableDictionary * map = [NSMutableDictionary dictionary];
+        for (NSInteger mode = 0; mode < TUIViewBlendingModeCount; mode++) {
+            NSString * string = TUIViewBlendingModeToString[mode];
+            if (string) {
+                map[string] = @(mode);
+            }
+        }
+        MapCache = map;
+    });
+    id filter = self.layer.compositingFilter;
+    if (!filter) {
+        return TUIViewBlendingModeNormal;
+    }
+    NSNumber * mode = MapCache[filter];
+    if (mode) {
+        return [mode integerValue];
+    }
+    return TUIViewBlendingModeNormal;
 }
 
 @end

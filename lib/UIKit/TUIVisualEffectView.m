@@ -11,6 +11,7 @@
 @interface TUIVisualEffectView ()
 
 @property (nonatomic, strong) NSVisualEffectView * backingView;
+@property (nonatomic, strong) TUIView * blurTintView;
 
 @end
 
@@ -34,6 +35,7 @@
         self.backingView = effectView;
         
         [self.layer addSublayer:effectView.layer];
+        [self addSubview:self.blurTintView];
         
         [self updateEffectViewState];
     }
@@ -45,14 +47,44 @@
     [super layoutSubviews];
     
     _backingView.frame = CGRectInset(self.bounds, -6, 0);
+    _blurTintView.frame = self.bounds;
 }
 
-- (void)setBlendingMode:(TUIVisualEffectBlendingMode)blendingMode
+- (TUIView *)blurTintView
 {
-    _backingView.blendingMode = (NSVisualEffectBlendingMode)blendingMode;
+    if (!_blurTintView) {
+        _blurTintView = [[TUIView alloc] initWithFrame:CGRectZero];
+        _blurTintView.userInteractionEnabled = NO;
+    }
+    return _blurTintView;
 }
 
-- (TUIVisualEffectBlendingMode)blendingMode
+- (void)setTintColor:(TUIColor *)tintColor
+{
+    _blurTintView.backgroundColor = tintColor;
+}
+
+- (TUIColor *)tintColor
+{
+    return _blurTintView.backgroundColor;
+}
+
+- (void)setTintBlendingMode:(TUIViewBlendingMode)tintBlendingMode
+{
+    _blurTintView.blendingMode = tintBlendingMode;
+}
+
+- (TUIViewBlendingMode)tintBlendingMode
+{
+    return _blurTintView.blendingMode;
+}
+
+- (void)setMaterialBlendingMode:(TUIVisualEffectBlendingMode)materialBlendingMode
+{
+    _backingView.blendingMode = (NSVisualEffectBlendingMode)materialBlendingMode;
+}
+
+- (TUIVisualEffectBlendingMode)materialBlendingMode
 {
     return (TUIVisualEffectBlendingMode)_backingView.blendingMode;
 }

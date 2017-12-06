@@ -324,7 +324,13 @@ static CAAnimation *ThrobAnimation()
 	}
 	
 	// Ugh. So this seems to be a decent approximation for the height of the cursor. It doesn't always match the native cursor but what ev.
-	CGRect r = CGRectIntegral([renderer firstSelectionRectForCharacterRange:selection]);
+    CGRect r = [renderer firstSelectionRectForCharacterRange:selection];
+    
+    if (CGRectIsNull(r)) {
+        r = CGRectMake(contentInset.left, contentInset.top, 0, 0);
+    }
+    
+    r = CGRectIntegral(r);
 	r.size.width = 2.0f;
 	CGRect fontBoundingBox = CTFontGetBoundingBox(self.font.ctFont);
 	r.size.height = round(fontBoundingBox.origin.y + fontBoundingBox.size.height);

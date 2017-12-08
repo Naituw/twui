@@ -16,7 +16,7 @@
 
 #import "TUIView.h"
 
-@interface TUIViewAnimation : NSObject <CAAction>
+@interface TUIViewAnimation : NSObject <CAAnimationDelegate>
 {
 	void *context;
 	NSString *animationID;
@@ -26,21 +26,58 @@
 	SEL animationDidStopSelector;
 	void (^animationCompletionBlock)(BOOL finished);
 	
-	CABasicAnimation *basicAnimation;
+    NSUInteger _waitingAnimations;
+    
+    NSTimeInterval _animationDelay;
+    NSTimeInterval _animationDuration;
+    TUIViewAnimationCurve _animationCurve;
+    BOOL _animationBeginsFromCurrentState;
+    BOOL _animationRepeatAutoreverses;
+    float _animationRepeatCount;
+    CFTimeInterval _animationBeginTime;
+    
+    CABasicAnimation * _animationTemplate;
 }
 
 @property (nonatomic, assign) void *context;
 @property (nonatomic, copy) NSString *animationID;
+
+@property (nonatomic, strong) NSMutableSet * animatingViews;
 
 @property (nonatomic, weak) id delegate;
 @property (nonatomic, assign) SEL animationWillStartSelector;
 @property (nonatomic, assign) SEL animationDidStopSelector;
 @property (nonatomic, copy) void (^animationCompletionBlock)(BOOL finished);
 
-@property (nonatomic, strong, readonly) CABasicAnimation *basicAnimation;
-@property (nonatomic, assign) BOOL beginFromCurrentState;
+- (void)setAnimationBeginsFromCurrentState:(BOOL)beginFromCurrentState;
+- (void)setAnimationCurve:(TUIViewAnimationCurve)curve;
+- (void)setAnimationDelay:(NSTimeInterval)delay;
+- (void)setAnimationDuration:(NSTimeInterval)duration;
+- (void)setAnimationRepeatAutoreverses:(BOOL)repeatAutoreverses;
+- (void)setAnimationRepeatCount:(float)repeatCount;
+
+- (id)actionForView:(TUIView *)view forKey:(NSString *)keyPath;
 
 @end
+
+static CAMediaTimingFunction * CAMediaTimingFunctionFromTUIViewAnimationCurve(TUIViewAnimationCurve curve) {
+    NSString *functionName = kCAMediaTimingFunctionEaseInEaseOut;
+    switch(curve) {
+        case TUIViewAnimationCurveLinear:
+            functionName = kCAMediaTimingFunctionLinear;
+            break;
+        case TUIViewAnimationCurveEaseIn:
+            functionName = kCAMediaTimingFunctionEaseIn;
+            break;
+        case TUIViewAnimationCurveEaseOut:
+            functionName = kCAMediaTimingFunctionEaseOut;
+            break;
+        case TUIViewAnimationCurveEaseInOut:
+            functionName = kCAMediaTimingFunctionEaseInEaseOut;
+            break;
+    }
+    return [CAMediaTimingFunction functionWithName:functionName];
+}
 
 @implementation TUIViewAnimation
 
@@ -52,10 +89,6 @@
 @synthesize animationDidStopSelector;
 @synthesize animationCompletionBlock;
 
-@synthesize basicAnimation;
-
-//static int animcount = 0;
-
 - (id)init
 {
     return [self initWithBasicAnimation:[CABasicAnimation animation]];
@@ -65,17 +98,22 @@
 {
 	if((self = [super init]))
 	{
-        basicAnimation = animation ? : [CABasicAnimation animation];
-        //		NSLog(@"+anims %d", ++animcount);
+        _waitingAnimations = 1;
+        _animationDuration = 0.2;
+        _animationCurve = TUIViewAnimationCurveEaseInOut;
+        _animationBeginsFromCurrentState = NO;
+        _animationRepeatAutoreverses = NO;
+        _animationRepeatCount = 0;
+        _animationBeginTime = CACurrentMediaTime();
+        _animatingViews = [[NSMutableSet alloc] initWithCapacity:0];
+        _animationTemplate = animation;
 	}
 	return self;
 }
 
 - (void)dealloc
 {
-    //	NSLog(@"-anims %d", --animcount);
-	if(animationCompletionBlock != nil) {
-        // happends when committing an animation context without any modification of layer's property
+	if (animationCompletionBlock != nil) {
 		animationCompletionBlock(NO);
         animationCompletionBlock = nil;
 		
@@ -83,19 +121,79 @@
 	}
 }
 
-- (void)runActionForKey:(NSString *)event object:(id)anObject arguments:(NSDictionary *)dict
+- (CAAnimation *)addAnimation:(CAAnimation *)animation
 {
-	CABasicAnimation *animation = [basicAnimation copyWithZone:nil];
-	animation.delegate = self;
-    
-    if (_beginFromCurrentState && [anObject isKindOfClass:[CALayer class]]) {
-//        animation.fromValue = [[anObject presentationLayer] valueForKey:event];
-    }
-    
-	[animation runActionForKey:event object:anObject arguments:dict];
+    animation.timingFunction = CAMediaTimingFunctionFromTUIViewAnimationCurve(_animationCurve);
+    animation.duration = _animationDuration;
+    animation.beginTime = _animationBeginTime + _animationDelay;
+    animation.repeatCount = _animationRepeatCount;
+    animation.autoreverses = _animationRepeatAutoreverses;
+    animation.fillMode = kCAFillModeBackwards;
+    animation.delegate = self;
+    animation.removedOnCompletion = YES;
+    _waitingAnimations++;
+    return animation;
 }
 
-//static int animstart = 0;
+- (id)actionForView:(TUIView *)view forKey:(NSString *)keyPath
+{
+    [_animatingViews addObject:view];
+    CALayer *layer = view.layer;
+    CABasicAnimation *animation = nil;
+    if (_animationTemplate) {
+        animation = [_animationTemplate copyWithZone:nil];
+        animation.keyPath = keyPath;
+    } else {
+        animation = [CABasicAnimation animationWithKeyPath:keyPath];
+    }
+    animation.fromValue = _animationBeginsFromCurrentState ? [layer.presentationLayer valueForKey:keyPath] : nil;
+    return [self addAnimation:animation];
+}
+
+- (void)setAnimationBeginsFromCurrentState:(BOOL)beginFromCurrentState
+{
+    _animationBeginsFromCurrentState = beginFromCurrentState;
+}
+
+- (void)setAnimationCurve:(TUIViewAnimationCurve)curve
+{
+    _animationCurve = curve;
+}
+
+- (void)setAnimationDelay:(NSTimeInterval)delay
+{
+    _animationDelay = delay;
+}
+
+- (void)setAnimationDuration:(NSTimeInterval)duration
+{
+    _animationDuration = duration;
+}
+
+- (void)setAnimationRepeatAutoreverses:(BOOL)repeatAutoreverses
+{
+    _animationRepeatAutoreverses = repeatAutoreverses;
+}
+
+- (void)setAnimationRepeatCount:(float)repeatCount
+{
+    _animationRepeatCount = repeatCount;
+}
+
+- (void)notifyAnimationsDidStopIfNeededUsingStatus:(BOOL)flag
+{
+    if (_waitingAnimations == 0) {
+        if(delegate && animationDidStopSelector) {
+            void (*animationDidStopIMP)(id,SEL,NSString*,NSNumber*,void*) = (void(*)(id,SEL,NSString*,NSNumber*,void*))[(NSObject *)delegate methodForSelector:animationDidStopSelector];
+            animationDidStopIMP(delegate, animationDidStopSelector, animationID, [NSNumber numberWithBool:flag], context);
+            animationDidStopSelector = NULL; // only fire this once
+        } else if(animationCompletionBlock) {
+            animationCompletionBlock(flag);
+            self.animationCompletionBlock = nil; // only fire this once
+        }
+        [_animatingViews removeAllObjects];
+    }
+}
 
 - (void)animationDidStart:(CAAnimation *)anim
 {
@@ -109,15 +207,14 @@
 
 - (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag
 {
-    //	NSLog(@"-animstart %d", --animstart);
-	if(delegate && animationDidStopSelector) {
-		void (*animationDidStopIMP)(id,SEL,NSString*,NSNumber*,void*) = (void(*)(id,SEL,NSString*,NSNumber*,void*))[(NSObject *)delegate methodForSelector:animationDidStopSelector];
-		animationDidStopIMP(delegate, animationDidStopSelector, animationID, [NSNumber numberWithBool:flag], context);
-		animationDidStopSelector = NULL; // only fire this once
-	} else if(animationCompletionBlock) {
-		animationCompletionBlock(flag);
-		self.animationCompletionBlock = nil; // only fire this once
-	}
+    _waitingAnimations--;
+    [self notifyAnimationsDidStopIfNeededUsingStatus:flag];
+}
+
+- (void)commit
+{
+    _waitingAnimations--;
+    [self notifyAnimationsDidStopIfNeededUsingStatus:YES];
 }
 
 @end
@@ -220,6 +317,7 @@ static NSMutableArray *AnimationStack = nil;
 {
     TUIViewAnimation * __autoreleasing animation = [self _currentAnimation]; // release in end of runloop
 	[[self _animationStack] removeLastObject];
+    [animation commit];
     //	NSLog(@"--- %d", [[self _animationStack] count]);
 }
 
@@ -247,59 +345,42 @@ static CGFloat SlomoTime()
 
 + (void)setAnimationDuration:(NSTimeInterval)duration
 {
-	[self _currentAnimation].basicAnimation.duration = duration * SlomoTime();
+	[[self _currentAnimation] setAnimationDuration:duration * SlomoTime()];
 }
 
 + (void)setAnimationDelay:(NSTimeInterval)delay                    // default = 0.0
 {
-	[self _currentAnimation].basicAnimation.beginTime = CACurrentMediaTime() + delay * SlomoTime();
-	[self _currentAnimation].basicAnimation.fillMode = kCAFillModeBoth;
+    [[self _currentAnimation] setAnimationDelay:delay * SlomoTime()];
 }
 
 + (void)setAnimationStartDate:(NSDate *)startDate                  // default = now ([NSDate date])
 {
 	NSLog(@"%@ %@ unimplemented", self, NSStringFromSelector(_cmd));
-	//[self _currentAnimation].basicAnimation.beginTime = startDate;
 }
 
 + (void)setAnimationCurve:(TUIViewAnimationCurve)curve              // default = UIViewAnimationCurveEaseInOut
 {
-	NSString *functionName = kCAMediaTimingFunctionEaseInEaseOut;
-	switch(curve) {
-		case TUIViewAnimationCurveLinear:
-			functionName = kCAMediaTimingFunctionLinear;
-			break;
-		case TUIViewAnimationCurveEaseIn:
-			functionName = kCAMediaTimingFunctionEaseIn;
-			break;
-		case TUIViewAnimationCurveEaseOut:
-			functionName = kCAMediaTimingFunctionEaseOut;
-			break;
-		case TUIViewAnimationCurveEaseInOut:
-			functionName = kCAMediaTimingFunctionEaseInEaseOut;
-			break;
-	}
-	[self _currentAnimation].basicAnimation.timingFunction = [CAMediaTimingFunction functionWithName:functionName];
+    [[self _currentAnimation] setAnimationCurve:curve];
 }
 
 + (void)setAnimationRepeatCount:(float)repeatCount                 // default = 0.0.  May be fractional
 {
-	[self _currentAnimation].basicAnimation.repeatCount = repeatCount;
+    [[self _currentAnimation] setAnimationRepeatCount:repeatCount];
 }
 
 + (void)setAnimationRepeatAutoreverses:(BOOL)repeatAutoreverses    // default = NO. used if repeat count is non-zero
 {
-	[self _currentAnimation].basicAnimation.autoreverses = repeatAutoreverses;
+    [[self _currentAnimation] setAnimationRepeatAutoreverses:repeatAutoreverses];
 }
 
 + (void)setAnimationIsAdditive:(BOOL)additive
 {
-	[self _currentAnimation].basicAnimation.additive = additive;
+    NSLog(@"%@ %@ unimplemented", self, NSStringFromSelector(_cmd));
 }
 
 + (void)setAnimationBeginsFromCurrentState:(BOOL)fromCurrentState  // default = NO. If YES, the current view position is always used for new animations -- allowing animations to "pile up" on each other. Otherwise, the last end state is used for the animation (the default).
 {
-    [self _currentAnimation].beginFromCurrentState = YES;
+    [[self _currentAnimation] setAnimationBeginsFromCurrentState:YES];
 }
 
 + (void)setAnimationTransition:(TUIViewAnimationTransition)transition forView:(TUIView *)view cache:(BOOL)cache  // current limitation - only one per begin/commit block
@@ -348,12 +429,20 @@ static BOOL animateContents = NO;
 - (id<CAAction>)actionForLayer:(CALayer *)layer forKey:(NSString *)event
 {
 	if(disableAnimations == NO) {
-		if((animateContents == NO) && [event isEqualToString:@"contents"])
+        
+        BOOL isContents = [event isEqualToString:@"contents"];
+        
+		if((animateContents == NO) && isContents)
 			return (id<CAAction>)[NSNull null]; // default - don't animate contents
 		
-		id<CAAction>animation = [TUIView _currentAnimation];
-		if(animation)
-			return animation;
+        if (isContents) {
+            NSLog(@"23");
+        }
+        
+		TUIViewAnimation * animation = [TUIView _currentAnimation];
+        if (animation) {
+            return [animation actionForView:self forKey:event];
+        }
 	}
 	
 	return (id<CAAction>)[NSNull null];

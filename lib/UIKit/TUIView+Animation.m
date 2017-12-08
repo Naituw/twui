@@ -146,7 +146,7 @@ static CAMediaTimingFunction * CAMediaTimingFunctionFromTUIViewAnimationCurve(TU
     } else {
         animation = [CABasicAnimation animationWithKeyPath:keyPath];
     }
-    animation.fromValue = _animationBeginsFromCurrentState ? [layer.presentationLayer valueForKey:keyPath] : nil;
+//    animation.fromValue = _animationBeginsFromCurrentState ? [layer.presentationLayer valueForKey:keyPath] : nil;
     return [self addAnimation:animation];
 }
 

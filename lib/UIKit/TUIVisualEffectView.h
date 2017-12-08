@@ -35,4 +35,7 @@ typedef NS_ENUM(NSInteger, TUIVisualEffectState) {
 @property (nonatomic, strong) TUIColor * tintColor;
 @property (nonatomic) TUIViewBlendingMode tintBlendingMode;
 
+@property (nonatomic, strong) TUIColor * activeBackdropBackgroundColor;
+@property (nonatomic, strong) TUIColor * inactiveBackdropBackgroundColor;
+
 @end

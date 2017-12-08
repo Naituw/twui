@@ -8,6 +8,12 @@
 
 #import "TUIVisualEffectView.h"
 
+@interface TUINSVisualEffectView : NSVisualEffectView
+
+@property (nonatomic, weak) TUIVisualEffectView * tuiView;
+
+@end
+
 @interface TUIVisualEffectView ()
 
 @property (nonatomic, strong) NSVisualEffectView * backingView;
@@ -16,6 +22,43 @@
 @end
 
 @implementation TUIVisualEffectView
+
+- (void)_updateBackdropLayer:(CALayer *)layer withBackgroundColor:(TUIColor *)color
+{
+    if (!color) {
+        return;
+    }
+    for (CALayer * sublayer in layer.sublayers) {
+        if ([sublayer.name isEqualToString:@"Backdrop"]) {
+            sublayer.backgroundColor = color.CGColor;
+        } else if ([sublayer.name isEqualToString:@"Tint"]) {
+            sublayer.opacity = 0.0;
+        }
+    }
+}
+
+- (void)updateBackingViewLayers
+{
+    if (!_activeBackdropBackgroundColor && !_inactiveBackdropBackgroundColor) {
+        return;
+    }
+    
+    [CATransaction begin];
+    [CATransaction setDisableActions:YES];
+    
+    CALayer * backdropLayer = self.backingView.layer.sublayers.firstObject;
+    if ([backdropLayer.name rangeOfString:@"CUIVariant"].location != NSNotFound) {
+        for (CALayer * layer in backdropLayer.sublayers) {
+            if ([layer.name isEqualToString:@"Active"]) {
+                [self _updateBackdropLayer:layer withBackgroundColor:_activeBackdropBackgroundColor];
+            } else if ([layer.name isEqualToString:@"Inactive"]) {
+                [self _updateBackdropLayer:layer withBackgroundColor:_inactiveBackdropBackgroundColor];
+            }
+        }
+    }
+    
+    [CATransaction commit];
+}
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -27,7 +70,8 @@
         
         // TODO: fallback for old systems
         
-        NSVisualEffectView * effectView = [[NSVisualEffectView alloc] initWithFrame:frame];
+        TUINSVisualEffectView * effectView = [[TUINSVisualEffectView alloc] initWithFrame:frame];
+        effectView.tuiView = self;
         effectView.material = NSVisualEffectMaterialLight;
         effectView.state = NSVisualEffectStateActive;
         effectView.wantsLayer = YES;
@@ -160,3 +204,15 @@
 }
 
 @end
+
+@implementation TUINSVisualEffectView
+
+- (void)updateLayer
+{
+    [super updateLayer];
+    
+    [_tuiView updateBackingViewLayers];
+}
+
+@end
+

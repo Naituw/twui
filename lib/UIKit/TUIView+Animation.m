@@ -435,10 +435,6 @@ static BOOL animateContents = NO;
 		if((animateContents == NO) && isContents)
 			return (id<CAAction>)[NSNull null]; // default - don't animate contents
 		
-        if (isContents) {
-            NSLog(@"23");
-        }
-        
 		TUIViewAnimation * animation = [TUIView _currentAnimation];
         if (animation) {
             return [animation actionForView:self forKey:event];

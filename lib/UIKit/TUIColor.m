@@ -174,7 +174,7 @@ CACHED_COLOR(graphiteColor,		[self colorWithRed:0.45 green:0.49 blue:0.58 alpha:
 
 + (TUIColor *)linkColor
 {
-	return [TUIColor colorWithRed:13.0f/255.0f green:140.0f/255.0f blue:231.0f/255.0f alpha:1.0f];
+	return [TUIColor colorWithRed:0.0f/255.0f green:109.0f/255.0f blue:234.0f/255.0f alpha:1.0f];
 }
 
 - (NSColor *)nsColor

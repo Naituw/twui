@@ -92,6 +92,7 @@
 
 - (void)_updateDefaultAttributes
 {
+    renderer.textLayout.fixedFontMetrics = TUIFontMetricsMakeFromTUIFont(self.font);
 	renderer.defaultAttributes = [NSDictionary dictionaryWithObjectsAndKeys:
 						 (id)[self.font ctFont], kCTFontAttributeName,
 						 [self.textColor CGColor], kCTForegroundColorAttributeName,
@@ -245,9 +246,13 @@ static CAAnimation *ThrobAnimation()
 	static const CGFloat singleLineWidth = 20000.0f;
 	
 	CGContextRef ctx = TUIGraphicsGetCurrentContext();
-	
+    CGContextSaveGState(ctx);
+    
 	if(drawFrame)
 		drawFrame(self, rect);
+    
+    TUIImage * image = TUIGraphicsGetImageFromCurrentImageContext();
+    NSImage * nsImage = [image nsImage];
 	
 	BOOL singleLine = [self singleLine];
 	CGRect textRect = [self textRect];
@@ -299,15 +304,18 @@ static CAAnimation *ThrobAnimation()
 		TUIAttributedString *attributedString = [TUIAttributedString stringWithString:self.placeholder];
 		attributedString.font = self.font;
 		attributedString.color = [self.textColor colorWithAlphaComponent:0.4f];
-		
+
 		self.placeholderRenderer.attributedString = attributedString;
-		self.placeholderRenderer.frame = rendererFrame;
+        self.placeholderRenderer.textLayout.fixedFontMetrics = TUIFontMetricsMakeFromTUIFont(self.font);
+		self.placeholderRenderer.frame = CGRectInset(rendererFrame, 2, 0);
 		[self.placeholderRenderer draw];
 	}
 	
 	if(doMask) {
 		CGContextRestoreGState(ctx);
 	}
+    
+    CGContextRestoreGState(ctx);
 }
 
 - (CGRect)_cursorRect
@@ -327,7 +335,7 @@ static CAAnimation *ThrobAnimation()
     CGRect r = [renderer firstSelectionRectForCharacterRange:selection];
     
     if (CGRectIsNull(r)) {
-        r = CGRectMake(contentInset.left, contentInset.top, 0, 0);
+        r = CGRectMake(contentInset.left, contentInset.bottom, 0, 0);
     }
     
     r = CGRectIntegral(r);

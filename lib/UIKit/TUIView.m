@@ -381,7 +381,7 @@ void TUISetCurrentContextScaleFactor(CGFloat s)
 	}
 
 	CGRect rectToDraw = self.bounds;
-	if (!CGRectEqualToRect(_context.dirtyRect, CGRectZero)) {
+	if (!CGRectIsEmpty(_context.dirtyRect)) {
 		rectToDraw = _context.dirtyRect;
 		_context.dirtyRect = CGRectZero;
 	}

@@ -151,6 +151,7 @@ typedef struct {
 
 @interface TUITableView ()
 
+@property (nonatomic, assign) NSInteger liveResizeLevels;
 @property (nonatomic, strong) TUITableViewFastLiveResizingContext * optimizedLiveResizeContext;
 
 @end
@@ -1268,10 +1269,15 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
 - (void)viewWillStartLiveResize
 {
     if (_optimizedLiveResizingEnabled) {
-        NSAssert(_optimizedLiveResizeContext == nil, @"Fast Live Resizing Context Already Exists");
-        
-        _optimizedLiveResizeContext = [[TUITableViewFastLiveResizingContext alloc] initWithWillStartLiveResizingTableView:self];
+        // viewWillStartLiveResize may get called twice when window enter fullscreen,
+        // so guard the liveResizeContext with liveResizeLevels
+        if (_liveResizeLevels == 0) {
+            NSAssert(_optimizedLiveResizeContext == nil, @"Fast Live Resizing Context Already Exists");
+            
+            _optimizedLiveResizeContext = [[TUITableViewFastLiveResizingContext alloc] initWithWillStartLiveResizingTableView:self];
+        }
     }
+    _liveResizeLevels++;
     
     [super viewWillStartLiveResize];
 }
@@ -1280,7 +1286,9 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
 {
     [super viewDidEndLiveResize];
     
-    if (_optimizedLiveResizeContext) {
+    _liveResizeLevels--;
+    
+    if (_liveResizeLevels == 0 && _optimizedLiveResizeContext) {
         [_optimizedLiveResizeContext endLiveResizing];
         _optimizedLiveResizeContext = nil;
     }

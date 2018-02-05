@@ -20,6 +20,7 @@
 #import "TUINSWindow.h"
 #import "TUITableView+Cell.h"
 #import "TUITableViewSectionHeader.h"
+#import "TUITableViewFastLiveResizingContext.h"
 
 // header views need to be above the cells at all times
 #define HEADER_Z_POSITION 1000 
@@ -146,6 +147,12 @@ typedef struct {
 @interface TUITableView (Private)
 - (void)_updateSectionInfo;
 - (void)_updateDerepeaterViews;
+@end
+
+@interface TUITableView ()
+
+@property (nonatomic, strong) TUITableViewFastLiveResizingContext * optimizedLiveResizeContext;
+
 @end
 
 @implementation TUITableView
@@ -1254,6 +1261,29 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
 - (void)setMaintainContentOffsetAfterReload:(BOOL)newValue
 {
 	_tableFlags.maintainContentOffsetAfterReload = newValue;
+}
+
+#pragma mark - Optimized Live Resizing Mode
+
+- (void)viewWillStartLiveResize
+{
+    if (_optimizedLiveResizingEnabled) {
+        NSAssert(_optimizedLiveResizeContext == nil, @"Fast Live Resizing Context Already Exists");
+        
+        _optimizedLiveResizeContext = [[TUITableViewFastLiveResizingContext alloc] initWithWillStartLiveResizingTableView:self];
+    }
+    
+    [super viewWillStartLiveResize];
+}
+
+- (void)viewDidEndLiveResize
+{
+    [super viewDidEndLiveResize];
+    
+    if (_optimizedLiveResizeContext) {
+        [_optimizedLiveResizeContext endLiveResizing];
+        _optimizedLiveResizeContext = nil;
+    }
 }
 
 @end

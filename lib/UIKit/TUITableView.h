@@ -118,6 +118,7 @@ typedef enum {
 
 @property (readwrite, assign) BOOL                        animateSelectionChanges;
 @property (nonatomic, assign) BOOL maintainContentOffsetAfterReload;
+@property (nonatomic, assign) BOOL optimizedLiveResizingEnabled;
 
 - (void)reloadData;
 

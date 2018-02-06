@@ -259,6 +259,7 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 	v.frame = CGRectMake(0, 0, s.width, s.height);
 	[self.tuiHostView.layer addSublayer:_rootView.layer];
 	
+    [self _updateDisplayID];
 	[self _updateLayerScaleFactor];
 }
 
@@ -309,6 +310,7 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 
 - (void)viewDidMoveToWindow
 {
+    [self _updateDisplayID];
 	[self _updateLayerScaleFactor];
 	
 	[self.rootView didMoveToWindow];
@@ -345,8 +347,15 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
 	}
 }
 
+- (void)_updateDisplayID {
+    if([self window] != nil) {
+        [self.rootView _updateDisplayID];
+    }
+}
+
 - (void)screenProfileOrBackingPropertiesDidChange:(NSNotification *)notification
 {
+    [self performSelector:@selector(_updateDisplayID) withObject:nil afterDelay:0.0];
 	[self performSelector:@selector(_updateLayerScaleFactor) withObject:nil afterDelay:0.0]; // the window's backingScaleFactor doesn't update until after this notification fires (10.8) - so delay it a bit.
 }
 

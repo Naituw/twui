@@ -72,7 +72,7 @@
 //			0.0, 0.0, 0.0, 0.55,
 //		};
 		
-		CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
+        CGColorSpaceRef space = TUICopyCurrentDisplayColorSpace();
 		CGGradientRef gradient = CGGradientCreateWithColorComponents(space, components, locations, 3);
 		
 //		CGContextSaveGState(ctx);

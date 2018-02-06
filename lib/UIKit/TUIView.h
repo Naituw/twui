@@ -100,7 +100,8 @@ extern CGRect(^TUIViewCenteredLayout)(TUIView*);
 	NSInteger	 _tag;
 	NSArray		*_textRenderers;
 	__weak id   _currentTextRenderer; // weak
-	
+    CGDirectDisplayID _displayID;
+    
 	CGPoint		startDrag;
 	
 	__weak id<TUIViewDelegate> _viewDelegate;
@@ -121,6 +122,7 @@ extern CGRect(^TUIViewCenteredLayout)(TUIView*);
 		CGContextRef context;
 		CGRect dirtyRect;
 		CGFloat lastContentsScale;
+        CGDirectDisplayID lastDisplayID;
 	} _context;
 	
 	struct {

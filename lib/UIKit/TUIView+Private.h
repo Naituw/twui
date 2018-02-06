@@ -23,10 +23,16 @@
 
 - (TUITextRenderer *)textRendererAtPoint:(CGPoint)point;
 
+@property (nonatomic, assign) CGDirectDisplayID displayID;
+
 - (void)_updateLayerScaleFactor;
+- (void)_updateDisplayID;
 - (void)_superSetNextResponder:(NSResponder *)responder;
 
 @end
 
 extern CGFloat TUICurrentContextScaleFactor(void);
 extern void TUISetCurrentContextScaleFactor(CGFloat scale);
+
+extern CGDirectDisplayID TUICurrentContextDisplayID(void);
+extern void TUISetCurrentContextDisplayID(CGDirectDisplayID displayID);

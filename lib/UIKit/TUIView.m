@@ -121,11 +121,13 @@ CGRect(^TUIViewCenteredLayout)(TUIView*) = nil;
 }
 
 static pthread_key_t TUICurrentContextScaleFactorTLSKey;
+static pthread_key_t TUICurrentContextDisplayIDTLSKey;
 
 + (void)initialize
 {
 	if(self == [TUIView class]) {
 		pthread_key_create(&TUICurrentContextScaleFactorTLSKey, free);
+        pthread_key_create(&TUICurrentContextDisplayIDTLSKey, free);
 
 		TUIViewCenteredLayout = [^(TUIView *v) {
 			TUIView *superview = v.superview;
@@ -311,12 +313,14 @@ static pthread_key_t TUICurrentContextScaleFactorTLSKey;
 	NSInteger h = b.size.height;
 	BOOL o = self.opaque;
 	CGFloat currentScale = [self.layer respondsToSelector:@selector(contentsScale)] ? self.layer.contentsScale : 1.0f;
+    CGDirectDisplayID displayID = TUICurrentContextDisplayID();
 	
 	if(_context.context) {
 		// kill if we're a different size
 		if(w != _context.lastWidth || 
 		   h != _context.lastHeight ||
 		   o != _context.lastOpaque ||
+           displayID != _context.lastDisplayID ||
 		   fabs(currentScale - _context.lastContentsScale) > 0.1f) 
 		{
 			CGContextRelease(_context.context);
@@ -330,6 +334,7 @@ static pthread_key_t TUICurrentContextScaleFactorTLSKey;
 		_context.lastHeight = h;
 		_context.lastOpaque = o;
 		_context.lastContentsScale = currentScale;
+        _context.lastDisplayID = displayID;
 
 		b.size.width *= currentScale;
 		b.size.height *= currentScale;
@@ -364,6 +369,24 @@ void TUISetCurrentContextScaleFactor(CGFloat s)
 	*v = s;
 }
 
+CGDirectDisplayID TUICurrentContextDisplayID(void)
+{
+    CGDirectDisplayID *v = pthread_getspecific(TUICurrentContextDisplayIDTLSKey);
+    if(v)
+        return *v;
+    return 0;
+}
+
+void TUISetCurrentContextDisplayID(CGDirectDisplayID displayID)
+{
+    CGDirectDisplayID *v = pthread_getspecific(TUICurrentContextDisplayIDTLSKey);
+    if(!v) {
+        v = malloc(sizeof(CGDirectDisplayID));
+        pthread_setspecific(TUICurrentContextDisplayIDTLSKey, v);
+    }
+    *v = displayID;
+}
+
 - (void)displayLayer:(CALayer *)layer
 {
 	if (_viewFlags.delegateWillDisplayLayer) {
@@ -387,11 +410,17 @@ void TUISetCurrentContextScaleFactor(CGFloat s)
 	}
 
 	void (^drawBlock)(void) = ^{
+        CGDirectDisplayID displayID = self.displayID;
+        if (displayID) {
+            TUISetCurrentContextDisplayID(displayID);
+        }
+
 		CGContextRef context = [self _CGContext];
 		TUIGraphicsPushContext(context);
         
         CGFloat scale = [self.layer respondsToSelector:@selector(contentsScale)] ? self.layer.contentsScale : 1.0f;
 		TUISetCurrentContextScaleFactor(scale);
+        
 		CGContextScaleCTM(context, scale, scale);
         
 		if (_viewFlags.clearsContextBeforeDrawing) {
@@ -595,6 +624,30 @@ void TUISetCurrentContextScaleFactor(CGFloat s)
             }
 		}
 	}
+}
+
+- (void)_updateDisplayID
+{
+    if([self nsWindow] != nil) {
+        [self.subviews makeObjectsPerformSelector:_cmd];
+        
+        NSNumber * screenNumber = self.nsWindow.screen.deviceDescription[@"NSScreenNumber"];
+        if ([screenNumber respondsToSelector:@selector(integerValue)]) {
+            _displayID = (CGDirectDisplayID)[screenNumber integerValue];
+        } else {
+            _displayID = kCGNullDirectDisplay;
+        }
+    }
+}
+
+- (void)setDisplayID:(CGDirectDisplayID)displayID
+{
+    _displayID = displayID;
+}
+
+- (CGDirectDisplayID)displayID
+{
+    return _displayID;
 }
 
 - (void)prepareSubview:(TUIView *)view insertionBlock:(void (^)(void))block

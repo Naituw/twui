@@ -18,16 +18,26 @@
 #import "TUIImage.h"
 #import "TUIView.h"
 
+CGColorSpaceRef TUICopyCurrentDisplayColorSpace(void)
+{
+    CGDirectDisplayID displayID = TUICurrentContextDisplayID();
+    if (!displayID) {
+        displayID = CGMainDisplayID();
+    }
+    CGColorSpaceRef colorSpace = CGDisplayCopyColorSpace(CGMainDisplayID());
+    if (!colorSpace) {
+        colorSpace = CGColorSpaceCreateDeviceRGB();
+    }
+    return colorSpace;
+}
+
 CGContextRef TUICreateOpaqueGraphicsContext(CGSize size)
 {
 	size_t width = size.width;
 	size_t height = size.height;
 	size_t bitsPerComponent = 8;
 	size_t bytesPerRow = 4 * width;
-    CGColorSpaceRef colorSpace = CGDisplayCopyColorSpace(CGMainDisplayID());
-    if (!colorSpace) {
-        colorSpace = CGColorSpaceCreateDeviceRGB();
-    }
+    CGColorSpaceRef colorSpace = TUICopyCurrentDisplayColorSpace();
 
 	CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Host | kCGImageAlphaNoneSkipFirst;
 	CGContextRef ctx = CGBitmapContextCreate(NULL, width, height, bitsPerComponent, bytesPerRow, colorSpace, bitmapInfo);
@@ -41,10 +51,7 @@ CGContextRef TUICreateGraphicsContext(CGSize size)
 	size_t height = size.height;
 	size_t bitsPerComponent = 8;
 	size_t bytesPerRow = 4 * width;
-    CGColorSpaceRef colorSpace = CGDisplayCopyColorSpace(CGMainDisplayID());
-    if (!colorSpace) {
-        colorSpace = CGColorSpaceCreateDeviceRGB();
-    }
+    CGColorSpaceRef colorSpace = TUICopyCurrentDisplayColorSpace();
 	// http://www.cocoTUIlder.com/archive/cocoa/228931-sub-pixel-font-smoothing-with-cgbitmapcontext.html
 	// http://developer.apple.com/mac/library/qa/qa2001/qa1037.html
 	CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Host | kCGImageAlphaPremultipliedFirst;

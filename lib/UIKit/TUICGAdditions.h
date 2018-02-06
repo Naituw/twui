@@ -35,6 +35,8 @@ typedef NSUInteger TUICGRoundedRectCorner;
 #ifdef __cplusplus
 extern "C" {
 #endif
+    
+extern CGColorSpaceRef TUICopyCurrentDisplayColorSpace(void);
 
 extern CGContextRef TUICreateOpaqueGraphicsContext(CGSize size);
 extern CGContextRef TUICreateGraphicsContext(CGSize size);

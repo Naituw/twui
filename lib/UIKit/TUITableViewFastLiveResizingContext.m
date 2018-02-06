@@ -1,12 +1,29 @@
+
+/*
+ Copyright 2011 Twitter, Inc.
+ 
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this work except in compliance with the License.
+ You may obtain a copy of the License in the LICENSE file, or at:
+ 
+ http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ */
 //
 //  TUITableViewFastLiveResizingContext.m
-//  Maipo
+//  TwUI
 //
 //  Created by 吴天 on 2018/2/5.
 //  Copyright © 2018年 Wutian. All rights reserved.
 //
 
 #import "TUITableViewFastLiveResizingContext.h"
+#import "TUITableView+Private.h"
 
 @interface TUITableViewFastLiveResizingContext () <TUITableViewDelegate, TUITableViewDataSource>
 {
@@ -22,6 +39,7 @@
 @property (nonatomic, strong) TUIFastIndexPath * initialFirstVisibleIndexPath;
 @property (nonatomic, assign) CGFloat initialRelativeOffset;
 @property (nonatomic, assign) NSUInteger initialVisibleCellsCount;
+@property (nonatomic, strong) TUIFastIndexPath * initialSelectedIndexPath;
 @property (nonatomic, assign) TUIScrollViewIndicatorVisibility initialVerticalScrollIndicatorVisibility;
 @property (nonatomic, assign) TUIScrollViewIndicatorVisibility initialHorizontalScrollIndicatorVisibility;
 
@@ -46,7 +64,12 @@
 
 - (void)endLiveResizing
 {
+    [self _restoreTableViewStates];
     [_tableView reloadDataMaintainingVisibleIndexPath:_initialFirstVisibleIndexPath relativeOffset:_initialRelativeOffset];
+    if (_initialSelectedIndexPath) {
+        [_tableView selectRowAtIndexPath:_initialSelectedIndexPath animated:NO scrollPosition:TUITableViewScrollPositionNone];
+    }
+    _tableView = nil;
 }
 
 - (void)_takeOverTableViewStates
@@ -63,6 +86,13 @@
         _flags.reloadingTableView = YES;
         [_tableView reloadDataMaintainingVisibleIndexPath:[TUIFastIndexPath indexPathForRow:0 inSection:0] relativeOffset:[self _currentTableViewRelativeOffset]];
         _flags.reloadingTableView = NO;
+        
+        if (_initialSelectedIndexPath) {
+            TUIFastIndexPath * mappedIndexPath = [self _mappedIndexPathFromOriginalIndexPath:_initialSelectedIndexPath];
+            if (mappedIndexPath) {
+                [_tableView selectRowAtIndexPath:mappedIndexPath animated:NO scrollPosition:TUITableViewScrollPositionNone];
+            }
+        }
     }
 }
 
@@ -95,6 +125,7 @@
     NSArray * indexPaths = [[_tableView indexPathsForVisibleRows] sortedArrayUsingSelector:@selector(compare:)];
     _initialFirstVisibleIndexPath = [indexPaths firstObject];
     _initialVisibleCellsCount = [indexPaths count];
+    _initialSelectedIndexPath = [_tableView indexPathForSelectedRow];
     
     NSUInteger preferredRowCount = MAX(_initialVisibleCellsCount * 2, 10);
     
@@ -186,15 +217,16 @@
 - (void)tableViewWillReloadData:(TUITableView *)tableView
 {
     if (!_flags.reloadingTableView) {
+        if (tableView.keepVisibleIndexPathForReload) {
+            tableView.keepVisibleIndexPathForReload = [self _originalIndexPathFromMappedIndexPath:tableView.keepVisibleIndexPathForReload];
+        }
         [self _restoreTableViewStates];
-    }
-}
-
-- (void)tableViewDidReloadData:(TUITableView *)tableView
-{
-    if (!_flags.reloadingTableView) {
-        [self _updateMappingStrategy];
-        [self _takeOverTableViewStates];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (self.tableView && self.tableView.delegate == self.originalTableViewDelegate) {
+                [self _updateMappingStrategy];
+                [self _takeOverTableViewStates];
+            }
+        });
     }
 }
 

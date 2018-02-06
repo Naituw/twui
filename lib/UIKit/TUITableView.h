@@ -85,8 +85,6 @@ typedef enum {
 	TUIFastIndexPath            * _selectedIndexPath;
 	TUIFastIndexPath            * _indexPathShouldBeFirstResponder;
 	NSInteger                     _futureMakeFirstResponderToken;
-	TUIFastIndexPath            * _keepVisibleIndexPathForReload;
-	CGFloat                       _relativeOffsetForReload;
 	
 	// drag-to-reorder state
   TUITableViewCell            * _dragToReorderCell;

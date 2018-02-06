@@ -14,19 +14,17 @@
  limitations under the License.
  */
 //
-//  TUITableViewFastLiveResizingContext.h
+//  TUITableView+Private.h
 //  TwUI
 //
-//  Created by 吴天 on 2018/2/5.
-//  Copyright © 2018年 Wutian. All rights reserved.
+//  Created by 吴天 on 2018/2/6.
 //
 
-#import <Foundation/Foundation.h>
+#import "TUITableView.h"
 
-@interface TUITableViewFastLiveResizingContext : NSObject
+@interface TUITableView ()
 
-- (instancetype)initWithWillStartLiveResizingTableView:(TUITableView *)tableView;
-
-- (void)endLiveResizing;
+@property (nonatomic, strong) TUIFastIndexPath * keepVisibleIndexPathForReload;
+@property (nonatomic, assign) CGFloat relativeOffsetForReload;
 
 @end

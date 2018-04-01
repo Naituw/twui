@@ -23,7 +23,7 @@
 
 @implementation NSAttributedString (TUIStringDrawing)
 
-NSString * const kThreadTextRendererKey = @"com.sina.weibo.thread-textrenderer";
+NSString * const kThreadTextRendererKey = @"com.twui.thread-textrenderer";
 
 + (TUITextRenderer *)ab_textRendererForCurrentThread
 {

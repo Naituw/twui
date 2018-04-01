@@ -48,7 +48,11 @@ NSString * const kThreadTextRendererKey = @"com.twui.thread-textrenderer";
 
 - (TUITextRenderer *)ab_sharedTextRenderer
 {
-    return [[self class] ab_textRendererForCurrentThread];
+    if ([NSThread isMainThread]) {
+        return [[self class] ab_globalTextRenderer];
+    } else {
+        return [[TUITextRenderer alloc] init];
+    }
 }
 
 - (CGSize)ab_sizeConstrainedToWidth:(CGFloat)width

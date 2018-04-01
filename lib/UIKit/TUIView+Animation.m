@@ -25,8 +25,6 @@
 	SEL animationWillStartSelector;
 	SEL animationDidStopSelector;
 	void (^animationCompletionBlock)(BOOL finished);
-	
-    NSUInteger _waitingAnimations;
     
     NSTimeInterval _animationDelay;
     NSTimeInterval _animationDuration;
@@ -42,12 +40,12 @@
 @property (nonatomic, assign) void *context;
 @property (nonatomic, copy) NSString *animationID;
 
-@property (nonatomic, strong) NSMutableSet * animatingViews;
-
 @property (nonatomic, weak) id delegate;
 @property (nonatomic, assign) SEL animationWillStartSelector;
 @property (nonatomic, assign) SEL animationDidStopSelector;
 @property (nonatomic, copy) void (^animationCompletionBlock)(BOOL finished);
+
+@property (nonatomic, assign) NSUInteger waitingAnimations;
 
 - (void)setAnimationBeginsFromCurrentState:(BOOL)beginFromCurrentState;
 - (void)setAnimationCurve:(TUIViewAnimationCurve)curve;
@@ -105,7 +103,6 @@ static CAMediaTimingFunction * CAMediaTimingFunctionFromTUIViewAnimationCurve(TU
         _animationRepeatAutoreverses = NO;
         _animationRepeatCount = 0;
         _animationBeginTime = CACurrentMediaTime();
-        _animatingViews = [[NSMutableSet alloc] initWithCapacity:0];
         _animationTemplate = animation;
 	}
 	return self;
@@ -137,8 +134,6 @@ static CAMediaTimingFunction * CAMediaTimingFunctionFromTUIViewAnimationCurve(TU
 
 - (id)actionForView:(TUIView *)view forKey:(NSString *)keyPath
 {
-    [_animatingViews addObject:view];
-    CALayer *layer = view.layer;
     CABasicAnimation *animation = nil;
     if (_animationTemplate) {
         animation = [_animationTemplate copyWithZone:nil];
@@ -146,7 +141,6 @@ static CAMediaTimingFunction * CAMediaTimingFunctionFromTUIViewAnimationCurve(TU
     } else {
         animation = [CABasicAnimation animationWithKeyPath:keyPath];
     }
-//    animation.fromValue = _animationBeginsFromCurrentState ? [layer.presentationLayer valueForKey:keyPath] : nil;
     return [self addAnimation:animation];
 }
 
@@ -191,7 +185,6 @@ static CAMediaTimingFunction * CAMediaTimingFunctionFromTUIViewAnimationCurve(TU
             animationCompletionBlock(flag);
             self.animationCompletionBlock = nil; // only fire this once
         }
-        [_animatingViews removeAllObjects];
     }
 }
 

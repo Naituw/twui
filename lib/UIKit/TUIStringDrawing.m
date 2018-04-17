@@ -23,12 +23,36 @@
 
 @implementation NSAttributedString (TUIStringDrawing)
 
+NSString * const kThreadTextRendererKey = @"com.twui.thread-textrenderer";
+
++ (TUITextRenderer *)ab_textRendererForCurrentThread
+{
+    NSThread * currentThread = [NSThread currentThread];
+    TUITextRenderer * renderer = currentThread.threadDictionary[kThreadTextRendererKey];
+    if (!renderer) {
+        renderer = [[TUITextRenderer alloc] init];
+        if (renderer) {
+            currentThread.threadDictionary[kThreadTextRendererKey] = renderer;
+        }
+    }
+    return renderer;
+}
+
++ (TUITextRenderer *)ab_globalTextRenderer
+{
+    static TUITextRenderer *t = nil;
+    if(!t)
+        t = [[TUITextRenderer alloc] init];
+    return t;
+}
+
 - (TUITextRenderer *)ab_sharedTextRenderer
 {
-	static TUITextRenderer *t = nil;
-	if(!t)
-		t = [[TUITextRenderer alloc] init];
-	return t;
+    if ([NSThread isMainThread]) {
+        return [[self class] ab_globalTextRenderer];
+    } else {
+        return [[TUITextRenderer alloc] init];
+    }
 }
 
 - (CGSize)ab_sizeConstrainedToWidth:(CGFloat)width

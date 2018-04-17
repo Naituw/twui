@@ -44,6 +44,9 @@
 		[self pasteboardDragMouseDown:event];
 	
 	startDrag = [self localPointForEvent:event];
+    _mouseDownEvent = event;
+    _viewFlags.windowServerDragging = 0;
+    
 	_viewFlags.dragDistanceLock = 1;
 	_viewFlags.didStartMovingByDragging = 0;
 	_viewFlags.didStartResizeByDragging = 0;
@@ -58,6 +61,9 @@
 {
 	[_currentTextRenderer mouseUp:event];
 	_currentTextRenderer = nil;
+    
+    _mouseDownEvent = nil;
+    _viewFlags.windowServerDragging = 0;
 	
 	if(_viewFlags.didStartResizeByDragging) {
 		_viewFlags.didStartResizeByDragging = 0;
@@ -101,6 +107,10 @@
 
 - (void)mouseDragged:(NSEvent *)event
 {
+    if (_viewFlags.windowServerDragging) {
+        return;
+    }
+    
 	[_currentTextRenderer mouseDragged:event];
 	NSPoint p = [self localPointForEvent:event];
 	
@@ -116,24 +126,29 @@
 		return; // ignore
 	
 	if(_viewFlags.moveWindowByDragging) {
-		NSWindow *window = [self nsWindow];
-		NSPoint o = [window frame].origin;
-		o.x += p.x - startDrag.x;
-		o.y += p.y - startDrag.y;
-		
-        //		CGRect r = [window frame];
-        //		r.origin = o;
-        //		r = ABClampProposedRectToScreen(r);
-        //		o = r.origin;
-		
-        if (([window styleMask] & NSFullScreenWindowMask) != NSFullScreenWindowMask)
-        {
-            if(!_viewFlags.didStartMovingByDragging) {
-                if([window respondsToSelector:@selector(windowWillStartLiveDrag)])
-                    [window performSelector:@selector(windowWillStartLiveDrag)];
-                _viewFlags.didStartMovingByDragging = 1;
+        if (@available(macOS 10.11, *)) {
+            _viewFlags.windowServerDragging = 1;
+            [self.nsWindow performWindowDragWithEvent:_mouseDownEvent];
+        } else {
+            NSWindow *window = [self nsWindow];
+            NSPoint o = [window frame].origin;
+            o.x += p.x - startDrag.x;
+            o.y += p.y - startDrag.y;
+            
+            //        CGRect r = [window frame];
+            //        r.origin = o;
+            //        r = ABClampProposedRectToScreen(r);
+            //        o = r.origin;
+            
+            if (([window styleMask] & NSFullScreenWindowMask) != NSFullScreenWindowMask)
+            {
+                if(!_viewFlags.didStartMovingByDragging) {
+                    if([window respondsToSelector:@selector(windowWillStartLiveDrag)])
+                        [window performSelector:@selector(windowWillStartLiveDrag)];
+                    _viewFlags.didStartMovingByDragging = 1;
+                }
+                [window setFrameOrigin:o];
             }
-            [window setFrameOrigin:o];
         }
 	} else if(_viewFlags.resizeWindowByDragging) {
 		if(!_viewFlags.didStartResizeByDragging) {

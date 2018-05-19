@@ -63,6 +63,7 @@
 	_currentTextRenderer = nil;
     
     _mouseDownEvent = nil;
+    BOOL windowServerDragged = _viewFlags.windowServerDragging;
     _viewFlags.windowServerDragging = 0;
 	
 	if(_viewFlags.didStartResizeByDragging) {
@@ -70,7 +71,7 @@
 		[self.nsView viewDidEndLiveResize];
 	}
     
-    if(_viewFlags.didStartMovingByDragging) {
+    if(_viewFlags.didStartMovingByDragging || windowServerDragged) {
         _viewFlags.didStartMovingByDragging = 0;
         if([self.nsWindow respondsToSelector:@selector(windowDidEndLiveDrag)])
             [self.nsWindow performSelector:@selector(windowDidEndLiveDrag)];
@@ -105,6 +106,11 @@
     return menu ? : [super menuForEvent:event];
 }
 
+- (BOOL)windowServerDraggingEnabled
+{
+    return AtLeastElCapitan;
+}
+
 - (void)mouseDragged:(NSEvent *)event
 {
     if (_viewFlags.windowServerDragging) {
@@ -126,8 +132,14 @@
 		return; // ignore
 	
 	if(_viewFlags.moveWindowByDragging) {
-        if (@available(macOS 10.11, *)) {
-            _viewFlags.windowServerDragging = 1;
+        if ([self windowServerDraggingEnabled]) {
+            if (!_viewFlags.windowServerDragging) {
+                _viewFlags.windowServerDragging = 1;
+                NSWindow * window = [self nsWindow];
+                if ([window respondsToSelector:@selector(windowWillStartLiveDrag)]) {
+                    [window performSelector:@selector(windowWillStartLiveDrag)];
+                }
+            }
             [self.nsWindow performWindowDragWithEvent:_mouseDownEvent];
         } else {
             NSWindow *window = [self nsWindow];

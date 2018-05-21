@@ -18,7 +18,7 @@
 #import "TUICGAdditions.h"
 #import "TUIScrollView.h"
 
-static NSTimeInterval const TUIScrollIndicatorDisplayPeriod = 1.0f;
+static NSTimeInterval const TUIScrollIndicatorDisplayPeriod = 0.75f;
 
 typedef NS_ENUM(NSInteger, TUIScrollKnobMode) {
     TUIScrollKnobModeCompact = 0,

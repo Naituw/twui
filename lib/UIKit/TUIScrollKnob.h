@@ -23,15 +23,7 @@
 	TUIScrollView *__weak scrollView;
 	TUIView *knob;
 	CGPoint _mouseDown;
-	CGRect _knobStartFrame;
-	
-	struct {
-		unsigned int hover:1;
-		unsigned int active:1;
-		unsigned int trackingInsideKnob:1;
-		unsigned int scrollIndicatorStyle:2;
-		unsigned int flashing:1;
-	} _scrollKnobFlags;
+	CGRect _knobStartFrame;	
 }
 
 @property (nonatomic, weak) TUIScrollView * scrollView;
@@ -40,5 +32,7 @@
 @property (nonatomic, readonly) BOOL flashing;
 
 - (void)flash;
+
++ (CGFloat)preferedSize;
 
 @end

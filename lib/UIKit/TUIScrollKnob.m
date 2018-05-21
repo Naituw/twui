@@ -18,25 +18,35 @@
 #import "TUICGAdditions.h"
 #import "TUIScrollView.h"
 
-static CGFloat const TUIScrollIndicatorWidth = 11.0f;
 static NSTimeInterval const TUIScrollIndicatorDisplayPeriod = 1.0f;
 
-static CGFloat const TUIScrollIndicatorHiddenAlpha = 0.0f;
-static CGFloat const TUIScrollIndicatorHoverAlpha = 0.6f;
-static CGFloat const TUIScrollIndicatorIdleAlpha = 0.5f;
+typedef NS_ENUM(NSInteger, TUIScrollKnobMode) {
+    TUIScrollKnobModeCompact = 0,
+    TUIScrollKnobModeFullWidth,
+    TUIScrollKnobModeHidden,
+};
 
-static NSTimeInterval const TUIScrollIndicatorStateChangeSpeed = 0.2f;
-static NSTimeInterval const TUIScrollIndicatorStateRefreshSpeed = 0.01f;
+@interface TUIScrollKnobBackgroundView : TUIView
+
+@end
 
 @interface TUIScrollKnob ()
+{
+    TUIScrollKnobMode _knobMode;
+    
+    struct {
+        unsigned int active:1;
+        unsigned int trackingInsideKnob:1;
+        unsigned int scrollIndicatorStyle:2;
+        unsigned int flashing:1;
+    } _scrollKnobFlags;
+}
 
-@property (nonatomic, strong) NSTimer *hideKnobTimer;
-@property (nonatomic, assign) BOOL knobHidden;
+@property (nonatomic, strong) TUIScrollKnobBackgroundView * backgroundView;
 @property (nonatomic, strong) id scrollerStyleNotificationObserver;
+@property (nonatomic, assign) NSScrollerStyle systemPreferedScrollerStyle;
+@property (nonatomic, assign, readonly) BOOL hovering;
 
-- (void)_hideKnob;
-- (void)_updateKnob;
-- (void)_updateKnobAlphaWithSpeed:(CGFloat)duration;
 - (void)_endFlashing;
 
 @end
@@ -49,75 +59,206 @@ static NSTimeInterval const TUIScrollIndicatorStateRefreshSpeed = 0.01f;
 - (id)initWithFrame:(CGRect)frame
 {
     if((self = [super initWithFrame:frame]))
-    {        
-        knob = [[TUIView alloc] initWithFrame:CGRectMake(0, 0, 12, 12)];
-        knob.layer.cornerRadius = 3.5;
+    {
+        [self addSubview:self.backgroundView];
+        
+        _systemPreferedScrollerStyle = [NSScroller preferredScrollerStyle];
+        
+        knob = [[TUIView alloc] initWithFrame:CGRectZero];
         knob.userInteractionEnabled = NO;
         knob.backgroundColor = [TUIColor blackColor];
         [self addSubview:knob];
-        [self _updateKnob];
-        [self _updateKnobAlphaWithSpeed:0.0];
+        
+        _knobMode = -1;
+        [self _updateKnobMode];
         
         __weak id weakSelf = self;
         
         self.scrollerStyleNotificationObserver = [NSNotificationCenter.defaultCenter addObserverForName:NSPreferredScrollerStyleDidChangeNotification object:nil queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification *notification) {
-            TUIScrollKnob *self = weakSelf;
+            TUIScrollKnob * self = weakSelf;
             if (self == nil) return;
             
-            self.hideKnobTimer = nil;
-            
-            if([NSScroller preferredScrollerStyle] == NSScrollerStyleOverlay) {
-                [self _hideKnob];
-            } else {
-                self.knobHidden = NO;
-                [self _updateKnobAlphaWithSpeed:TUIScrollIndicatorStateChangeSpeed];
-            }
+            self.systemPreferedScrollerStyle = [NSScroller preferredScrollerStyle];
         }];
     }
     return self;
 }
 
-- (void)setFrame:(CGRect)frame
+- (void)setSystemPreferedScrollerStyle:(NSScrollerStyle)systemPreferedScrollerStyle
 {
-    [super setFrame:frame];
+    if (_systemPreferedScrollerStyle != systemPreferedScrollerStyle) {
+        _systemPreferedScrollerStyle = systemPreferedScrollerStyle;
+        
+        [self _updateKnobMode];
+    }
+}
+
+- (BOOL)hovering
+{
+    NSPoint mouseLocation = [NSEvent mouseLocation];
+    if ([NSWindow windowNumberAtPoint:mouseLocation belowWindowWithWindowNumber:0] != self.nsWindow.windowNumber) {
+        return NO;
+    }
+    
+    NSPoint windowLocation = [self.nsWindow convertRectFromScreen:(NSRect){mouseLocation, NSZeroSize}].origin;
+    TUIView * hitTestView = [self.nsView.rootView hitTest:windowLocation withEvent:nil];
+    return [hitTestView isDescendantOfView:self];
+}
+
+- (void)_updateKnobMode
+{
+    TUIScrollViewIndicatorVisibility visibility = TUIScrollViewIndicatorVisibleDefault;
+    
+    if ([self isVertical]) {
+        visibility = scrollView.verticalScrollIndicatorVisibility;
+    } else {
+        visibility = scrollView.horizontalScrollIndicatorVisibility;
+    }
+    
+    if (visibility == TUIScrollViewIndicatorVisibleNever) {
+        return [self setKnobMode:TUIScrollKnobModeHidden animated:YES];
+    }
+    
+    const BOOL hovering = self.hovering;
+    
+    if (_scrollKnobFlags.active) {
+        if (hovering) {
+            [self setKnobMode:TUIScrollKnobModeFullWidth animated:YES];
+        } else if (_knobMode == TUIScrollKnobModeHidden) {
+            [self setKnobMode:TUIScrollKnobModeCompact animated:YES];
+        }
+    } else if (!hovering) {
+        if (_systemPreferedScrollerStyle == NSScrollerStyleOverlay) {
+            [self setKnobMode:TUIScrollKnobModeHidden animated:YES];
+        } else {
+            [self setKnobMode:TUIScrollKnobModeCompact animated:YES];
+        }
+    }
+}
+
+- (TUIScrollKnobBackgroundView *)backgroundView
+{
+    if (!_backgroundView) {
+        _backgroundView = [[TUIScrollKnobBackgroundView alloc] initWithFrame:self.bounds];
+        [_backgroundView setLayout:^CGRect(TUIView * v) {
+            return v.superview.bounds;
+        }];
+    }
+    return _backgroundView;
+}
+
++ (CGFloat)preferedSize
+{
+    return 16;
 }
 
 - (void)dealloc {
     [NSNotificationCenter.defaultCenter removeObserver:self.scrollerStyleNotificationObserver];
 }
 
-- (void)refreshKnobTimer {
-    if([NSScroller preferredScrollerStyle] == NSScrollerStyleOverlay) {
-        TUIScrollViewIndicatorVisibility visibility;
-        if([self isVertical])
-            visibility = scrollView.verticalScrollIndicatorVisibility;
-        else
-            visibility = scrollView.horizontalScrollIndicatorVisibility;
+- (void)setKnobMode:(TUIScrollKnobMode)knobMode animated:(BOOL)animated
+{
+    if (_knobMode != knobMode) {
+        _knobMode = knobMode;
         
-        if(visibility != TUIScrollViewIndicatorVisibleNever) {
-            self.hideKnobTimer = nil;
-            self.hideKnobTimer = [NSTimer scheduledTimerWithTimeInterval:TUIScrollIndicatorDisplayPeriod
-                                                                  target:self
-                                                                selector:@selector(_hideKnob)
-                                                                userInfo:nil
-                                                                 repeats:NO];
-            
-            self.knobHidden = NO;
-            [self _updateKnobAlphaWithSpeed:TUIScrollIndicatorStateRefreshSpeed];
+        if (animated) {
+            [TUIView animateWithDuration:0.2 animations:^{
+                [self _updateWithKnobMode];
+            }];
         } else {
-            self.knobHidden = YES;
-            [self _updateKnobAlphaWithSpeed:TUIScrollIndicatorStateRefreshSpeed];
+            [self _updateWithKnobMode];
         }
     }
 }
 
-- (void)setHideKnobTimer:(NSTimer *)hideKnobTimer {
-    if(!hideKnobTimer && _hideKnobTimer) {
-        [_hideKnobTimer invalidate];
-        _hideKnobTimer = nil;
-    } else {
-        _hideKnobTimer = hideKnobTimer;
+- (void)_updateWithKnobMode
+{
+
+    switch (_knobMode) {
+        default:
+        case TUIScrollKnobModeCompact:
+            [self _updateKnobSizeTo:7.0];
+            _backgroundView.alpha = 0.0;
+            knob.alpha = 0.5;
+            break;
+        case TUIScrollKnobModeFullWidth:
+            [self _updateKnobSizeTo:11.0];
+            _backgroundView.alpha = 1.0;
+            knob.alpha = 0.5;
+            break;
+        case TUIScrollKnobModeHidden:
+            _backgroundView.alpha = 0.0;
+            knob.alpha = 0.0;
+            break;
     }
+    [self _updateKnobPosition];
+}
+
+- (void)_updateKnobSizeTo:(CGFloat)size
+{
+    CGRect frame = knob.frame;
+    if (self.isVertical) {
+        frame.size.width = size;
+    } else {
+        frame.size.height = size;
+    }
+    knob.frame = frame;
+    knob.layer.cornerRadius = size / 2;
+}
+
+- (void)didMoveToWindow
+{
+    [super didMoveToWindow];
+    if (!self.nsWindow) {
+        [self _deactivateKnob];
+    }
+}
+
+- (void)_deactivateKnobWithDelay
+{
+    [self _cancelKnobDeactivation];
+    [self performSelector:@selector(_deactivateKnob) withObject:nil afterDelay:TUIScrollIndicatorDisplayPeriod];
+}
+
+- (void)_cancelKnobDeactivation
+{
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(_deactivateKnob) object:nil];
+}
+
+- (void)setFrame:(CGRect)frame
+{
+    if (!CGRectEqualToRect(super.frame, frame)) {
+        [self _activateKnob];
+    }
+    [super setFrame:frame];
+}
+
+- (void)_activateKnob
+{
+    [self _deactivateKnobWithDelay];
+
+    if (_scrollKnobFlags.active) {
+        return;
+    }
+    _scrollKnobFlags.active = 1;
+    [self _updateKnobMode];
+}
+
+- (void)_deactivateKnob
+{
+    [self _cancelKnobDeactivation];
+    
+    if (!_scrollKnobFlags.active) {
+        return;
+    }
+    
+    const BOOL hovering = self.hovering;
+
+    if (_scrollKnobFlags.trackingInsideKnob || hovering) {
+        return;
+    }
+    _scrollKnobFlags.active = 0;
+    [self _updateKnobMode];
 }
 
 - (BOOL)isVertical
@@ -138,50 +279,46 @@ float knobOffset = offsetProportion * rangeOfMotion; \
 if(isnan(knobOffset)) knobOffset = 0.0; \
 if(isnan(knobLength)) knobLength = 0.0;
 
-#define DEFAULT_MIN_KNOB_SIZE 25
+#define DEFAULT_MIN_KNOB_SIZE 33
 
-- (void)_updateKnob {
+- (void)_updateKnobPosition {
     CGRect trackBounds = self.bounds;
     CGRect visible = scrollView.visibleRect;
     CGSize contentSize = scrollView.contentSize;
     
-    if([self isVertical]) {
+    BOOL isVertical = self.isVertical;
+    CGFloat knobSize = isVertical ? knob.bounds.size.width : knob.bounds.size.height;
+    
+    CGFloat knobMargin = 2;
+    
+    if(isVertical) {
         KNOB_CALCULATIONS(y, height, DEFAULT_MIN_KNOB_SIZE)
         
         CGRect frame;
-        frame.origin.x = 0.0;
+        frame.origin.x = trackBounds.size.width - knobMargin - knobSize;
         frame.origin.y = knobOffset;
         frame.size.height = MIN(2000, knobLength);
-        frame.size.width = TUIScrollIndicatorWidth;
-        frame = ABRectRoundOrigin(CGRectInset(frame, 2, 4));
-        frame.origin.x += 1;
-        
-        [self refreshKnobTimer];
+        frame.size.width = knobSize;
+        frame = ABRectRoundOrigin(CGRectInset(frame, 0, 4));
         knob.frame = frame;
     } else {
         KNOB_CALCULATIONS(x, width, DEFAULT_MIN_KNOB_SIZE)
         
         CGRect frame;
         frame.origin.x = knobOffset;
-        frame.origin.y = 0.0;
+        frame.origin.y = knobMargin;
         frame.size.width = MIN(2000, knobLength);
-        frame.size.height = TUIScrollIndicatorWidth;
-        frame = ABRectRoundOrigin(CGRectInset(frame, 4, 2));
-        
-        [self refreshKnobTimer];
+        frame.size.height = knobSize;
+        frame = ABRectRoundOrigin(CGRectInset(frame, 4, 0));
         knob.frame = frame;
     }
 }
 
-- (void)_hideKnob {
-    self.hideKnobTimer = nil;
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
     
-    self.knobHidden = YES;
-    [self _updateKnobAlphaWithSpeed:TUIScrollIndicatorStateChangeSpeed];
-}
-
-- (void)layoutSubviews {
-    [self _updateKnob];
+    [self _updateKnobPosition];
 }
 
 - (void)flash {
@@ -225,29 +362,17 @@ if(isnan(knobLength)) knobLength = 0.0;
     }
 }
 
-- (void)_updateKnobAlphaWithSpeed:(CGFloat)duration {
-    [TUIView animateWithDuration:duration animations:^{
-        if(self.knobHidden)
-            knob.alpha = TUIScrollIndicatorHiddenAlpha;
-        else if(_scrollKnobFlags.hover)
-            knob.alpha = TUIScrollIndicatorHoverAlpha;
-        else
-            knob.alpha = TUIScrollIndicatorIdleAlpha;
-    }];
-}
-
 - (void)mouseEntered:(NSEvent *)event
 {
-    _scrollKnobFlags.hover = 1;
-    [self _updateKnobAlphaWithSpeed:0.08];
+    [self _updateKnobMode];
     // make sure we propagate mouse events
     [super mouseEntered:event];
 }
 
 - (void)mouseExited:(NSEvent *)event
 {
-    _scrollKnobFlags.hover = 0;
-    [self _updateKnobAlphaWithSpeed:0.25];
+    [self _updateKnobMode];
+    [self _deactivateKnobWithDelay];
     // make sure we propagate mouse events
     [super mouseExited:event];
 }
@@ -256,9 +381,8 @@ if(isnan(knobLength)) knobLength = 0.0;
 {
     _mouseDown = [self localPointForEvent:event];
     _knobStartFrame = knob.frame;
-    _scrollKnobFlags.active = 1;
-    [self _updateKnobAlphaWithSpeed:0.08];
-    
+    [self _activateKnob];
+
     if([knob pointInside:[self convertPoint:_mouseDown toView:knob] withEvent:event]) { // can't use hitTest because userInteractionEnabled is NO
         // normal drag-knob-scroll
         _scrollKnobFlags.trackingInsideKnob = 1;
@@ -291,8 +415,9 @@ if(isnan(knobLength)) knobLength = 0.0;
 
 - (void)mouseUp:(NSEvent *)event
 {
-    _scrollKnobFlags.active = 0;
-    [self _updateKnobAlphaWithSpeed:0.08];
+    _scrollKnobFlags.trackingInsideKnob = NO;
+    [self _updateKnobMode];
+    [self _deactivateKnobWithDelay];
     [super mouseUp:event];
 }
 
@@ -334,6 +459,53 @@ CGFloat maxContentOffset = contentSize.LENGTH - visible.size.LENGTH;
 - (BOOL)flashing
 {
     return _scrollKnobFlags.flashing;
+}
+
+@end
+
+@interface TUIScrollKnobBackgroundView ()
+
+@property (nonatomic, strong) TUIView * border;
+
+@end
+
+@implementation TUIScrollKnobBackgroundView
+
+- (id)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame]) {
+        self.backgroundColor = [TUIColor colorWithWhite:0.985 alpha:0.82];
+        self.userInteractionEnabled = NO;
+        
+        [self addSubview:self.border];
+    }
+    return self;
+}
+
+- (BOOL)isVertical
+{
+    CGRect b = self.bounds;
+    return b.size.height > b.size.width;
+}
+
+- (TUIView *)border
+{
+    if (!_border) {
+        _border = [[TUIView alloc] initWithFrame:CGRectZero];
+        _border.backgroundColor = [TUIColor colorWithWhite:0.0 alpha:0.08];
+    }
+    return _border;
+}
+
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+    
+    if (self.isVertical) {
+        _border.frame = CGRectMake(0, 0, 1, self.bounds.size.height);
+    } else {
+        _border.frame = CGRectMake(0, self.bounds.size.height - 1, self.bounds.size.width, 1);
+    }
 }
 
 @end

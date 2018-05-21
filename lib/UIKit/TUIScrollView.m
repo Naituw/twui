@@ -84,14 +84,14 @@ enum {
 		_scrollViewFlags.verticalScrollIndicatorVisibility = TUIScrollViewIndicatorVisibleDefault;
 		_scrollViewFlags.horizontalScrollIndicatorVisibility = TUIScrollViewIndicatorVisibleDefault;
 		
-		_horizontalScrollKnob = [[TUIScrollKnob alloc] initWithFrame:CGRectZero];
+		_horizontalScrollKnob = [[TUIScrollKnob alloc] initWithFrame:CGRectMake(0, 0, 2, 1)];
 		_horizontalScrollKnob.scrollView = self;
 		_horizontalScrollKnob.layer.zPosition = KNOB_Z_POSITION;
 		_horizontalScrollKnob.hidden = YES;
 		_horizontalScrollKnob.opaque = NO;
 		[self addSubview:_horizontalScrollKnob];
 		
-		_verticalScrollKnob = [[TUIScrollKnob alloc] initWithFrame:CGRectZero];
+		_verticalScrollKnob = [[TUIScrollKnob alloc] initWithFrame:CGRectMake(0, 0, 1, 2)];
 		_verticalScrollKnob.scrollView = self;
 		_verticalScrollKnob.layer.zPosition = KNOB_Z_POSITION;
 		_verticalScrollKnob.hidden = YES;
@@ -430,7 +430,7 @@ static CVReturn scrollCallback(CVDisplayLinkRef displayLink, const CVTimeStamp *
   
 	CGPoint offset = _unroundedContentOffset;
 	CGRect bounds = self.bounds;
-	CGFloat knobSize = 12;
+	CGFloat knobSize = [TUIScrollKnob preferedSize];
 	
 	BOOL vWasVisible = _scrollViewFlags.verticalScrollIndicatorShowing;
 	BOOL vVisible = [self _verticalScrollKnobNeededForContentSize:self.contentSize];

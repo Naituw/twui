@@ -53,7 +53,6 @@ typedef NS_ENUM(NSInteger, TUIScrollKnobMode) {
 
 @implementation TUIScrollKnob
 
-@synthesize scrollView;
 @synthesize knob;
 
 - (id)initWithFrame:(CGRect)frame
@@ -105,14 +104,27 @@ typedef NS_ENUM(NSInteger, TUIScrollKnobMode) {
     return [hitTestView isDescendantOfView:self];
 }
 
+- (void)update
+{
+    [self _updateKnobMode];
+}
+
+- (void)setScrollView:(TUIScrollView *)scrollView
+{
+    if (_scrollView != scrollView) {
+        _scrollView = scrollView;
+        [self update];
+    }
+}
+
 - (void)_updateKnobMode
 {
     TUIScrollViewIndicatorVisibility visibility = TUIScrollViewIndicatorVisibleDefault;
     
     if ([self isVertical]) {
-        visibility = scrollView.verticalScrollIndicatorVisibility;
+        visibility = _scrollView.verticalScrollIndicatorVisibility;
     } else {
-        visibility = scrollView.horizontalScrollIndicatorVisibility;
+        visibility = _scrollView.horizontalScrollIndicatorVisibility;
     }
     
     if (visibility == TUIScrollViewIndicatorVisibleNever) {
@@ -133,6 +145,8 @@ typedef NS_ENUM(NSInteger, TUIScrollKnobMode) {
         } else {
             [self setKnobMode:TUIScrollKnobModeCompact animated:YES];
         }
+    } else {
+        [self setKnobMode:TUIScrollKnobModeHidden animated:YES];
     }
 }
 
@@ -160,7 +174,7 @@ typedef NS_ENUM(NSInteger, TUIScrollKnobMode) {
 {
     if (_knobMode != knobMode) {
         _knobMode = knobMode;
-        
+                
         if (animated) {
             [TUIView animateWithDuration:0.2 animations:^{
                 [self _updateWithKnobMode];
@@ -283,8 +297,8 @@ if(isnan(knobLength)) knobLength = 0.0;
 
 - (void)_updateKnobPosition {
     CGRect trackBounds = self.bounds;
-    CGRect visible = scrollView.visibleRect;
-    CGSize contentSize = scrollView.contentSize;
+    CGRect visible = _scrollView.visibleRect;
+    CGSize contentSize = _scrollView.contentSize;
     
     BOOL isVertical = self.isVertical;
     CGFloat knobSize = isVertical ? knob.bounds.size.width : knob.bounds.size.height;
@@ -390,8 +404,8 @@ if(isnan(knobLength)) knobLength = 0.0;
         // page-scroll
         _scrollKnobFlags.trackingInsideKnob = 0;
         
-        CGRect visible = scrollView.visibleRect;
-        CGPoint contentOffset = scrollView.contentOffset;
+        CGRect visible = _scrollView.visibleRect;
+        CGPoint contentOffset = _scrollView.contentOffset;
         
         if([self isVertical]) {
             if(_mouseDown.y < _knobStartFrame.origin.y) {
@@ -407,7 +421,7 @@ if(isnan(knobLength)) knobLength = 0.0;
             }
         }
         
-        [scrollView setContentOffset:contentOffset animated:YES];
+        [_scrollView setContentOffset:contentOffset animated:YES];
     }
     
     [super mouseDown:event];
@@ -437,19 +451,19 @@ CGFloat maxContentOffset = contentSize.LENGTH - visible.size.LENGTH;
         CGSize diff = CGSizeMake(p.x - _mouseDown.x, p.y - _mouseDown.y);
         
         CGRect trackBounds = self.bounds;
-        CGRect visible = scrollView.visibleRect;
-        CGSize contentSize = scrollView.contentSize;
+        CGRect visible = _scrollView.visibleRect;
+        CGSize contentSize = _scrollView.contentSize;
         
         if([self isVertical]) {
             KNOB_CALCULATIONS_REVERSE(y, height)
-            CGPoint scrollOffset = scrollView.contentOffset;
+            CGPoint scrollOffset = _scrollView.contentOffset;
             scrollOffset.y = roundf(-proportion * maxContentOffset);
-            scrollView.contentOffset = scrollOffset;
+            _scrollView.contentOffset = scrollOffset;
         } else {
             KNOB_CALCULATIONS_REVERSE(x, width)
-            CGPoint scrollOffset = scrollView.contentOffset;
+            CGPoint scrollOffset = _scrollView.contentOffset;
             scrollOffset.x = roundf(-proportion * maxContentOffset);
-            scrollView.contentOffset = scrollOffset;
+            _scrollView.contentOffset = scrollOffset;
         }
     } else { // dragging in knob-track area
         // ignore

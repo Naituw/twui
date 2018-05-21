@@ -20,7 +20,6 @@
 
 @interface TUIScrollKnob : TUIView
 {
-	TUIScrollView *__weak scrollView;
 	TUIView *knob;
 	CGPoint _mouseDown;
 	CGRect _knobStartFrame;	
@@ -34,5 +33,6 @@
 - (void)flash;
 
 + (CGFloat)preferedSize;
+- (void)update;
 
 @end

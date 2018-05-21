@@ -164,6 +164,7 @@ enum {
  */
 -(void)setVerticalScrollIndicatorVisibility:(TUIScrollViewIndicatorVisibility)visibility {
    _scrollViewFlags.verticalScrollIndicatorVisibility = visibility;
+    [_verticalScrollKnob update];
 }
 
 /**
@@ -190,6 +191,7 @@ enum {
  */
 -(void)setHorizontalScrollIndicatorVisibility:(TUIScrollViewIndicatorVisibility)visibility {
    _scrollViewFlags.horizontalScrollIndicatorVisibility = visibility;
+    [_horizontalScrollKnob update];
 }
 
 /**

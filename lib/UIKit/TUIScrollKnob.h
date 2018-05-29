@@ -18,12 +18,19 @@
 
 @class TUIScrollView;
 
+typedef NS_ENUM(NSInteger, TUIScrollKnobDirection) {
+    TUIScrollKnobDirectionVertical = 0,
+    TUIScrollKnobDirectionHorizontal,
+};
+
 @interface TUIScrollKnob : TUIView
 {
 	TUIView *knob;
 	CGPoint _mouseDown;
 	CGRect _knobStartFrame;	
 }
+
+- (instancetype)initWithDirection:(TUIScrollKnobDirection)direction;
 
 @property (nonatomic, weak) TUIScrollView * scrollView;
 @property (nonatomic, assign) unsigned int    scrollIndicatorStyle;

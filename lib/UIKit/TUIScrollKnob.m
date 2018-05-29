@@ -42,6 +42,7 @@ typedef NS_ENUM(NSInteger, TUIScrollKnobMode) {
     } _scrollKnobFlags;
 }
 
+@property (nonatomic, assign) TUIScrollKnobDirection knobDirection;
 @property (nonatomic, strong) TUIScrollKnobBackgroundView * backgroundView;
 @property (nonatomic, strong) id scrollerStyleNotificationObserver;
 @property (nonatomic, assign) NSScrollerStyle systemPreferedScrollerStyle;
@@ -55,10 +56,13 @@ typedef NS_ENUM(NSInteger, TUIScrollKnobMode) {
 
 @synthesize knob;
 
-- (id)initWithFrame:(CGRect)frame
+- (instancetype)initWithDirection:(TUIScrollKnobDirection)direction
 {
-    if((self = [super initWithFrame:frame]))
-    {
+    BOOL isVertical = direction == TUIScrollKnobDirectionVertical;
+    if (self = [self initWithFrame:CGRectMake(0, 0, isVertical ? 5 : 20, isVertical ? 20 : 5)]) {
+        
+        _knobDirection = direction;
+        
         [self addSubview:self.backgroundView];
         
         _systemPreferedScrollerStyle = [NSScroller preferredScrollerStyle];
@@ -277,8 +281,7 @@ typedef NS_ENUM(NSInteger, TUIScrollKnobMode) {
 
 - (BOOL)isVertical
 {
-    CGRect b = self.bounds;
-    return b.size.height > b.size.width;
+    return _knobDirection == TUIScrollKnobDirectionVertical;
 }
 
 #define KNOB_CALCULATIONS(OFFSET, LENGTH, MIN_KNOB_SIZE) \
@@ -389,6 +392,14 @@ if(isnan(knobLength)) knobLength = 0.0;
     [self _deactivateKnobWithDelay];
     // make sure we propagate mouse events
     [super mouseExited:event];
+}
+
+- (BOOL)pointInside:(CGPoint)point withEvent:(id)event
+{
+    if (_knobMode == TUIScrollKnobModeHidden) {
+        return NO;
+    }
+    return [super pointInside:point withEvent:event];
 }
 
 - (void)mouseDown:(NSEvent *)event

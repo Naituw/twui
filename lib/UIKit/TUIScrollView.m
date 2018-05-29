@@ -84,14 +84,14 @@ enum {
 		_scrollViewFlags.verticalScrollIndicatorVisibility = TUIScrollViewIndicatorVisibleDefault;
 		_scrollViewFlags.horizontalScrollIndicatorVisibility = TUIScrollViewIndicatorVisibleDefault;
 		
-		_horizontalScrollKnob = [[TUIScrollKnob alloc] initWithFrame:CGRectMake(0, 0, 2, 1)];
+		_horizontalScrollKnob = [[TUIScrollKnob alloc] initWithDirection:TUIScrollKnobDirectionHorizontal];
 		_horizontalScrollKnob.scrollView = self;
 		_horizontalScrollKnob.layer.zPosition = KNOB_Z_POSITION;
 		_horizontalScrollKnob.hidden = YES;
 		_horizontalScrollKnob.opaque = NO;
 		[self addSubview:_horizontalScrollKnob];
 		
-		_verticalScrollKnob = [[TUIScrollKnob alloc] initWithFrame:CGRectMake(0, 0, 1, 2)];
+		_verticalScrollKnob = [[TUIScrollKnob alloc] initWithDirection:TUIScrollKnobDirectionVertical];
 		_verticalScrollKnob.scrollView = self;
 		_verticalScrollKnob.layer.zPosition = KNOB_Z_POSITION;
 		_verticalScrollKnob.hidden = YES;

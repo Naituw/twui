@@ -36,4 +36,6 @@
 - (void)mouseEntered:(NSEvent *)event onSubview:(TUIView *)subview;
 - (void)mouseExited:(NSEvent *)event fromSubview:(TUIView *)subview;
 
+- (BOOL)needsHoverStateDuringScroll;
+
 @end

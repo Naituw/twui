@@ -292,4 +292,9 @@
     [self.superview mouseExited:event fromSubview:subview];
 }
 
+- (BOOL)needsHoverStateDuringScroll
+{
+    return NO;
+}
+
 @end

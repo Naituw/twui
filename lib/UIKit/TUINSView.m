@@ -583,8 +583,11 @@ static NSComparisonResult compareNSViewOrdering (NSView *viewA, NSView *viewB, v
     }
     
     {
-        [[self viewForEvent:event] scrollWheel:event];
-        [self _updateHoverView:nil withEvent:event]; // don't pop in while scrolling
+        TUIView * view = [self viewForEvent:event];
+        [view scrollWheel:event];
+        if (view != _hoverView || !view.needsHoverStateDuringScroll) {
+            [self _updateHoverView:nil withEvent:event]; // don't pop in while scrolling
+        }
         
         if (_viewFlags.delegateScrollWheel)
         {

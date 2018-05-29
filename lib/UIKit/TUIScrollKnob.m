@@ -17,6 +17,7 @@
 #import "TUIScrollKnob.h"
 #import "TUICGAdditions.h"
 #import "TUIScrollView.h"
+#import "TUINSView+Private.h"
 
 static NSTimeInterval const TUIScrollIndicatorDisplayPeriod = 0.75f;
 
@@ -39,6 +40,7 @@ typedef NS_ENUM(NSInteger, TUIScrollKnobMode) {
         unsigned int trackingInsideKnob:1;
         unsigned int scrollIndicatorStyle:2;
         unsigned int flashing:1;
+        unsigned int pendingHoveringState:1;
     } _scrollKnobFlags;
 }
 
@@ -96,17 +98,17 @@ typedef NS_ENUM(NSInteger, TUIScrollKnobMode) {
     }
 }
 
-- (BOOL)hovering
-{
-    NSPoint mouseLocation = [NSEvent mouseLocation];
-    if ([NSWindow windowNumberAtPoint:mouseLocation belowWindowWithWindowNumber:0] != self.nsWindow.windowNumber) {
-        return NO;
-    }
-    
-    NSPoint windowLocation = [self.nsWindow convertRectFromScreen:(NSRect){mouseLocation, NSZeroSize}].origin;
-    TUIView * hitTestView = [self.nsView.rootView hitTest:windowLocation withEvent:nil];
-    return [hitTestView isDescendantOfView:self];
-}
+//- (BOOL)hovering
+//{
+//    NSPoint mouseLocation = [NSEvent mouseLocation];
+//    if ([NSWindow windowNumberAtPoint:mouseLocation belowWindowWithWindowNumber:0] != self.nsWindow.windowNumber) {
+//        return NO;
+//    }
+//
+//    NSPoint windowLocation = [self.nsWindow convertRectFromScreen:(NSRect){mouseLocation, NSZeroSize}].origin;
+//    TUIView * hitTestView = [self.nsView.rootView hitTest:windowLocation withEvent:nil];
+//    return [hitTestView isDescendantOfView:self];
+//}
 
 - (void)update
 {
@@ -260,6 +262,7 @@ typedef NS_ENUM(NSInteger, TUIScrollKnobMode) {
     }
     _scrollKnobFlags.active = 1;
     [self _updateKnobMode];
+    [self.nsView updateHoverView];
 }
 
 - (void)_deactivateKnob
@@ -277,6 +280,30 @@ typedef NS_ENUM(NSInteger, TUIScrollKnobMode) {
     }
     _scrollKnobFlags.active = 0;
     [self _updateKnobMode];
+}
+
+- (void)_hover
+{
+    if (_scrollKnobFlags.pendingHoveringState) {
+        return;
+    }
+    _scrollKnobFlags.pendingHoveringState = YES;
+    [self performSelector:@selector(_delayedSetHovering) withObject:nil afterDelay:0.075];
+}
+
+- (void)_unhover
+{
+    _scrollKnobFlags.pendingHoveringState = NO;
+    _hovering = NO;
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(_delayedSetHovering) object:nil];
+}
+
+- (void)_delayedSetHovering
+{
+    if (_hovering == NO) {
+        _hovering = YES;
+        [self _updateKnobMode];
+    }
 }
 
 - (BOOL)isVertical
@@ -381,6 +408,7 @@ if(isnan(knobLength)) knobLength = 0.0;
 
 - (void)mouseEntered:(NSEvent *)event
 {
+    [self _hover];
     [self _updateKnobMode];
     // make sure we propagate mouse events
     [super mouseEntered:event];
@@ -388,6 +416,7 @@ if(isnan(knobLength)) knobLength = 0.0;
 
 - (void)mouseExited:(NSEvent *)event
 {
+    [self _unhover];
     [self _updateKnobMode];
     [self _deactivateKnobWithDelay];
     // make sure we propagate mouse events
@@ -404,6 +433,7 @@ if(isnan(knobLength)) knobLength = 0.0;
 
 - (void)mouseDown:(NSEvent *)event
 {
+    _hovering = YES;
     _mouseDown = [self localPointForEvent:event];
     _knobStartFrame = knob.frame;
     [self _activateKnob];
@@ -484,6 +514,11 @@ CGFloat maxContentOffset = contentSize.LENGTH - visible.size.LENGTH;
 - (BOOL)flashing
 {
     return _scrollKnobFlags.flashing;
+}
+
+- (BOOL)needsHoverStateDuringScroll
+{
+    return YES;
 }
 
 @end

@@ -408,6 +408,9 @@ if(isnan(knobLength)) knobLength = 0.0;
 
 - (void)mouseEntered:(NSEvent *)event
 {
+    if (_systemPreferedScrollerStyle == NSScrollerStyleLegacy) {
+        [self _activateKnob];
+    }
     [self _hover];
     [self _updateKnobMode];
     // make sure we propagate mouse events
